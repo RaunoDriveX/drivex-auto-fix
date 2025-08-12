@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import CallCenterCTA from "@/components/CallCenterCTA";
 import CompareOptions from "@/components/CompareOptions";
+import ShopOffers from "@/components/ShopOffers";
 
 function analyzeFromToken(token: string) {
   let h = 0;
@@ -77,8 +78,12 @@ const AIReport = () => {
         <div className="container mx-auto max-w-5xl">
           <article>
             <header className="mb-6">
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground">AI windshield damage assessment</h1>
-              <p className="mt-2 text-muted-foreground">Review your AI report below, then continue with the next steps.</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                AI windshield damage assessment — {result.decision === "repair" ? "This windshield can be repaired" : "Replacement recommended"}
+              </h1>
+              <p className="mt-2 text-muted-foreground">
+                {result.decision === "repair" ? "Save 85% of costs compared to a replacement." : "We’ll ensure the right glass and calibration for your vehicle."}
+              </p>
             </header>
 
             <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
@@ -105,6 +110,10 @@ const AIReport = () => {
                     </Button>
                   </CardFooter>
                 </Card>
+
+                <div className="mt-6">
+                  <ShopOffers kind={result.decision as "repair" | "replacement"} />
+                </div>
               </section>
 
               <aside className="space-y-6">
