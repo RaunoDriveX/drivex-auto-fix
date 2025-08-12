@@ -17,12 +17,19 @@ const Workflow = () => {
           How DriveX works
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {steps.map(({ icon: Icon, title, desc }) => (
-            <Card key={title}>
+          {steps.map(({ icon: Icon, title, desc }, i) => (
+            <Card
+              key={title}
+              className="hover-scale animate-fade-in"
+              style={{ animationDelay: `${i * 80}ms` }}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Icon className="h-5 w-5 text-foreground" />
-                  {title}
+                  <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                    {i + 1}
+                  </span>
+                  <Icon className="h-5 w-5 text-foreground" aria-hidden="true" />
+                  <span>{title}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground">{desc}</CardContent>
