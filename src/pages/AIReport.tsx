@@ -3,9 +3,7 @@ import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import shot1 from "@/assets/ai-report-1.jpg";
-import shot2 from "@/assets/ai-report-2.jpg";
-import shot3 from "@/assets/ai-report-3.jpg";
+import { Progress } from "@/components/ui/progress";
 
 function analyzeFromToken(token: string) {
   let h = 0;
@@ -29,16 +27,11 @@ function analyzeFromToken(token: string) {
   return { decision, confidence: Math.min(0.97, confidence), factors } as const;
 }
 
-const images = [
-  { src: shot1, alt: "Windshield stone chip – small bullseye near passenger side" },
-  { src: shot2, alt: "Windshield long crack extending from edge near driver side" },
-  { src: shot3, alt: "Windshield star-break with multiple short radiating cracks" },
-];
 
 const AIReport = () => {
   const { token } = useParams<{ token: string }>();
   const result = useMemo(() => analyzeFromToken(token || ""), [token]);
-
+  const reportUrl = "https://admin.drivex.ee/access/b54PrNNRWlX2xutBBJc1AvHW";
   const canonical = typeof window !== "undefined" ? window.location.href : "/report/mock";
   const jsonLd = {
     "@context": "https://schema.org",
@@ -48,7 +41,8 @@ const AIReport = () => {
     about: "Windshield repair vs. replacement recommendation",
     datePublished: new Date().toISOString(),
     author: { "@type": "Organization", name: "DriveX AI" },
-    image: images.map((i) => i.src),
+    url: reportUrl,
+    isBasedOn: reportUrl,
     articleSection: result.decision === "repair" ? "Repair" : "Replacement",
   };
 
@@ -69,67 +63,58 @@ const AIReport = () => {
           <article>
             <header className="mb-6">
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">AI windshield damage assessment</h1>
-              <p className="mt-2 text-muted-foreground">This is a mock report to build confidence in the recommendation.</p>
+              <p className="mt-2 text-muted-foreground">Review your AI report below, then continue with the next steps.</p>
             </header>
 
             <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
               <section>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Captured images</CardTitle>
-                    <CardDescription>Representative frames from the guided capture (mock).</CardDescription>
+                    <CardTitle>AI report (web view)</CardTitle>
+                    <CardDescription>Secure embedded report with the repair/replace decision.</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {images.map((img, i) => (
-                        <figure key={i} className="overflow-hidden rounded-md border">
-                          <img
-                            src={img.src}
-                            alt={img.alt}
-                            loading="lazy"
-                            decoding="async"
-                            className="w-full h-auto"
-                          />
-                          <figcaption className="p-2 text-xs text-muted-foreground">{img.alt}</figcaption>
-                        </figure>
-                      ))}
+                    <div className="rounded-md border overflow-hidden">
+                      <iframe
+                        src={reportUrl}
+                        title="DriveX AI report"
+                        className="w-full h-[70vh]"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
                     </div>
                   </CardContent>
+                  <CardFooter>
+                    <Button asChild>
+                      <a href={reportUrl} target="_blank" rel="noopener noreferrer">Open full report in new tab</a>
+                    </Button>
+                  </CardFooter>
                 </Card>
               </section>
 
               <aside>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Recommendation</CardTitle>
-                    <CardDescription>AI-confirmed preliminary result</CardDescription>
+                    <CardTitle>Next steps</CardTitle>
+                    <CardDescription>You're almost done — select a repair shop to proceed.</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="p-4 rounded-md border">
-                      <p className="text-sm text-muted-foreground">Decision</p>
-                      <h2 className="text-2xl font-semibold">
-                        {result.decision === "repair" ? "Repair recommended" : "Replacement recommended"}
-                      </h2>
-                      <p className="mt-1 text-sm text-muted-foreground">Confidence: {(result.confidence * 100).toFixed(0)}%</p>
-                    </div>
+                  <CardContent className="space-y-4">
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Key factors</p>
-                      <ul className="list-disc pl-5 space-y-1 text-sm">
-                        {result.factors.map((f) => (
-                          <li key={f}>{f}</li>
-                        ))}
-                      </ul>
+                      <p className="text-sm text-muted-foreground mb-2">Your progress</p>
+                      <Progress value={66} />
+                      <p className="mt-1 text-xs text-muted-foreground">Step 2 of 3</p>
                     </div>
+                    <ol className="list-decimal pl-5 space-y-1 text-sm">
+                      <li className="">Inspection completed</li>
+                      <li className="">AI report reviewed ({result.decision === "repair" ? "Repair" : "Replacement"})</li>
+                      <li className="text-muted-foreground">Select repair shop</li>
+                      <li className="text-muted-foreground">Book appointment</li>
+                    </ol>
                   </CardContent>
                   <CardFooter className="flex flex-wrap gap-3">
                     <Button asChild>
-                      <Link to="/#lead-form">Book a shop</Link>
+                      <Link to="/#lead-form">Select repair shop</Link>
                     </Button>
-                    {result.decision === "repair" && (
-                      <Button asChild variant="secondary">
-                        <Link to="/#lead-form">Order DIY resin</Link>
-                      </Button>
-                    )}
                     <Button asChild variant="secondary">
                       <Link to="/">Back to home</Link>
                     </Button>
