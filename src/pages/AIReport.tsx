@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import CallCenterCTA from "@/components/CallCenterCTA";
 import CompareOptions from "@/components/CompareOptions";
 import ShopOffers from "@/components/ShopOffers";
+import { Badge } from "@/components/ui/badge";
 
 function analyzeFromToken(token: string) {
   let h = 0;
@@ -90,8 +91,7 @@ const AIReport = () => {
               <section>
                 <Card>
                   <CardHeader>
-                    <CardTitle>AI report (web view)</CardTitle>
-                    <CardDescription>Secure embedded report with the repair/replace decision.</CardDescription>
+                    <CardTitle>AI report</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="rounded-md border overflow-hidden">
