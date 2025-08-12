@@ -3,11 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
   const handleStart = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    window.location.hash = "lead-form";
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    const vehicle = String(data.get("vehicle") || "");
+    const phone = String(data.get("phone") || "");
+    navigate(`/report?vehicle=${encodeURIComponent(vehicle)}&phone=${encodeURIComponent(phone)}`);
   };
   return (
     <section className="bg-background">
