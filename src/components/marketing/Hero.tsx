@@ -32,11 +32,6 @@ const Hero = () => {
             </div>
             <Button size="lg" type="submit">Continue</Button>
           </form>
-          <div className="mt-3">
-            <a href="#lead-form">
-              <Button size="lg" variant="secondary">Order DIY Resin</Button>
-            </a>
-          </div>
         </div>
         <div className="relative">
           <img
