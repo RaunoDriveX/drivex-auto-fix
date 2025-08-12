@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import QRCode from "react-qr-code";
+import CallCenterCTA from "@/components/CallCenterCTA";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -83,6 +84,7 @@ const Hero = () => {
                 <Button asChild size="lg" variant="outline">
                   <Link to={`/report/${token}`}>Review AI report (demo)</Link>
                 </Button>
+                <CallCenterCTA token={token} />
               </div>
 
               <div className="grid gap-2">

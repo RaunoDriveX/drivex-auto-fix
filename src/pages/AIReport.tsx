@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import CallCenterCTA from "@/components/CallCenterCTA";
 
 function analyzeFromToken(token: string) {
   let h = 0;
@@ -155,7 +156,9 @@ const AIReport = () => {
                     </Button>
                   </CardFooter>
                 </Card>
-              </aside>
+
+                <CallCenterCTA token={token} decision={result.decision as "repair" | "replacement"} />
+               </aside>
             </div>
           </article>
         </div>
