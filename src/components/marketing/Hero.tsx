@@ -49,7 +49,7 @@ const Hero = () => {
       <div className="container mx-auto grid gap-8 lg:grid-cols-2 items-center py-16">
         <div>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-            DriveX Auto Glass Repair & Replacement
+            Fix your vehicle glass!
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
             Report your glass damage in minutes. Our AI triages repair vs. replacement and

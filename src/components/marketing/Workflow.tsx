@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Camera, Brain, MapPin, CheckCircle, Wrench } from "lucide-react";
+import { Camera, Brain, MapPin, CheckCircle, Wrench, Bot } from "lucide-react";
 
 const steps = [
   { icon: Camera, title: "Report damage", desc: "Upload photos or start a quick inspection." },
@@ -16,6 +16,17 @@ const Workflow = () => {
         <h2 id="workflow-heading" className="text-2xl md:text-3xl font-semibold text-foreground mb-6">
           How DriveX works
         </h2>
+
+        <div className="mb-6 animate-enter rounded-lg border bg-card p-4 md:p-5 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <Bot className="h-6 w-6 text-primary" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="font-medium text-foreground">Meet your virtual technician</p>
+            <p className="text-sm text-muted-foreground">Guides your photos, explains AI results, and helps pick a shop.</p>
+          </div>
+        </div>
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {steps.map(({ icon: Icon, title, desc }, i) => (
             <Card
