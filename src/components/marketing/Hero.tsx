@@ -68,6 +68,10 @@ const Hero = () => {
             <Button size="lg" type="submit">Continue</Button>
           </form>
 
+          <div className="mt-3">
+            <CallCenterCTA />
+          </div>
+
           {showOptions && (
             <div className="mt-4 grid gap-3">
               <div className="flex flex-wrap gap-3">

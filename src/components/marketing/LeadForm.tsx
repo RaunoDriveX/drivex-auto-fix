@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import CallCenterCTA from "@/components/CallCenterCTA";
 
 const LeadForm = () => {
   const [loading, setLoading] = useState(false);
@@ -24,9 +25,12 @@ const LeadForm = () => {
   return (
     <section id="lead-form" aria-labelledby="lead-form-heading" className="bg-background py-16">
       <div className="container mx-auto max-w-3xl">
-        <h2 id="lead-form-heading" className="text-2xl md:text-3xl font-semibold text-foreground mb-6">
+        <h2 id="lead-form-heading" className="text-2xl md:text-3xl font-semibold text-foreground mb-4">
           Get your glass fixed fast
         </h2>
+        <div className="mb-6">
+          <CallCenterCTA variant="default" size="lg" />
+        </div>
         <Card>
           <CardHeader>
             <CardTitle>Tell us about the damage</CardTitle>
