@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import CallCenterCTA from "@/components/CallCenterCTA";
+import CompareOptions from "@/components/CompareOptions";
 
 function analyzeFromToken(token: string) {
   let h = 0;
@@ -158,6 +159,8 @@ const AIReport = () => {
                 </Card>
 
                 <CallCenterCTA token={token} decision={result.decision as "repair" | "replacement"} />
+
+                <CompareOptions decision={result.decision as "repair" | "replacement"} />
                </aside>
             </div>
           </article>
