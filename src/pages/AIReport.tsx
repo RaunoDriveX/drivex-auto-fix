@@ -1,9 +1,12 @@
 import { Helmet } from "react-helmet-async";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 function analyzeFromToken(token: string) {
   let h = 0;
@@ -45,6 +48,16 @@ const AIReport = () => {
     isBasedOn: reportUrl,
     articleSection: result.decision === "repair" ? "Repair" : "Replacement",
   };
+
+  // Share options state and helpers
+  const [email, setEmail] = useState("");
+  const { toast } = useToast();
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/report/${token}` : "/report/mock";
+  const subject = `Your DriveX AI report – ${result.decision === "repair" ? "Repair" : "Replacement"}`;
+  const body = encodeURIComponent(`Here is your AI report with ${result.decision} recommendation:\n${shareUrl}`);
+  const mailtoHref = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${body}`;
+  const waHref = `https://wa.me/?text=${encodeURIComponent(`DriveX AI report (${result.decision}): ${shareUrl}`)}`;
+  const appHref = `drivex://report/${token}`;
 
   return (
     <>
@@ -92,7 +105,7 @@ const AIReport = () => {
                 </Card>
               </section>
 
-              <aside>
+              <aside className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Next steps</CardTitle>
@@ -117,6 +130,28 @@ const AIReport = () => {
                     </Button>
                     <Button asChild variant="secondary">
                       <Link to="/">Back to home</Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Send report</CardTitle>
+                    <CardDescription>Get the AI result via app, email, or WhatsApp.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid gap-2">
+                      <Label htmlFor="share-email">Email address</Label>
+                      <Input id="share-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex flex-wrap gap-3">
+                    <Button onClick={(e) => { e.preventDefault(); if (!email) { toast({ title: "Enter an email", description: "Please add a recipient address", variant: "destructive" }); return; } window.location.href = mailtoHref; }}>Send Email</Button>
+                    <Button asChild variant="secondary">
+                      <a href={waHref} target="_blank" rel="noopener noreferrer">Share via WhatsApp</a>
+                    </Button>
+                    <Button asChild variant="outline">
+                      <a href={appHref}>Open in app</a>
                     </Button>
                   </CardFooter>
                 </Card>
