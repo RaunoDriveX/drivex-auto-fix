@@ -4,16 +4,44 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import QRCode from "react-qr-code";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [showOptions, setShowOptions] = useState(false);
+  const [vehicle, setVehicle] = useState("");
+  const [phone, setPhone] = useState("");
+  const [token, setToken] = useState("");
+
+  const isMobile = typeof navigator !== "undefined" && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  function generateToken(length = 24) {
+    const bytes = new Uint8Array(length);
+    crypto.getRandomValues(bytes);
+    return btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+  }
+
+  const inspectionUrl = useMemo(() => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    return token ? `${origin}/inspection/${token}` : "";
+  }, [token]);
+
   const handleStart = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
-    const vehicle = String(data.get("vehicle") || "");
-    const phone = String(data.get("phone") || "");
-    navigate(`/report?vehicle=${encodeURIComponent(vehicle)}&phone=${encodeURIComponent(phone)}`);
+    const v = String(data.get("vehicle") || "");
+    const p = String(data.get("phone") || "");
+    setVehicle(v);
+    setPhone(p);
+    setToken(generateToken());
+    setShowOptions(true);
   };
   return (
     <section className="bg-background">
@@ -38,6 +66,31 @@ const Hero = () => {
             </div>
             <Button size="lg" type="submit">Continue</Button>
           </form>
+
+          {showOptions && (
+            <div className="mt-4 grid gap-3">
+              <div className="flex flex-wrap gap-3">
+                {isMobile && (
+                  <Button size="lg" onClick={() => navigate(`/inspection/${token}`)}>Start instant inspection</Button>
+                )}
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  onClick={() => toast({ title: "Link sent via SMS (mock)", description: `To ${phone || "(no number)"}` })}
+                >
+                  Send SMS link for later
+                </Button>
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Or scan QR on your phone (mock)</Label>
+                <div className="bg-card p-4 rounded-md w-[220px] h-[220px] flex items-center justify-center">
+                  <QRCode value={inspectionUrl} size={192} />
+                </div>
+                <p className="text-sm text-muted-foreground break-all">{inspectionUrl}</p>
+              </div>
+            </div>
+          )}
         </div>
         <div className="relative">
           <img
