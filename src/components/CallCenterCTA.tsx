@@ -49,7 +49,7 @@ export default function CallCenterCTA({ token, decision, phoneNumber = DEFAULT_N
   return (
     <>
       <Button size={size} variant={variant} onClick={() => { setOpen(true); setStatus("idle"); }}>
-        Talk to AI (call center)
+        Call us now to get your car fixed
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
