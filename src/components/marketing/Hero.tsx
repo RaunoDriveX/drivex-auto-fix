@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import QRCode from "react-qr-code";
@@ -79,6 +79,9 @@ const Hero = () => {
                   onClick={() => toast({ title: "Link sent via SMS (mock)", description: `To ${phone || "(no number)"}` })}
                 >
                   Send SMS link for later
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link to={`/report/${token}`}>Review AI report (demo)</Link>
                 </Button>
               </div>
 
