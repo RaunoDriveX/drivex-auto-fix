@@ -56,7 +56,7 @@ const Inspection = () => {
               </CardHeader>
               <CardFooter>
                 <Button asChild>
-                  <Link to="/report">Back to link generator</Link>
+                  <Link to="/">Back to home</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -122,8 +122,11 @@ const Inspection = () => {
                   <Button variant="secondary" disabled>Processing…</Button>
                 )}
                 {step === "result" && (
-                  <div className="flex gap-3">
-                    <Button onClick={sendBack}>Send result back</Button>
+                  <div className="flex flex-wrap gap-3">
+                    <Button asChild>
+                      <Link to={`/report/${token}`}>View AI report</Link>
+                    </Button>
+                    <Button variant="secondary" onClick={sendBack}>Send result back</Button>
                     <Button asChild variant="secondary">
                       <Link to="/">Return home</Link>
                     </Button>
