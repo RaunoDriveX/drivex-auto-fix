@@ -44,6 +44,7 @@ const AIReport = () => {
   }), []);
   const [postalCode, setPostalCode] = useState("");
   const [partnersVisible, setPartnersVisible] = useState(false);
+  const [showReplacement, setShowReplacement] = useState(false);
   const offersRef = useRef<HTMLDivElement | null>(null);
   const reportUrl = "https://admin.drivex.ee/access/b54PrNNRWlX2xutBBJc1AvHW";
   const canonical = typeof window !== "undefined" ? window.location.href : "/report/mock";
@@ -152,7 +153,7 @@ const AIReport = () => {
             {partnersVisible && (
               <div ref={offersRef}>
                 <section aria-label="Partner offers" className="mt-6">
-                  <CompareOptions decision="repair" postalCode={postalCode} />
+                  <CompareOptions decision="repair" postalCode={postalCode} showReplacement={showReplacement} onRequestReplacement={() => setShowReplacement(true)} />
                 </section>
               </div>
             )}

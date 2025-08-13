@@ -7,9 +7,11 @@ import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck 
 export type CompareOptionsProps = {
   decision: "repair" | "replacement";
   postalCode?: string;
+  showReplacement?: boolean;
+  onRequestReplacement?: () => void;
 };
 
-export default function CompareOptions({ decision, postalCode }: CompareOptionsProps) {
+export default function CompareOptions({ decision, postalCode, showReplacement = true, onRequestReplacement }: CompareOptionsProps) {
   const isRepairRecommended = decision === "repair";
 
   type Shop = {
@@ -129,59 +131,66 @@ export default function CompareOptions({ decision, postalCode }: CompareOptionsP
               </p>
             </div>
           </CardContent>
-          <CardFooter className="hidden" />
+          <CardFooter className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Pricing includes labor, materials, and tax.</span>
+            {!showReplacement && onRequestReplacement && (
+              <Button variant="link" size="sm" onClick={onRequestReplacement}>Prefer full replacement? See options</Button>
+            )}
+          </CardFooter>
         </Card>
 
         {/* Replacement card */}
-        <Card className="hover-scale animate-fade-in" style={{ animationDelay: "120ms" }}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Factory className="h-5 w-5" aria-hidden="true" />
-              Replacement options
-            </CardTitle>
-            <CardDescription>
-              Order glass from DriveX catalog (mock) or compare shop offers (OEM vs aftermarket).
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3">
-              {replacementShops.map((s) => (
-                <div key={s.id} className="p-3 rounded-md border">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`h-9 w-9 rounded-md grid place-items-center text-xs font-semibold ${s.id === 'dxc' ? 'bg-primary/10' : s.id === 'ps1' ? 'bg-accent/10' : 'bg-secondary/20'}`} aria-label={`${s.name} logo`}>
-                        {s.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
+        {showReplacement && (
+          <Card className="hover-scale animate-fade-in" style={{ animationDelay: "120ms" }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Factory className="h-5 w-5" aria-hidden="true" />
+                Replacement options
+              </CardTitle>
+              <CardDescription>
+                Order glass from DriveX catalog (mock) or compare shop offers (OEM vs aftermarket).
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3">
+                {replacementShops.map((s) => (
+                  <div key={s.id} className="p-3 rounded-md border">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`h-9 w-9 rounded-md grid place-items-center text-xs font-semibold ${s.id === 'dxc' ? 'bg-primary/10' : s.id === 'ps1' ? 'bg-accent/10' : 'bg-secondary/20'}`} aria-label={`${s.name} logo`}>
+                          {s.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
+                        </div>
+                        <div className="font-medium">{s.name}</div>
                       </div>
-                      <div className="font-medium">{s.name}</div>
+                      <div className="flex items-center gap-2">
+                        {s.id === replBestPrice && <Badge>Best price</Badge>}
+                        {s.id === replSoonest && <Badge variant="secondary">Soonest</Badge>}
+                        {s.id === replTopRated && <Badge variant="secondary">Top-rated</Badge>}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {s.id === replBestPrice && <Badge>Best price</Badge>}
-                      {s.id === replSoonest && <Badge variant="secondary">Soonest</Badge>}
-                      {s.id === replTopRated && <Badge variant="secondary">Top-rated</Badge>}
+                    <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Next slot: {s.nextSlot}</div>
+                      <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {s.type === 'Mobile' ? 'Comes to you' : `${s.distanceKm?.toFixed(1)} km`}</div>
+                      <div>Rating: <span className="text-foreground font-medium">{s.rating.toFixed(1)}</span> ({s.reviews})</div>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                        <span>Labor {euro(s.labor)}</span>
+                        <span>Materials {euro(s.materials)}</span>
+                        <span>Tax {euro(s.tax)}</span>
+                      </div>
+                      <div className="text-sm"><span className="text-muted-foreground mr-1">Total</span><span className="font-semibold text-foreground">{euro(total(s))}</span></div>
+                    </div>
+                    <div className="mt-3">
+                      <Button asChild size="sm"><Link to="/#lead-form">Select</Link></Button>
                     </div>
                   </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Next slot: {s.nextSlot}</div>
-                    <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {s.type === 'Mobile' ? 'Comes to you' : `${s.distanceKm?.toFixed(1)} km`}</div>
-                    <div>Rating: <span className="text-foreground font-medium">{s.rating.toFixed(1)}</span> ({s.reviews})</div>
-                  </div>
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                      <span>Labor {euro(s.labor)}</span>
-                      <span>Materials {euro(s.materials)}</span>
-                      <span>Tax {euro(s.tax)}</span>
-                    </div>
-                    <div className="text-sm"><span className="text-muted-foreground mr-1">Total</span><span className="font-semibold text-foreground">{euro(total(s))}</span></div>
-                  </div>
-                  <div className="mt-3">
-                    <Button asChild size="sm"><Link to="/#lead-form">Select</Link></Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-          <CardFooter className="hidden" />
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+            <CardFooter className="hidden" />
+          </Card>
+        )}
       </div>
     </section>
   );
