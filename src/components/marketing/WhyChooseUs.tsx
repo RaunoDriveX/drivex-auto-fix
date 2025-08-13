@@ -53,14 +53,14 @@ const WhyChooseUs = () => {
         {/* Main header */}
         <div className="text-center mb-16">
           <Badge variant="secondary" className="mb-4 px-4 py-2">
-            Why DriveX?
+            Patent Pending Technology
           </Badge>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            The smartest way to fix your glass
+            Your neutral advocate for glass damage
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            We're revolutionizing auto glass repair with AI-powered assessment, transparent pricing, 
-            and a network of verified professionals. From single cars to entire fleets.
+            Our patent-pending AI understands every claim and damage with <span className="font-semibold text-primary">95% accuracy</span>. 
+            DriveX stands for your interests and wallet, not the repair shops.
           </p>
         </div>
 
