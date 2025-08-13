@@ -41,11 +41,11 @@ const Index = () => {
           <div className="container mx-auto max-w-3xl">
             <h3 className="text-lg font-semibold mb-4 text-center">🧪 Development Shortcuts</h3>
             <div className="flex flex-wrap gap-4 justify-center">
-              <a href="/test-partners" className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-                Test Partner Selection
+              <a href="/report/eo3w_x1IBgPaUDj8gsUVkI2qL8rG0gSx" className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+                Jump to Partner Selection
               </a>
-              <a href="/test-booking" className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 transition-colors">
-                Test Booking Form
+              <a href="/inspection/test123" className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 transition-colors">
+                Start Inspection Flow
               </a>
             </div>
           </div>
