@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import CallCenterCTA from "@/components/CallCenterCTA";
 import CompareOptions from "@/components/CompareOptions";
 import LeadForm from "@/components/marketing/LeadForm";
+import DIYResinKit from "@/components/DIYResinKit";
 import { ShieldCheck } from "lucide-react";
 
 function analyzeFromToken(token: string) {
@@ -193,7 +194,16 @@ const AIReport = () => {
 
             {partnersVisible && (
               <div ref={offersRef}>
-                <section aria-label="Partner offers" className="mt-6">
+                {/* DIY Kit Section - separate from partner offers */}
+                <section aria-label="DIY repair kit" className="mt-6">
+                  <div className="mb-6">
+                    <h3 className="text-xl font-semibold text-foreground mb-2">DIY Repair Option</h3>
+                    <p className="text-muted-foreground text-sm">Fix small chips yourself with our professional-grade kit</p>
+                  </div>
+                  <DIYResinKit chipSize={2.0} damageType="chip" />
+                </section>
+
+                <section aria-label="Partner offers" className="mt-8">
                   <CompareOptions 
                     decision="repair" 
                     postalCode={address} 
@@ -203,7 +213,7 @@ const AIReport = () => {
                       setSelectedShop({id: shopId, name: shopName});
                       setTimeout(() => bookingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
                     }}
-                    chipSize={2.0} // Mock small chip size to show DIY option
+                    chipSize={2.0}
                     damageType="chip"
                   />
                 </section>

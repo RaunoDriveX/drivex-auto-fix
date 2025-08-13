@@ -144,10 +144,6 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
                 </div>
               ))}
             </div>
-            {/* DIY Resin Kit - only show for small chips */}
-            {chipSize < 2.5 && damageType === "chip" && (
-              <DIYResinKit chipSize={chipSize} damageType={damageType} />
-            )}
           </CardContent>
           <CardFooter className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Pricing includes labor, materials, and tax.</span>

@@ -39,7 +39,7 @@ const DIYResinKit = ({ chipSize, damageType }: DIYResinKitProps) => {
     return null;
   }
 
-  const kitPrice = 24.99;
+  const kitPrice = 9.99;
   const shippingCost = 4.99;
   const totalCost = kitPrice + shippingCost;
   const estimatedDelivery = "1-2 business days";
@@ -324,7 +324,7 @@ const DIYResinKit = ({ chipSize, damageType }: DIYResinKitProps) => {
             <Package className="h-8 w-8 text-accent" />
             <div>
               <div className="font-medium">Professional Resin Kit</div>
-              <div className="text-sm text-muted-foreground">Includes resin, curing strips, instructions</div>
+              <div className="text-sm text-muted-foreground">Includes resin, curing strips & free tutorial</div>
             </div>
           </div>
           <div className="text-right">
