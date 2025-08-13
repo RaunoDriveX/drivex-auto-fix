@@ -110,13 +110,6 @@ const Workflow = () => {
           ))}
         </div>
 
-        {/* Call to action */}
-        <div className="text-center mt-12">
-          <p className="text-lg text-muted-foreground">
-            Ready to get started? 
-            <span className="font-semibold text-primary ml-2">It takes less than 5 minutes!</span>
-          </p>
-        </div>
       </div>
     </section>
   );

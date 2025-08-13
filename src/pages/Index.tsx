@@ -34,10 +34,10 @@ const Index = () => {
       </header>
 
       <main>
+        <Testimonials />
         <WhyChooseUs />
         <Workflow />
         <CustomerSegments />
-        <Testimonials />
         
         {/* Development shortcuts - remove in production */}
         <section className="bg-muted/30 py-8 border-t">
