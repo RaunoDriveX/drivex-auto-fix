@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, Phone, Mail } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,9 +20,9 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <a href="/" className="text-2xl font-bold text-primary">
+            <Link to="/" className="text-2xl font-bold text-primary">
               DriveX
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
