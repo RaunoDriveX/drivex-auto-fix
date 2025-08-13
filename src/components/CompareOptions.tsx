@@ -132,14 +132,8 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
               </p>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="success" className="inline-flex items-center gap-1">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                Verified by DriveX
-              </Badge>
-              <span className="text-xs text-muted-foreground">Pricing includes labor, materials, and tax.</span>
-            </div>
+          <CardFooter className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Pricing includes labor, materials, and tax.</span>
             {!showReplacement && onRequestReplacement && (
               <Button variant="link" size="sm" onClick={onRequestReplacement}>Prefer full replacement? See options</Button>
             )}

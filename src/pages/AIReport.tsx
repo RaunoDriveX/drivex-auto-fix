@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import CallCenterCTA from "@/components/CallCenterCTA";
 import CompareOptions from "@/components/CompareOptions";
+import { ShieldCheck } from "lucide-react";
 function analyzeFromToken(token: string) {
   let h = 0;
   for (let i = 0; i < token.length; i++) h = (h * 31 + token.charCodeAt(i)) >>> 0;
@@ -119,7 +121,15 @@ const AIReport = () => {
             <section aria-label="Find partners by postal code" className="mt-8 animate-fade-in">
               <Card>
                 <CardHeader>
-                  <CardTitle>Find partners near you</CardTitle>
+                  <div className="flex items-center justify-between gap-3">
+                    <CardTitle>Find verified & high quality technicians near you</CardTitle>
+                    {partnersVisible && (
+                      <Badge className="inline-flex items-center gap-1">
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                        Verified by DriveX
+                      </Badge>
+                    )}
+                  </div>
                   <CardDescription>Enter your postal code to see relevant repair offers.</CardDescription>
                 </CardHeader>
                 <CardContent>
