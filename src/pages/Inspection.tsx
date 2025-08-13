@@ -276,9 +276,12 @@ const Inspection = () => {
                     </>
                   )}
                 </CardContent>
-                <CardFooter>
-                  <Button asChild variant="secondary" className="w-full">
+                <CardFooter className="flex gap-3">
+                  <Button asChild variant="secondary" className="flex-1">
                     <Link to="/">Return to homepage</Link>
+                  </Button>
+                  <Button asChild className="flex-1">
+                    <Link to="/report">Move to Results</Link>
                   </Button>
                 </CardFooter>
               </Card>
