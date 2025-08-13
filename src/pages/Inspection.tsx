@@ -112,16 +112,6 @@ const Inspection = () => {
                       >
                         📸 Go Photograph Your Car Right Now
                       </Button>
-                      
-                      {/* Mock completion button for testing */}
-                      <Button 
-                        onClick={() => window.location.href = `/results/${token}`}
-                        variant="outline"
-                        size="sm"
-                        className="w-full mt-2 text-xs"
-                      >
-                        🧪 Mock Completion (Test)
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -286,16 +276,9 @@ const Inspection = () => {
                     </>
                   )}
                 </CardContent>
-                <CardFooter className="flex gap-3">
-                  <Button asChild variant="secondary" className="flex-1">
+                <CardFooter>
+                  <Button asChild variant="secondary" className="w-full">
                     <Link to="/">Return to homepage</Link>
-                  </Button>
-                  <Button 
-                    onClick={() => window.location.href = `/results/${token}`}
-                    variant="outline" 
-                    className="flex-1"
-                  >
-                    🧪 Mock Results (Test)
                   </Button>
                 </CardFooter>
               </Card>
