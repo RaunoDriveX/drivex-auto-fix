@@ -45,41 +45,34 @@ const WhyChooseUs = () => {
       <div className="container mx-auto">
         
         {/* Main header */}
-        <div className="text-center mb-16">
-          <Badge variant="secondary" className="mb-4 px-4 py-2">
+        <div className="text-center mb-20">
+          <Badge variant="secondary" className="mb-6 px-6 py-3 text-sm font-medium">
             Patent Pending Technology
           </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Your neutral advocate for glass damage
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8 leading-tight">
+            Fair pricing. Quality repairs.<br/>
+            <span className="text-primary">Powered by AI.</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Our patent-pending AI understands every claim and damage with <span className="font-semibold text-primary">95% accuracy</span>. 
-            DriveX creates a fair marketplace connecting car owners with quality repair partners.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            300,000 assessments completed with <span className="font-semibold text-foreground">95% accuracy</span> over 6 years. 
+            DriveX creates transparency in the auto glass repair market.
           </p>
         </div>
 
         {/* Our practices */}
-        <div className="grid md:grid-cols-2 gap-8 mb-20">
+        <div className="grid md:grid-cols-3 gap-8 mb-24">
           {practices.map((practice, index) => (
-            <Card key={practice.title} className="hover-scale animate-fade-in border-0 shadow-lg" style={{ animationDelay: `${index * 150}ms` }}>
-              <CardHeader>
-                <CardTitle className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl bg-primary/10 text-primary flex-shrink-0">
-                    <practice.icon className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">{practice.title}</h3>
-                    <p className="text-muted-foreground font-normal">{practice.description}</p>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2 text-sm text-primary font-medium">
-                  <CheckCircle className="h-4 w-4" />
-                  {practice.benefit}
-                </div>
-              </CardContent>
-            </Card>
+            <div key={practice.title} className="text-center group animate-fade-in" style={{ animationDelay: `${index * 150}ms` }}>
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <practice.icon className="h-10 w-10 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-4">{practice.title}</h3>
+              <p className="text-muted-foreground mb-4 leading-relaxed">{practice.description}</p>
+              <div className="inline-flex items-center gap-2 text-sm text-primary font-medium px-4 py-2 bg-primary/5 rounded-full">
+                <CheckCircle className="h-4 w-4" />
+                {practice.benefit}
+              </div>
+            </div>
           ))}
         </div>
 
