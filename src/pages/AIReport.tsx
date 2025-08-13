@@ -1,8 +1,10 @@
 import { Helmet } from "react-helmet-async";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import CallCenterCTA from "@/components/CallCenterCTA";
 import CompareOptions from "@/components/CompareOptions";
 function analyzeFromToken(token: string) {
@@ -40,6 +42,8 @@ const AIReport = () => {
       "No edge impact detected",
     ],
   }), []);
+  const [postalCode, setPostalCode] = useState("");
+  const [partnersVisible, setPartnersVisible] = useState(false);
   const reportUrl = "https://admin.drivex.ee/access/b54PrNNRWlX2xutBBJc1AvHW";
   const canonical = typeof window !== "undefined" ? window.location.href : "/report/mock";
   const jsonLd = {
@@ -78,9 +82,10 @@ const AIReport = () => {
               <p className="mt-2 text-muted-foreground">
                 {result.decision === "repair" ? "Save 85% of costs compared to a replacement." : "We’ll ensure the right glass and calibration for your vehicle."}
               </p>
+              <p className="text-muted-foreground">We’ll send your inspection result, booking, and pricing via SMS or email.</p>
             </header>
 
-            <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
+            <div className="space-y-6">
               <section>
                 <Card>
                   <CardHeader>
@@ -97,21 +102,6 @@ const AIReport = () => {
                       />
                     </div>
                   </CardContent>
-                  <CardFooter className="hidden">
-                    <Button asChild>
-                      <a href={reportUrl} target="_blank" rel="noopener noreferrer">Open full report in new tab</a>
-                    </Button>
-                  </CardFooter>
-                </Card>
-
-              </section>
-
-              <aside className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Next steps</CardTitle>
-                    <CardDescription>We’ll send your inspection result, booking, and pricing via SMS or email.</CardDescription>
-                  </CardHeader>
                   <CardFooter className="flex flex-wrap gap-3">
                     <Button asChild variant="secondary">
                       <Link to="/">Back to home</Link>
@@ -119,12 +109,44 @@ const AIReport = () => {
                     <CallCenterCTA token={token} decision={result.decision as "repair" | "replacement"} />
                   </CardFooter>
                 </Card>
-              </aside>
+
+              </section>
+
             </div>
 
-            <section aria-label="Compare repair and replacement options" className="mt-8">
-              <CompareOptions decision="repair" />
+            <section aria-label="Find partners by postal code" className="mt-8 animate-fade-in">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Find partners near you</CardTitle>
+                  <CardDescription>Enter your postal code to see relevant repair offers.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form
+                    onSubmit={(e) => { e.preventDefault(); setPartnersVisible(true); }}
+                    className="flex flex-col sm:flex-row gap-3"
+                    aria-label="Postal code form"
+                  >
+                    <div className="flex-1">
+                      <Label htmlFor="postal">Postal code</Label>
+                      <Input
+                        id="postal"
+                        placeholder="e.g., 10115"
+                        value={postalCode}
+                        onChange={(e) => setPostalCode(e.target.value)}
+                        autoComplete="postal-code"
+                      />
+                    </div>
+                    <Button type="submit" className="sm:self-end">Show partners</Button>
+                  </form>
+                </CardContent>
+              </Card>
             </section>
+
+            {partnersVisible && (
+              <section aria-label="Compare repair and replacement options" className="mt-6">
+                <CompareOptions decision="repair" />
+              </section>
+            )}
           </article>
         </div>
       </main>
