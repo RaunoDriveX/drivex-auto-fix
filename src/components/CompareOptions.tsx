@@ -12,6 +12,51 @@ export type CompareOptionsProps = {
 export default function CompareOptions({ decision, postalCode }: CompareOptionsProps) {
   const isRepairRecommended = decision === "repair";
 
+  type Shop = {
+    id: string;
+    name: string;
+    type: "Mobile" | "Stationary";
+    distanceKm?: number; // for stationary
+    labor: number;
+    materials: number;
+    tax: number;
+    nextSlot: string; // ISO or label
+    rating: number; // 0-5
+    reviews: number;
+    color: string; // tailwind bg token suffix, e.g., 'primary/10'
+  };
+
+  const euro = (n: number) => `€${n.toFixed(0)}`;
+  const total = (s: Shop) => s.labor + s.materials + s.tax;
+
+  const repairShops: Shop[] = [
+    { id: "rgm", name: "RapidGlass Mobile", type: "Mobile", labor: 55, materials: 24, tax: 10, nextSlot: "Today 16:30", rating: 4.6, reviews: 128, color: "primary/10" },
+    { id: "cgc", name: "CityGlass Center", type: "Stationary", distanceKm: 2.1, labor: 49, materials: 20, tax: 10, nextSlot: "Tomorrow 09:00", rating: 4.8, reviews: 201, color: "accent/10" },
+    { id: "glx", name: "GlassXperts", type: "Stationary", distanceKm: 3.4, labor: 45, materials: 22, tax: 10, nextSlot: "Today 18:00", rating: 4.4, reviews: 76, color: "secondary/15" },
+  ];
+
+  const replacementShops: Shop[] = [
+    { id: "dxc", name: "DriveX OEM Center", type: "Stationary", distanceKm: 4.8, labor: 120, materials: 220, tax: 68, nextSlot: "In 2 days", rating: 4.7, reviews: 93, color: "primary/10" },
+    { id: "ps1", name: "Partner Shop A", type: "Stationary", distanceKm: 2.9, labor: 110, materials: 180, tax: 58, nextSlot: "Tomorrow 13:00", rating: 4.5, reviews: 141, color: "accent/10" },
+    { id: "ps2", name: "Partner Shop B", type: "Mobile", labor: 115, materials: 175, tax: 57, nextSlot: "Tomorrow 08:30", rating: 4.3, reviews: 67, color: "secondary/15" },
+  ];
+
+  const byBestPrice = (shops: Shop[]) => shops.reduce((a, b) => (total(a) <= total(b) ? a : b));
+  const bySoonest = (shops: Shop[]) => {
+    // very simple scoring: Today < Tomorrow < In N days
+    const score = (slot: string) => (slot.startsWith("Today") ? 0 : slot.startsWith("Tomorrow") ? 1 : 2);
+    return shops.reduce((a, b) => (score(a.nextSlot) <= score(b.nextSlot) ? a : b));
+  };
+  const byTopRated = (shops: Shop[]) => shops.reduce((a, b) => (a.rating >= b.rating ? a : b));
+
+  const repairBestPrice = byBestPrice(repairShops).id;
+  const repairSoonest = bySoonest(repairShops).id;
+  const repairTopRated = byTopRated(repairShops).id;
+
+  const replBestPrice = byBestPrice(replacementShops).id;
+  const replSoonest = bySoonest(replacementShops).id;
+  const replTopRated = byTopRated(replacementShops).id;
+
   return (
     <section aria-labelledby="compare-options-heading" className="mt-10">
       <div className="mb-4 flex items-center justify-between">
@@ -41,32 +86,39 @@ export default function CompareOptions({ decision, postalCode }: CompareOptionsP
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-3">
-              <div className="p-3 rounded-md border">
-                <div className="flex items-center justify-between">
-                  <div className="font-medium">RapidGlass Mobile</div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Mobile unit</Badge>
-                    <span className="text-sm text-muted-foreground">from €89</span>
+              {repairShops.map((s) => (
+                <div key={s.id} className="p-3 rounded-md border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-9 w-9 rounded-md grid place-items-center text-xs font-semibold ${s.id === 'rgm' ? 'bg-primary/10' : s.id === 'cgc' ? 'bg-accent/10' : 'bg-secondary/20'}`} aria-label={`${s.name} logo`}>
+                        {s.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
+                      </div>
+                      <div className="font-medium">{s.name}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {s.id === repairBestPrice && <Badge>Best price</Badge>}
+                      {s.id === repairSoonest && <Badge variant="secondary">Soonest</Badge>}
+                      {s.id === repairTopRated && <Badge variant="secondary">Top-rated</Badge>}
+                    </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Next slot: {s.nextSlot}</div>
+                    <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {s.type === 'Mobile' ? 'Comes to you' : `${s.distanceKm?.toFixed(1)} km`}</div>
+                    <div>Rating: <span className="text-foreground font-medium">{s.rating.toFixed(1)}</span> ({s.reviews})</div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                      <span>Labor {euro(s.labor)}</span>
+                      <span>Materials {euro(s.materials)}</span>
+                      <span>Tax {euro(s.tax)}</span>
+                    </div>
+                    <div className="text-sm"><span className="text-muted-foreground mr-1">Total</span><span className="font-semibold text-foreground">{euro(total(s))}</span></div>
+                  </div>
+                  <div className="mt-3">
+                    <Button asChild size="sm"><Link to="/#lead-form">Select</Link></Button>
                   </div>
                 </div>
-                <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5" /> Next slot: Today 16:30
-                  <MapPin className="h-3.5 w-3.5" /> Comes to you
-                </div>
-              </div>
-              <div className="p-3 rounded-md border">
-                <div className="flex items-center justify-between">
-                  <div className="font-medium">CityGlass Center</div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Stationary</Badge>
-                    <span className="text-sm text-muted-foreground">from €79</span>
-                  </div>
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5" /> Next slot: Tomorrow 09:00
-                  <MapPin className="h-3.5 w-3.5" /> 2.1 km
-                </div>
-              </div>
+              ))}
             </div>
             <div className="p-3 rounded-md border bg-muted/30">
               <div className="flex items-center gap-2 font-medium">
@@ -77,14 +129,7 @@ export default function CompareOptions({ decision, postalCode }: CompareOptionsP
               </p>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-wrap gap-3">
-            <Button asChild>
-              <Link to="/#lead-form">See shops</Link>
-            </Button>
-            <Button asChild variant="secondary">
-              <Link to="/#lead-form">Order DIY resin</Link>
-            </Button>
-          </CardFooter>
+          <CardFooter className="hidden" />
         </Card>
 
         {/* Replacement card */}
@@ -100,41 +145,42 @@ export default function CompareOptions({ decision, postalCode }: CompareOptionsP
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-3">
-              <div className="p-3 rounded-md border">
-                <div className="flex items-center justify-between">
-                  <div className="font-medium">DriveX Glass Catalog</div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">OEM</Badge>
-                    <Badge variant="secondary">Aftermarket</Badge>
+              {replacementShops.map((s) => (
+                <div key={s.id} className="p-3 rounded-md border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-9 w-9 rounded-md grid place-items-center text-xs font-semibold ${s.id === 'dxc' ? 'bg-primary/10' : s.id === 'ps1' ? 'bg-accent/10' : 'bg-secondary/20'}`} aria-label={`${s.name} logo`}>
+                        {s.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
+                      </div>
+                      <div className="font-medium">{s.name}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {s.id === replBestPrice && <Badge>Best price</Badge>}
+                      {s.id === replSoonest && <Badge variant="secondary">Soonest</Badge>}
+                      {s.id === replTopRated && <Badge variant="secondary">Top-rated</Badge>}
+                    </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Next slot: {s.nextSlot}</div>
+                    <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {s.type === 'Mobile' ? 'Comes to you' : `${s.distanceKm?.toFixed(1)} km`}</div>
+                    <div>Rating: <span className="text-foreground font-medium">{s.rating.toFixed(1)}</span> ({s.reviews})</div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                      <span>Labor {euro(s.labor)}</span>
+                      <span>Materials {euro(s.materials)}</span>
+                      <span>Tax {euro(s.tax)}</span>
+                    </div>
+                    <div className="text-sm"><span className="text-muted-foreground mr-1">Total</span><span className="font-semibold text-foreground">{euro(total(s))}</span></div>
+                  </div>
+                  <div className="mt-3">
+                    <Button asChild size="sm"><Link to="/#lead-form">Select</Link></Button>
                   </div>
                 </div>
-                <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <Truck className="h-3.5 w-3.5" /> Delivery ETA: 1–3 days
-                  <Clock className="h-3.5 w-3.5" /> Install time: ~2h
-                </div>
-              </div>
-              <div className="p-3 rounded-md border">
-                <div className="flex items-center justify-between">
-                  <div className="font-medium">Partner Shop Offers</div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">OEM</Badge>
-                    <Badge variant="secondary">Aftermarket</Badge>
-                  </div>
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <Store className="h-3.5 w-3.5" /> Nearby shops with next-day availability
-                </div>
-              </div>
+              ))}
             </div>
           </CardContent>
-          <CardFooter className="flex flex-wrap gap-3">
-            <Button asChild>
-              <Link to="/#lead-form">Browse catalog</Link>
-            </Button>
-            <Button asChild variant="secondary">
-              <Link to="/#lead-form">See shop offers</Link>
-            </Button>
-          </CardFooter>
+          <CardFooter className="hidden" />
         </Card>
       </div>
     </section>
