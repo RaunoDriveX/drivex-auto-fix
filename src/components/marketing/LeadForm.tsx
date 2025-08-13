@@ -10,13 +10,14 @@ import CallCenterCTA from "@/components/CallCenterCTA";
 
 const LeadForm = () => {
   const [loading, setLoading] = useState(false);
+  const [isInsuranceClaim, setIsInsuranceClaim] = useState<string>("");
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      (toast as any).success?.("Request received! We'll reach out shortly.") || toast("Request received! We'll reach out shortly.");
+      (toast as any).success?.("Booking confirmed! We'll contact you soon.") || toast("Booking confirmed! We'll contact you soon.");
       (e.currentTarget as HTMLFormElement).reset();
       window.location.hash = "lead-form";
     }, 600);
@@ -25,15 +26,9 @@ const LeadForm = () => {
   return (
     <section id="lead-form" aria-labelledby="lead-form-heading" className="bg-background py-16">
       <div className="container mx-auto max-w-3xl">
-        <h2 id="lead-form-heading" className="text-2xl md:text-3xl font-semibold text-foreground mb-4">
-          Get your glass fixed fast
-        </h2>
-        <div className="mb-6">
-          <CallCenterCTA variant="default" size="lg" />
-        </div>
         <Card>
           <CardHeader>
-            <CardTitle>Tell us about the damage</CardTitle>
+            <CardTitle>Your booking details</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={onSubmit} className="grid gap-4">
@@ -46,17 +41,34 @@ const LeadForm = () => {
                 <Input id="email" name="email" type="email" placeholder="jane@example.com" required />
               </div>
               <div className="grid gap-2">
-                <Label>Insurance</Label>
-                <Select name="insured">
+                <Label>Is this an insurance claim?</Label>
+                <Select name="insuranceClaim" onValueChange={setIsInsuranceClaim}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="insured">Insured</SelectItem>
-                    <SelectItem value="uninsured">Uninsured</SelectItem>
+                    <SelectItem value="yes">Yes, insurance claim</SelectItem>
+                    <SelectItem value="no">No, paying myself</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+              
+              {isInsuranceClaim === "yes" && (
+                <>
+                  <div className="grid gap-2">
+                    <Label htmlFor="insurerName">Insurance company name</Label>
+                    <Input id="insurerName" name="insurerName" placeholder="e.g. Allianz, AXA, etc." required />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="policyNumber">Policy number</Label>
+                    <Input id="policyNumber" name="policyNumber" placeholder="Your policy number" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="claimNumber">Claim number (if available)</Label>
+                    <Input id="claimNumber" name="claimNumber" placeholder="Leave blank if not yet filed" />
+                  </div>
+                </>
+              )}
               <div className="grid gap-2">
                 <Label>Preferred contact</Label>
                 <Select name="contact">
@@ -72,7 +84,7 @@ const LeadForm = () => {
               </div>
               <div className="pt-2">
                 <Button type="submit" disabled={loading}>
-                  {loading ? "Submitting..." : "Submit Request"}
+                  {loading ? "Processing..." : "Finish my booking"}
                 </Button>
               </div>
             </form>
