@@ -125,7 +125,7 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
             </div>
             <div className="p-3 rounded-md border bg-muted/30">
               <div className="flex items-center gap-2 font-medium">
-                <ShoppingCart className="h-4 w-4" /> DIY resin kit (budget)
+                <ShoppingCart className="h-4 w-4" /> Repair Yourself with resin and tutorials
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 Uninsured or tight budget? Order resin and follow our video to stop the spread.
