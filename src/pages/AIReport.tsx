@@ -122,13 +122,11 @@ const AIReport = () => {
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between gap-3">
-                    <CardTitle>Find verified & high quality technicians near you</CardTitle>
-                    {partnersVisible && (
-                      <Badge className="inline-flex items-center gap-1">
-                        <ShieldCheck className="h-3.5 w-3.5" />
-                        Verified by DriveX
-                      </Badge>
-                    )}
+                    <CardTitle>Find high quality technicians near you</CardTitle>
+                    <Badge className="inline-flex items-center gap-1">
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      Verified by DriveX
+                    </Badge>
                   </div>
                   <CardDescription>Enter your postal code to see relevant repair offers.</CardDescription>
                 </CardHeader>
