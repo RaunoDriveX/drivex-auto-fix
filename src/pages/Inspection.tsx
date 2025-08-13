@@ -55,7 +55,10 @@ const Inspection = () => {
   };
 
   const startInspection = () => {
-    window.location.href = smartscanUrl;
+    // Add callback parameter to redirect to results page after completion
+    const callbackUrl = `${window.location.origin}/results/${token}`;
+    const urlWithCallback = `${smartscanUrl}&callback=${encodeURIComponent(callbackUrl)}`;
+    window.location.href = urlWithCallback;
   };
 
   const title = token ? "Vehicle Self-Inspection" : "Invalid link";

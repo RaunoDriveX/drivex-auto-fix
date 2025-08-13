@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import Inspection from "./pages/Inspection";
+import InspectionResults from "./pages/InspectionResults";
 import AIReport from "./pages/AIReport";
 import NotFound from "./pages/NotFound";
 
@@ -21,6 +22,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/inspection/:token" element={<Inspection />} />
+            <Route path="/results/:token" element={<InspectionResults />} />
             <Route path="/report/:token" element={<AIReport />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
