@@ -101,27 +101,10 @@ const LeadForm = ({ jobType = "repair" }: LeadFormProps) => {
                     <Label htmlFor="policyNumber">Policy number</Label>
                     <Input id="policyNumber" name="policyNumber" placeholder="Your policy number" />
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="claimNumber">Claim number (if available)</Label>
-                    <Input id="claimNumber" name="claimNumber" placeholder="Leave blank if not yet filed" />
-                  </div>
                 </>
               )}
-              <div className="grid gap-2">
-                <Label>Preferred contact</Label>
-                <Select name="contact">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="call">Call</SelectItem>
-                    <SelectItem value="sms">SMS</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid gap-4">
+               
+               <div className="grid gap-4">
                 <div className="p-4 bg-accent/10 rounded-lg border border-accent/20">
                   <div className="flex items-center gap-2 mb-2">
                     <Clock className="h-4 w-4 text-accent" />
