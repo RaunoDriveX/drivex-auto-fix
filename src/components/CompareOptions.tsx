@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck, Leaf, Banknote, ShieldCheck, Star } from "lucide-react";
+import DIYResinKit from "@/components/DIYResinKit";
 
 export type CompareOptionsProps = {
   decision: "repair" | "replacement";
@@ -10,9 +11,11 @@ export type CompareOptionsProps = {
   showReplacement?: boolean;
   onRequestReplacement?: () => void;
   onBookSlot?: (shopId: string, shopName: string) => void;
+  chipSize?: number; // in cm, for DIY resin kit eligibility
+  damageType?: "chip" | "crack" | "spider";
 };
 
-export default function CompareOptions({ decision, postalCode, showReplacement = true, onRequestReplacement, onBookSlot }: CompareOptionsProps) {
+export default function CompareOptions({ decision, postalCode, showReplacement = true, onRequestReplacement, onBookSlot, chipSize = 3.0, damageType = "chip" }: CompareOptionsProps) {
   const isRepairRecommended = decision === "repair";
 
   type Shop = {
@@ -141,14 +144,10 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
                 </div>
               ))}
             </div>
-            <div className="p-3 rounded-md border bg-muted/30">
-              <div className="flex items-center gap-2 font-medium">
-                <ShoppingCart className="h-4 w-4" /> Repair Yourself with resin and tutorials
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Uninsured or tight budget? Order resin and follow our video to stop the spread.
-              </p>
-            </div>
+            {/* DIY Resin Kit - only show for small chips */}
+            {chipSize < 2.5 && damageType === "chip" && (
+              <DIYResinKit chipSize={chipSize} damageType={damageType} />
+            )}
           </CardContent>
           <CardFooter className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Pricing includes labor, materials, and tax.</span>

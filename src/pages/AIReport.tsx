@@ -173,6 +173,8 @@ const AIReport = () => {
                       setSelectedShop({id: shopId, name: shopName});
                       setTimeout(() => bookingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
                     }}
+                    chipSize={2.0} // Mock small chip size to show DIY option
+                    damageType="chip"
                   />
                 </section>
                 
