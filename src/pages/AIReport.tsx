@@ -79,16 +79,16 @@ const AIReport = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="rounded-md border overflow-hidden">
-                      <iframe
-                        src={reportUrl}
-                        title="DriveX AI report"
-                        className="w-full h-[70vh]"
+                      <img
+                        src="/lovable-uploads/c1b17908-3759-47aa-8be9-2ca25b318c3d.png"
+                        alt="AI windshield inspection: reference images and detected chip damage — recommended repair"
+                        className="w-full h-auto"
                         loading="lazy"
-                        referrerPolicy="no-referrer"
+                        decoding="async"
                       />
                     </div>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="hidden">
                     <Button asChild>
                       <a href={reportUrl} target="_blank" rel="noopener noreferrer">Open full report in new tab</a>
                     </Button>
