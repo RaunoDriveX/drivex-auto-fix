@@ -5,25 +5,25 @@ const Testimonials = () => {
   const testimonials = [
     {
       name: "María Elena Rodríguez",
-      location: "Ciudad de México",
+      location: "Mexico City",
       image: "👩‍💼",
-      text: "DriveX me ayudó a ahorrar más de $3,000 pesos comparando precios. Antes iba al primer taller que encontraba, ahora sé que estoy pagando un precio justo.",
+      text: "DriveX helped me save over $150 by comparing prices from different shops. Before, I would just go to the first repair shop I found. Now I know I'm paying a fair price.",
       benefit: "Saving Money",
       rating: 5
     },
     {
       name: "Carlos Hernández",
-      location: "Guadalajara, Jalisco", 
+      location: "Guadalajara, Mexico", 
       image: "👨‍🚗",
-      text: "En 20 minutos ya tenía mi cita agendada y el técnico vino a mi oficina. No perdí tiempo buscando talleres ni esperando en filas. Increíble servicio.",
+      text: "In 20 minutes I had my appointment scheduled and the technician came to my office. I didn't waste time searching for shops or waiting in lines. Incredible service.",
       benefit: "Saving Time",
       rating: 5
     },
     {
       name: "Ana Sofía Morales",
-      location: "Monterrey, Nuevo León",
+      location: "Monterrey, Mexico",
       image: "👩‍🎓", 
-      text: "Por fin alguien que defiende mis intereses y no los del taller. DriveX me explicó todo claramente y me ayudó a tomar la mejor decisión para mi bolsillo.",
+      text: "Finally someone who defends my interests and not the repair shop's. DriveX explained everything clearly and helped me make the best decision for my wallet.",
       benefit: "Peace of Mind",
       rating: 5
     }
@@ -34,10 +34,10 @@ const Testimonials = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Lo que dicen nuestros clientes
+            What our customers say
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Más de 300,000 conductores mexicanos ya confían en DriveX para reparar su cristal automotriz
+            Over 300,000 drivers already trust DriveX for their auto glass repair needs
           </p>
         </div>
 
@@ -87,20 +87,20 @@ const Testimonials = () => {
         {/* Call to action */}
         <div className="text-center mt-12">
           <p className="text-lg text-muted-foreground mb-6">
-            Únete a miles de mexicanos que ya eligieron la forma inteligente de reparar su cristal
+            Join thousands of drivers who chose the smart way to repair their auto glass
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <a 
               href="/report/eo3w_x1IBgPaUDj8gsUVkI2qL8rG0gSx" 
               className="px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
             >
-              Comenzar evaluación
+              Start Your Assessment
             </a>
             <a 
               href="mailto:fleet@drivex.com" 
               className="px-8 py-4 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/5 transition-colors"
             >
-              Contactar ventas flotillas
+              Contact Fleet Sales
             </a>
           </div>
         </div>
