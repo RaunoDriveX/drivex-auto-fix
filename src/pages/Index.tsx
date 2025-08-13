@@ -35,6 +35,21 @@ const Index = () => {
       <main>
         <Workflow />
         <LeadForm />
+        
+        {/* Development shortcuts - remove in production */}
+        <section className="bg-muted/30 py-8 border-t">
+          <div className="container mx-auto max-w-3xl">
+            <h3 className="text-lg font-semibold mb-4 text-center">🧪 Development Shortcuts</h3>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <a href="/test-partners" className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+                Test Partner Selection
+              </a>
+              <a href="/test-booking" className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 transition-colors">
+                Test Booking Form
+              </a>
+            </div>
+          </div>
+        </section>
       </main>
     </>
   );
