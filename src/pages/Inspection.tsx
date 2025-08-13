@@ -285,7 +285,7 @@ const Inspection = () => {
                     <Link to="/">Return to homepage</Link>
                   </Button>
                   <Button asChild className="flex-1">
-                    <Link to="/report">Move to Results</Link>
+                    <Link to={`/report/${token}`}>Move to Results</Link>
                   </Button>
                 </CardFooter>
               </Card>
