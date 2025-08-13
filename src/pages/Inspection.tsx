@@ -112,6 +112,16 @@ const Inspection = () => {
                       >
                         📸 Go Photograph Your Car Right Now
                       </Button>
+                      
+                      {/* Mock completion button for testing */}
+                      <Button 
+                        onClick={() => window.location.href = `/results/${token}`}
+                        variant="outline"
+                        size="sm"
+                        className="w-full mt-2 text-xs"
+                      >
+                        🧪 Mock Completion (Test)
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
