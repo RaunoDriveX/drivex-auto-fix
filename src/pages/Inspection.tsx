@@ -286,9 +286,16 @@ const Inspection = () => {
                     </>
                   )}
                 </CardContent>
-                <CardFooter>
-                  <Button asChild variant="secondary" className="w-full">
+                <CardFooter className="flex gap-3">
+                  <Button asChild variant="secondary" className="flex-1">
                     <Link to="/">Return to homepage</Link>
+                  </Button>
+                  <Button 
+                    onClick={() => window.location.href = `/results/${token}`}
+                    variant="outline" 
+                    className="flex-1"
+                  >
+                    🧪 Mock Results (Test)
                   </Button>
                 </CardFooter>
               </Card>
