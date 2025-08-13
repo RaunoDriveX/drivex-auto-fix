@@ -94,8 +94,27 @@ const LeadForm = ({ jobType = "repair" }: LeadFormProps) => {
               {isInsuranceClaim === "yes" && (
                 <>
                   <div className="grid gap-2">
-                    <Label htmlFor="insurerName">Insurance company name</Label>
-                    <Input id="insurerName" name="insurerName" placeholder="e.g. Allianz, AXA, etc." required />
+                    <Label htmlFor="insurerName">Insurance company</Label>
+                    <Select name="insurerName">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your insurance company" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border border-border z-50">
+                        <SelectItem value="allianz">Allianz</SelectItem>
+                        <SelectItem value="axa">AXA</SelectItem>
+                        <SelectItem value="ing">ING</SelectItem>
+                        <SelectItem value="aegon">Aegon</SelectItem>
+                        <SelectItem value="nn">Nationale Nederlanden</SelectItem>
+                        <SelectItem value="achmea">Achmea</SelectItem>
+                        <SelectItem value="univé">Univé</SelectItem>
+                        <SelectItem value="centraal-beheer">Centraal Beheer</SelectItem>
+                        <SelectItem value="ohra">Ohra</SelectItem>
+                        <SelectItem value="fbto">FBTO</SelectItem>
+                        <SelectItem value="asr">ASR</SelectItem>
+                        <SelectItem value="delta-lloyd">Delta Lloyd</SelectItem>
+                        <SelectItem value="other">Other / Not listed</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </>
               )}
