@@ -24,13 +24,10 @@ const LeadForm = () => {
   };
 
   return (
-    <section id="lead-form" aria-labelledby="lead-form-heading" className="bg-background py-16">
+    <section id="lead-form" aria-labelledby="lead-form-heading" className="bg-background">
       <div className="container mx-auto max-w-3xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Your booking details</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="shadow-lg border-primary/20">
+          <CardContent className="p-6">
             <form onSubmit={onSubmit} className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="name">Full name</Label>

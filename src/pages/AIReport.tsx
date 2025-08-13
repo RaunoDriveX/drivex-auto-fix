@@ -50,6 +50,7 @@ const AIReport = () => {
   const [showReplacement, setShowReplacement] = useState(false);
   const [selectedShop, setSelectedShop] = useState<{id: string, name: string} | null>(null);
   const offersRef = useRef<HTMLDivElement | null>(null);
+  const bookingRef = useRef<HTMLDivElement | null>(null);
   const reportUrl = "https://admin.drivex.ee/access/b54PrNNRWlX2xutBBJc1AvHW";
   const canonical = typeof window !== "undefined" ? window.location.href : "/report/mock";
   const jsonLd = {
@@ -168,21 +169,24 @@ const AIReport = () => {
                     postalCode={postalCode} 
                     showReplacement={showReplacement} 
                     onRequestReplacement={() => setShowReplacement(true)}
-                    onBookSlot={(shopId, shopName) => setSelectedShop({id: shopId, name: shopName})}
+                    onBookSlot={(shopId, shopName) => {
+                      setSelectedShop({id: shopId, name: shopName});
+                      setTimeout(() => bookingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                    }}
                   />
                 </section>
                 
                 {selectedShop && (
-                  <section aria-label="Booking form" className="mt-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Book with {selectedShop.name}</CardTitle>
-                        <CardDescription>Fill out your details to book a slot with your selected repair shop.</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <LeadForm />
-                      </CardContent>
-                    </Card>
+                  <section ref={bookingRef} aria-label="Booking form" className="mt-8">
+                    <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg border border-primary/20 p-6">
+                      <div className="mb-4">
+                        <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                          📅 Book with {selectedShop.name}
+                        </h3>
+                        <p className="text-muted-foreground">Complete your booking details below</p>
+                      </div>
+                      <LeadForm />
+                    </div>
                   </section>
                 )}
               </div>
