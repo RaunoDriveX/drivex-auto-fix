@@ -78,7 +78,7 @@ const AIReport = () => {
           <article>
             <header className="mb-6">
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                Your car's damage assessment
+                {result.decision === "repair" ? "Our AI recommends to repair this windshield" : "Our AI recommends windshield replacement"}
               </h1>
               <p className="mt-2 text-muted-foreground">
                 {result.decision === "repair" ? "Save 85% of costs compared to a replacement." : "We’ll ensure the right glass and calibration for your vehicle."}
@@ -90,7 +90,7 @@ const AIReport = () => {
               <section>
                 <Card>
                   <CardHeader>
-                    <CardTitle>AI report</CardTitle>
+                    <CardTitle>Your car's damage assessment</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="rounded-md border overflow-hidden">
