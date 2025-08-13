@@ -185,7 +185,7 @@ const AIReport = () => {
                         </h3>
                         <p className="text-muted-foreground">Complete your booking details below</p>
                       </div>
-                      <LeadForm />
+                      <LeadForm jobType={result.decision} />
                     </div>
                   </section>
                 )}
