@@ -1,48 +1,49 @@
 import { Helmet } from "react-helmet-async";
-import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-
-const analyzeMock = (token: string) => {
-  // Deterministic mock triage: simple hash
-  let h = 0;
-  for (let i = 0; i < token.length; i++) h = (h * 31 + token.charCodeAt(i)) >>> 0;
-  const severity = h % 100;
-  // 0-49 repair, 50-99 replacement
-  return severity < 50 ? ("repair" as const) : ("replacement" as const);
-};
+import QRCode from "react-qr-code";
+import { Copy, MessageCircle, Smartphone, ExternalLink } from "lucide-react";
 
 const Inspection = () => {
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
-  const [step, setStep] = useState<"instructions" | "capturing" | "analyzing" | "result">("instructions");
 
-  const verdict = useMemo(() => (token ? analyzeMock(token) : "repair"), [token]);
-
-  useEffect(() => {
-    if (step === "capturing") {
-      const t = setTimeout(() => setStep("analyzing"), 1200);
-      return () => clearTimeout(t);
+  // Generate the smartscan URL using the token
+  const smartscanUrl = token ? `https://smartscan.drivex.io/?urlId=${token}&lang=en` : "";
+  
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(smartscanUrl);
+      toast({ title: "Link copied!", description: "The inspection link has been copied to your clipboard." });
+    } catch (err) {
+      toast({ title: "Copy failed", description: "Please copy the link manually.", variant: "destructive" });
     }
-    if (step === "analyzing") {
-      const t = setTimeout(() => setStep("result"), 1400);
-      return () => clearTimeout(t);
-    }
-  }, [step]);
-
-  const sendBack = () => {
-    toast({ title: "Inspection submitted (mock)", description: "Results sent to DriveX." });
   };
 
-  const title = token ? "Smartphone inspection" : "Invalid link";
+  const sendViaSMS = () => {
+    const message = `DriveX Vehicle Inspection: ${smartscanUrl}`;
+    window.open(`sms:?body=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const sendViaWhatsApp = () => {
+    const message = `DriveX Vehicle Inspection: ${smartscanUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const openInNewTab = () => {
+    window.open(smartscanUrl, '_blank');
+  };
+
+  const title = token ? "Vehicle Self-Inspection" : "Invalid link";
 
   return (
     <>
       <Helmet>
         <title>{title} | DriveX</title>
-        <meta name="description" content="Mock smartphone windshield inspection flow with guided capture and triage." />
+        <meta name="description" content="Self-service vehicle inspection via smartphone. Scan QR code or use direct link." />
         <link rel="canonical" href={typeof window !== "undefined" ? window.location.href : "/inspection/mock"} />
       </Helmet>
 
@@ -61,79 +62,126 @@ const Inspection = () => {
               </CardFooter>
             </Card>
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>Smartphone inspection</CardTitle>
-                <CardDescription>Mock guided capture for token {token.slice(0, 6)}…</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {step === "instructions" && (
-                  <div className="space-y-2">
-                    <p className="text-muted-foreground">
-                      You’ll be guided to capture your windshield at specific angles and lighting. Keep your phone steady.
-                    </p>
-                    <ul className="list-disc pl-5 text-sm text-muted-foreground">
-                      <li>Clean the glass briefly.</li>
-                      <li>Move to outdoor light if possible.</li>
-                      <li>Avoid reflections.</li>
-                    </ul>
+            <div className="space-y-6">
+              {/* Header Card */}
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader className="text-center">
+                  <CardTitle className="flex items-center justify-center gap-2">
+                    <Smartphone className="h-6 w-6 text-primary" />
+                    Self-Service Vehicle Inspection
+                  </CardTitle>
+                  <CardDescription>
+                    Complete your windshield inspection using your smartphone. No technician visit required.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+
+              {/* QR Code Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-center">Scan with your phone</CardTitle>
+                  <CardDescription className="text-center">
+                    Use your smartphone camera to scan this QR code and start the inspection
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center space-y-4">
+                  <div className="p-4 bg-white rounded-lg shadow-sm">
+                    <QRCode
+                      value={smartscanUrl}
+                      size={200}
+                      style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                    />
                   </div>
-                )}
-                {step === "capturing" && (
-                  <div className="space-y-2">
-                    <p className="text-muted-foreground">Capturing views… (mock)</p>
-                    <div className="h-2 w-full rounded bg-muted">
-                      <div className="h-2 rounded bg-primary" style={{ width: "60%" }} />
-                    </div>
-                  </div>
-                )}
-                {step === "analyzing" && (
-                  <div className="space-y-2">
-                    <p className="text-muted-foreground">Analyzing damage… (mock)</p>
-                    <div className="h-2 w-full rounded bg-muted">
-                      <div className="h-2 rounded bg-primary" style={{ width: "85%" }} />
-                    </div>
-                  </div>
-                )}
-                {step === "result" && (
-                  <div className="space-y-3">
-                    <div className="p-4 rounded-md border">
-                      <p className="text-sm text-muted-foreground">Preliminary triage (mock)</p>
-                      <h2 className="text-2xl font-semibold mt-1">
-                        {verdict === "repair" ? "Repair recommended" : "Replacement recommended"}
-                      </h2>
-                      <p className="mt-2 text-muted-foreground">
-                        Based on capture quality and detected crack patterns, our mock model suggests
-                        {" "}
-                        <strong>{verdict}</strong>. A technician will confirm.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                {step === "instructions" && (
-                  <Button onClick={() => setStep("capturing")}>Start guided capture</Button>
-                )}
-                {step === "capturing" && (
-                  <Button variant="secondary" onClick={() => setStep("analyzing")}>Next</Button>
-                )}
-                {step === "analyzing" && (
-                  <Button variant="secondary" disabled>Processing…</Button>
-                )}
-                {step === "result" && (
-                  <div className="flex flex-wrap gap-3">
-                    <Button asChild>
-                      <Link to={`/report/${token}`}>View AI report</Link>
+                  <p className="text-sm text-muted-foreground text-center max-w-sm">
+                    Point your phone's camera at the QR code above to automatically open the inspection interface
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Alternative Methods Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Alternative sharing methods</CardTitle>
+                  <CardDescription>
+                    Can't scan the QR code? Use one of these options instead
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Button variant="outline" onClick={sendViaSMS} className="flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      Send via SMS
                     </Button>
-                    <Button variant="secondary" onClick={sendBack}>Send result back</Button>
-                    <Button asChild variant="secondary">
-                      <Link to="/">Return home</Link>
+                    <Button variant="outline" onClick={sendViaWhatsApp} className="flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      Send via WhatsApp
+                    </Button>
+                    <Button variant="outline" onClick={copyToClipboard} className="flex items-center gap-2">
+                      <Copy className="h-4 w-4" />
+                      Copy Link
+                    </Button>
+                    <Button variant="outline" onClick={openInNewTab} className="flex items-center gap-2">
+                      <ExternalLink className="h-4 w-4" />
+                      Open Link
                     </Button>
                   </div>
-                )}
-              </CardFooter>
-            </Card>
+                  
+                  {/* Direct URL display */}
+                  <div className="mt-4 p-3 bg-muted/30 rounded-md">
+                    <Label className="text-xs text-muted-foreground">Direct link:</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <code className="text-xs bg-background px-2 py-1 rounded border flex-1 truncate">
+                        {smartscanUrl}
+                      </code>
+                      <Button size="sm" variant="ghost" onClick={copyToClipboard}>
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Instructions Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>What happens next?</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
+                      1
+                    </div>
+                    <div>
+                      <p className="font-medium">Access the inspection tool</p>
+                      <p className="text-sm text-muted-foreground">Scan the QR code or use one of the sharing options above</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
+                      2
+                    </div>
+                    <div>
+                      <p className="font-medium">Follow guided capture</p>
+                      <p className="text-sm text-muted-foreground">Take photos of your windshield damage following the on-screen instructions</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
+                      3
+                    </div>
+                    <div>
+                      <p className="font-medium">Get instant AI assessment</p>
+                      <p className="text-sm text-muted-foreground">Receive repair recommendations and partner pricing in minutes</p>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button asChild variant="secondary" className="w-full">
+                    <Link to="/">Return to homepage</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
           )}
         </div>
       </main>
