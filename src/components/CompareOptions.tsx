@@ -9,9 +9,10 @@ export type CompareOptionsProps = {
   postalCode?: string;
   showReplacement?: boolean;
   onRequestReplacement?: () => void;
+  onBookSlot?: (shopId: string, shopName: string) => void;
 };
 
-export default function CompareOptions({ decision, postalCode, showReplacement = true, onRequestReplacement }: CompareOptionsProps) {
+export default function CompareOptions({ decision, postalCode, showReplacement = true, onRequestReplacement, onBookSlot }: CompareOptionsProps) {
   const isRepairRecommended = decision === "repair";
 
   type Shop = {
@@ -134,7 +135,7 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
                     <div className="text-sm"><span className="text-muted-foreground mr-1">Total</span><span className="font-semibold text-foreground">{euro(total(s))}</span></div>
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="h-3.5 w-3.5" /> Next slot: {s.nextSlot}</div>
-                      <Button asChild size="sm"><Link to="/#lead-form">Book a slot</Link></Button>
+                      <Button size="sm" onClick={() => onBookSlot?.(s.id, s.name)}>Book a slot</Button>
                     </div>
                   </div>
                 </div>
@@ -195,7 +196,7 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
                       <div className="text-sm"><span className="text-muted-foreground mr-1">Total</span><span className="font-semibold text-foreground">{euro(total(s))}</span></div>
                     </div>
                     <div className="mt-3">
-                      <Button asChild size="sm"><Link to="/#lead-form">Select</Link></Button>
+                      <Button size="sm" onClick={() => onBookSlot?.(s.id, s.name)}>Select</Button>
                     </div>
                   </div>
                 ))}

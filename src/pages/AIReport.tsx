@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import CallCenterCTA from "@/components/CallCenterCTA";
 import CompareOptions from "@/components/CompareOptions";
+import LeadForm from "@/components/marketing/LeadForm";
 import { ShieldCheck } from "lucide-react";
 function analyzeFromToken(token: string) {
   let h = 0;
@@ -47,6 +48,7 @@ const AIReport = () => {
   const [postalCode, setPostalCode] = useState("");
   const [partnersVisible, setPartnersVisible] = useState(false);
   const [showReplacement, setShowReplacement] = useState(false);
+  const [selectedShop, setSelectedShop] = useState<{id: string, name: string} | null>(null);
   const offersRef = useRef<HTMLDivElement | null>(null);
   const reportUrl = "https://admin.drivex.ee/access/b54PrNNRWlX2xutBBJc1AvHW";
   const canonical = typeof window !== "undefined" ? window.location.href : "/report/mock";
@@ -161,8 +163,28 @@ const AIReport = () => {
             {partnersVisible && (
               <div ref={offersRef}>
                 <section aria-label="Partner offers" className="mt-6">
-                  <CompareOptions decision="repair" postalCode={postalCode} showReplacement={showReplacement} onRequestReplacement={() => setShowReplacement(true)} />
+                  <CompareOptions 
+                    decision="repair" 
+                    postalCode={postalCode} 
+                    showReplacement={showReplacement} 
+                    onRequestReplacement={() => setShowReplacement(true)}
+                    onBookSlot={(shopId, shopName) => setSelectedShop({id: shopId, name: shopName})}
+                  />
                 </section>
+                
+                {selectedShop && (
+                  <section aria-label="Booking form" className="mt-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Book with {selectedShop.name}</CardTitle>
+                        <CardDescription>Fill out your details to book a slot with your selected repair shop.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <LeadForm />
+                      </CardContent>
+                    </Card>
+                  </section>
+                )}
               </div>
             )}
           </article>
