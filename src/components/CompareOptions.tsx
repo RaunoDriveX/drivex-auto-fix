@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck, Leaf, Banknote, ShieldCheck } from "lucide-react";
+import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck, Leaf, Banknote, ShieldCheck, Star } from "lucide-react";
 
 export type CompareOptionsProps = {
   decision: "repair" | "replacement";
@@ -113,20 +113,29 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Next slot: {s.nextSlot}</div>
-                    <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {s.type === 'Mobile' ? 'Comes to you' : `${s.distanceKm?.toFixed(1)} km`}</div>
+                    {s.type !== 'Mobile' && (
+                      <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {`${s.distanceKm?.toFixed(1)} km`}</div>
+                    )}
                     {s.type === 'Mobile' ? (
-                      <div className="flex items-center gap-1"><Truck className="h-3.5 w-3.5" /> Mobile service at your location</div>
+                      <div className="flex items-center gap-1"><Truck className="h-3.5 w-3.5" /> Mobile service</div>
                     ) : (
                       <div className="flex items-center gap-1"><Store className="h-3.5 w-3.5" /> Stationary workshop</div>
                     )}
-                    <div>Rating: <span className="text-foreground font-medium">{s.rating.toFixed(1)}</span> ({s.reviews})</div>
                   </div>
-                  <div className="mt-3 flex items-center justify-end">
+                  <div className="mt-2 flex items-center gap-1">
+                    {[1,2,3,4,5].map((i) => (
+                      <span key={i} className={i <= Math.round(s.rating) ? 'text-foreground' : 'text-muted-foreground'}>
+                        <Star className="h-3.5 w-3.5" {...(i <= Math.round(s.rating) ? { fill: 'currentColor' } : {})} />
+                      </span>
+                    ))}
+                    <span className="ml-2 text-xs text-muted-foreground">{s.rating.toFixed(1)} ({s.reviews})</span>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between gap-3">
                     <div className="text-sm"><span className="text-muted-foreground mr-1">Total</span><span className="font-semibold text-foreground">{euro(total(s))}</span></div>
-                  </div>
-                  <div className="mt-3">
-                    <Button asChild size="sm"><Link to="/#lead-form">Select</Link></Button>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="h-3.5 w-3.5" /> Next slot: {s.nextSlot}</div>
+                      <Button asChild size="sm"><Link to="/#lead-form">Book a slot</Link></Button>
+                    </div>
                   </div>
                 </div>
               ))}
