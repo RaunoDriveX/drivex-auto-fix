@@ -74,7 +74,8 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
 
       <div className={`grid gap-6 ${showReplacement ? 'lg:grid-cols-2' : 'grid-cols-1'}`}>
         {/* Repair card */}
-        <Card className="hover-scale animate-fade-in" style={{ animationDelay: "40ms" }}>
+        <Card className="relative overflow-hidden hover-scale animate-fade-in border-success/40 bg-success/5 hover:ring-2 hover:ring-success/30 transition-shadow" style={{ animationDelay: "40ms" }}>
+          <div aria-hidden className="absolute left-0 top-0 h-full w-1 bg-success" />
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Wrench className="h-5 w-5 text-success" aria-hidden="true" />
