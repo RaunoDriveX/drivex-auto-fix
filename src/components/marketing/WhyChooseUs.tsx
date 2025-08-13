@@ -76,72 +76,8 @@ const WhyChooseUs = () => {
           ))}
         </div>
 
-        {/* For individuals vs fleets */}
-        <div className="grid lg:grid-cols-2 gap-12">
-          
-          {/* Individual drivers */}
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/10">
-            <CardHeader className="text-center pb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Users className="h-8 w-8 text-blue-600" />
-              </div>
-              <CardTitle className="text-2xl mb-3">For Individual Drivers</CardTitle>
-              <p className="text-muted-foreground">
-                Fast, affordable, and hassle-free glass repair for your personal vehicle.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {individualBenefits.map((benefit, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 p-4 bg-blue-500/5 rounded-lg">
-                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-semibold mb-1">
-                  <Clock className="h-4 w-4" />
-                  Average time to repair: 30 minutes
-                </div>
-                <p className="text-sm text-muted-foreground">Most repairs completed same-day</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Fleet owners */}
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/20 dark:to-orange-900/10">
-            <CardHeader className="text-center pb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-500/10 flex items-center justify-center">
-                <Building2 className="h-8 w-8 text-orange-600" />
-              </div>
-              <CardTitle className="text-2xl mb-3">For Fleet Owners</CardTitle>
-              <p className="text-muted-foreground">
-                Streamline maintenance across your entire fleet with enterprise-grade tools.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {fleetBenefits.map((benefit, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 p-4 bg-orange-500/5 rounded-lg">
-                <div className="flex items-center gap-2 text-orange-700 dark:text-orange-300 font-semibold mb-1">
-                  <TrendingUp className="h-4 w-4" />
-                  Average cost savings: 25-40%
-                </div>
-                <p className="text-sm text-muted-foreground">Compared to traditional repair channels</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Team section */}
-        <div className="mt-20 mb-16">
+        <div className="mb-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <Badge variant="secondary" className="mb-4 px-4 py-2">
@@ -205,6 +141,70 @@ const WhyChooseUs = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* For individuals vs fleets */}
+        <div className="grid lg:grid-cols-2 gap-12 mb-16">
+          
+          {/* Individual drivers */}
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/10">
+            <CardHeader className="text-center pb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <Users className="h-8 w-8 text-blue-600" />
+              </div>
+              <CardTitle className="text-2xl mb-3">For Individual Drivers</CardTitle>
+              <p className="text-muted-foreground">
+                Fast, affordable, and hassle-free glass repair for your personal vehicle.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {individualBenefits.map((benefit, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 p-4 bg-blue-500/5 rounded-lg">
+                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-semibold mb-1">
+                  <Clock className="h-4 w-4" />
+                  Average time to repair: 30 minutes
+                </div>
+                <p className="text-sm text-muted-foreground">Most repairs completed same-day</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Fleet owners */}
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/20 dark:to-orange-900/10">
+            <CardHeader className="text-center pb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-500/10 flex items-center justify-center">
+                <Building2 className="h-8 w-8 text-orange-600" />
+              </div>
+              <CardTitle className="text-2xl mb-3">For Fleet Owners</CardTitle>
+              <p className="text-muted-foreground">
+                Streamline maintenance across your entire fleet with enterprise-grade tools.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {fleetBenefits.map((benefit, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 p-4 bg-orange-500/5 rounded-lg">
+                <div className="flex items-center gap-2 text-orange-700 dark:text-orange-300 font-semibold mb-1">
+                  <TrendingUp className="h-4 w-4" />
+                  Average cost savings: 25-40%
+                </div>
+                <p className="text-sm text-muted-foreground">Compared to traditional repair channels</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Bottom CTA */}
