@@ -4,7 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import CallCenterCTA from "@/components/CallCenterCTA";
-
+import CompareOptions from "@/components/CompareOptions";
 function analyzeFromToken(token: string) {
   let h = 0;
   for (let i = 0; i < token.length; i++) h = (h * 31 + token.charCodeAt(i)) >>> 0;
@@ -30,7 +30,16 @@ function analyzeFromToken(token: string) {
 
 const AIReport = () => {
   const { token } = useParams<{ token: string }>();
-  const result = useMemo(() => analyzeFromToken(token || ""), [token]);
+  const result = useMemo(() => ({
+    decision: "repair" as const,
+    confidence: 0.92,
+    factors: [
+      "Chip diameter below 2.5 cm",
+      "Crack length under 6 cm",
+      "Not in driver’s critical view",
+      "No edge impact detected",
+    ],
+  }), []);
   const reportUrl = "https://admin.drivex.ee/access/b54PrNNRWlX2xutBBJc1AvHW";
   const canonical = typeof window !== "undefined" ? window.location.href : "/report/mock";
   const jsonLd = {
@@ -50,8 +59,8 @@ const AIReport = () => {
   return (
     <>
       <Helmet>
-        <title>AI Windshield Damage Assessment | DriveX</title>
-        <meta name="description" content="See AI-confirmed windshield assessment with images, detected damages, and repair vs. replacement recommendation." />
+        <title>Windshield Repair Recommendation | DriveX</title>
+        <meta name="description" content="AI-confirmed windshield repair assessment with images. Save 85% vs replacement." />
         <link rel="canonical" href={canonical} />
         <meta property="og:title" content="AI Windshield Damage Assessment" />
         <meta property="og:description" content="AI-confirmed assessment with images and recommendation." />
@@ -112,6 +121,10 @@ const AIReport = () => {
                 </Card>
               </aside>
             </div>
+
+            <section aria-label="Compare repair and replacement options" className="mt-8">
+              <CompareOptions decision="repair" />
+            </section>
           </article>
         </div>
       </main>
