@@ -78,7 +78,7 @@ const AIReport = () => {
           <article>
             <header className="mb-6">
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                {result.decision === "repair" ? "Our AI recommends to repair this windshield" : "Our AI recommends windshield replacement"}
+                Your car's damage assessment
               </h1>
               <p className="mt-2 text-muted-foreground">
                 {result.decision === "repair" ? "Save 85% of costs compared to a replacement." : "We’ll ensure the right glass and calibration for your vehicle."}
