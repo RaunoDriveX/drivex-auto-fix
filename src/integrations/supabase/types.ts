@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      insurance_details: {
+        Row: {
+          booking_reference: string
+          created_at: string
+          customer_email: string | null
+          customer_phone: string | null
+          id: string
+          insurance_company_name: string
+          insurer_name: string
+          updated_at: string
+        }
+        Insert: {
+          booking_reference: string
+          created_at?: string
+          customer_email?: string | null
+          customer_phone?: string | null
+          id?: string
+          insurance_company_name: string
+          insurer_name: string
+          updated_at?: string
+        }
+        Update: {
+          booking_reference?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_phone?: string | null
+          id?: string
+          insurance_company_name?: string
+          insurer_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
