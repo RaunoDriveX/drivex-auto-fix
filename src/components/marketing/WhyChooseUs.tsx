@@ -143,8 +143,34 @@ const WhyChooseUs = () => {
           </div>
         </div>
 
+      </div>
+    </section>
+  );
+};
+
+// Separate component for customer segments
+export const CustomerSegments = () => {
+  const individualBenefits = [
+    "Get fair pricing from multiple shops instantly",
+    "Book mobile repair at your location",
+    "DIY option for budget-conscious drivers",
+    "Real-time tracking and reminders",
+    "Insurance claim assistance"
+  ];
+
+  const fleetBenefits = [
+    "Centralized dashboard for all vehicles",
+    "Volume discounts from our partner network",
+    "Priority scheduling for business vehicles",
+    "Detailed reporting and cost analytics",
+    "Dedicated fleet support team"
+  ];
+
+  return (
+    <section className="bg-background py-20">
+      <div className="container mx-auto">
         {/* For individuals vs fleets */}
-        <div className="grid lg:grid-cols-2 gap-12 mb-16">
+        <div className="grid lg:grid-cols-2 gap-12">
           
           {/* Individual drivers */}
           <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/10">
@@ -205,30 +231,6 @@ const WhyChooseUs = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Bottom CTA */}
-        <div className="text-center mt-16">
-          <h3 className="text-2xl font-bold text-foreground mb-4">
-            Ready to experience the future of auto glass repair?
-          </h3>
-          <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of satisfied customers who've discovered a better way to fix their glass damage.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <a 
-              href="/report/eo3w_x1IBgPaUDj8gsUVkI2qL8rG0gSx" 
-              className="px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              Start Your Assessment
-            </a>
-            <a 
-              href="mailto:fleet@drivex.com" 
-              className="px-8 py-4 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/5 transition-colors"
-            >
-              Contact Fleet Sales
-            </a>
-          </div>
         </div>
 
       </div>

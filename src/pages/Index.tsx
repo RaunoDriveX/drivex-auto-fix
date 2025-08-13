@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import Hero from "@/components/marketing/Hero";
 import Workflow from "@/components/marketing/Workflow";
-import WhyChooseUs from "@/components/marketing/WhyChooseUs";
+import WhyChooseUs, { CustomerSegments } from "@/components/marketing/WhyChooseUs";
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
@@ -35,6 +35,7 @@ const Index = () => {
       <main>
         <WhyChooseUs />
         <Workflow />
+        <CustomerSegments />
         
         {/* Development shortcuts - remove in production */}
         <section className="bg-muted/30 py-8 border-t">
