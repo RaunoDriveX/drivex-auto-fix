@@ -97,10 +97,6 @@ const LeadForm = ({ jobType = "repair" }: LeadFormProps) => {
                     <Label htmlFor="insurerName">Insurance company name</Label>
                     <Input id="insurerName" name="insurerName" placeholder="e.g. Allianz, AXA, etc." required />
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="policyNumber">Policy number</Label>
-                    <Input id="policyNumber" name="policyNumber" placeholder="Your policy number" />
-                  </div>
                 </>
               )}
                
