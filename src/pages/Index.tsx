@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import Hero from "@/components/marketing/Hero";
 import Workflow from "@/components/marketing/Workflow";
+import WhyChooseUs from "@/components/marketing/WhyChooseUs";
 import LeadForm from "@/components/marketing/LeadForm";
 
 const Index = () => {
@@ -33,6 +34,7 @@ const Index = () => {
       </header>
 
       <main>
+        <WhyChooseUs />
         <Workflow />
         <LeadForm />
         
