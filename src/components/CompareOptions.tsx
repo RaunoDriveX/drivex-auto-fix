@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck, Leaf, Banknote } from "lucide-react";
+import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck, Leaf, Banknote, ShieldCheck } from "lucide-react";
 
 export type CompareOptionsProps = {
   decision: "repair" | "replacement";
@@ -114,12 +114,7 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
                     <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {s.type === 'Mobile' ? 'Comes to you' : `${s.distanceKm?.toFixed(1)} km`}</div>
                     <div>Rating: <span className="text-foreground font-medium">{s.rating.toFixed(1)}</span> ({s.reviews})</div>
                   </div>
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                      <span>Labor {euro(s.labor)}</span>
-                      <span>Materials {euro(s.materials)}</span>
-                      <span>Tax {euro(s.tax)}</span>
-                    </div>
+                  <div className="mt-3 flex items-center justify-end">
                     <div className="text-sm"><span className="text-muted-foreground mr-1">Total</span><span className="font-semibold text-foreground">{euro(total(s))}</span></div>
                   </div>
                   <div className="mt-3">
@@ -137,8 +132,14 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
               </p>
             </div>
           </CardContent>
-          <CardFooter className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Pricing includes labor, materials, and tax.</span>
+          <CardFooter className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="success" className="inline-flex items-center gap-1">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Verified by DriveX
+              </Badge>
+              <span className="text-xs text-muted-foreground">Pricing includes labor, materials, and tax.</span>
+            </div>
             {!showReplacement && onRequestReplacement && (
               <Button variant="link" size="sm" onClick={onRequestReplacement}>Prefer full replacement? See options</Button>
             )}
@@ -179,12 +180,7 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
                       <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {s.type === 'Mobile' ? 'Comes to you' : `${s.distanceKm?.toFixed(1)} km`}</div>
                       <div>Rating: <span className="text-foreground font-medium">{s.rating.toFixed(1)}</span> ({s.reviews})</div>
                     </div>
-                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                        <span>Labor {euro(s.labor)}</span>
-                        <span>Materials {euro(s.materials)}</span>
-                        <span>Tax {euro(s.tax)}</span>
-                      </div>
+                    <div className="mt-3 flex items-center justify-end">
                       <div className="text-sm"><span className="text-muted-foreground mr-1">Total</span><span className="font-semibold text-foreground">{euro(total(s))}</span></div>
                     </div>
                     <div className="mt-3">
