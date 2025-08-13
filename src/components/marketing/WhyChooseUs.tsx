@@ -6,27 +6,21 @@ const WhyChooseUs = () => {
   const practices = [
     {
       icon: Zap,
-      title: "Lightning-Fast AI Triage",
-      description: "Our AI analyzes damage in seconds, not hours. Get instant recommendations for repair vs. replacement.",
-      benefit: "Save time and get back on the road faster"
+      title: "AI-Powered Assessment",
+      description: "Patent-pending technology analyzes damage instantly with 95% accuracy.",
+      benefit: "Get the right solution every time"
     },
     {
       icon: DollarSign,
-      title: "Transparent Pricing",
-      description: "See upfront costs from multiple shops. No hidden fees, no surprises. Compare and choose what works for you.",
-      benefit: "Make informed decisions with full price visibility"
-    },
-    {
-      icon: Shield,
-      title: "Vetted Network",
-      description: "Only certified, top-rated repair shops make it into our network. Quality guaranteed, every time.",
-      benefit: "Peace of mind with every repair"
+      title: "Transparent Marketplace",
+      description: "Compare real prices from vetted shops. Fair deals for everyone.",
+      benefit: "Best value with full price visibility"
     },
     {
       icon: Smartphone,
-      title: "Mobile-First Experience",
-      description: "Everything happens on your phone. Report damage, get quotes, book appointments - all in minutes.",
-      benefit: "Convenience at your fingertips"
+      title: "Mobile-First Platform",
+      description: "Complete assessment to booking in minutes on your phone.",
+      benefit: "Maximum convenience and speed"
     }
   ];
 
@@ -60,7 +54,7 @@ const WhyChooseUs = () => {
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Our patent-pending AI understands every claim and damage with <span className="font-semibold text-primary">95% accuracy</span>. 
-            DriveX stands for your interests and wallet, not the repair shops.
+            DriveX creates a fair marketplace connecting car owners with quality repair partners.
           </p>
         </div>
 
@@ -194,10 +188,10 @@ const WhyChooseUs = () => {
               <div className="mt-8 p-6 bg-primary/5 rounded-lg border border-primary/10">
                 <div className="flex items-center gap-2 text-primary font-semibold mb-2">
                   <TrendingUp className="h-5 w-5" />
-                  Growing Fast
+                  Proven Track Record
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Over 10,000+ successful repairs completed across our international network, 
+                  Over 300,000 assessments completed in 6 years of operation, 
                   with 97% customer satisfaction rate.
                 </p>
               </div>
