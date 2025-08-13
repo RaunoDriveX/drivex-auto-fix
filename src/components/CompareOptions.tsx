@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck } from "lucide-react";
+import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck, Leaf, Banknote } from "lucide-react";
 
 export type CompareOptionsProps = {
   decision: "repair" | "replacement";
@@ -65,21 +65,26 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
         <h2 id="compare-options-heading" className="text-2xl font-semibold text-foreground">
           Partner offers near {postalCode ? postalCode : "your area"}
         </h2>
-        <Badge variant="secondary" className="hidden sm:inline-flex">
-          <BadgeCheck className="h-3.5 w-3.5 mr-1" />
-          Recommended: {isRepairRecommended ? "Repair" : "Replacement"}
+        <Badge variant="success" className="hidden sm:inline-flex items-center gap-1">
+          <Leaf className="h-3.5 w-3.5" />
+          <Banknote className="h-3.5 w-3.5" />
+          Repair recommended
         </Badge>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className={`grid gap-6 ${showReplacement ? 'lg:grid-cols-2' : 'grid-cols-1'}`}>
         {/* Repair card */}
         <Card className="hover-scale animate-fade-in" style={{ animationDelay: "40ms" }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wrench className="h-5 w-5" aria-hidden="true" />
+              <Wrench className="h-5 w-5 text-success" aria-hidden="true" />
               Repair options
               {isRepairRecommended && (
-                <Badge className="ml-2">Recommended</Badge>
+                <Badge variant="success" className="ml-2 inline-flex items-center gap-1">
+                  <Leaf className="h-3.5 w-3.5" />
+                  <Banknote className="h-3.5 w-3.5" />
+                  Eco + saves money
+                </Badge>
               )}
             </CardTitle>
             <CardDescription>
