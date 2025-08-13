@@ -5,11 +5,28 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import QRCode from "react-qr-code";
-import { Copy, MessageCircle, Smartphone, ExternalLink } from "lucide-react";
+import { Copy, MessageCircle, Smartphone, ExternalLink, Camera } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const Inspection = () => {
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect if user is on mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const mobileKeywords = ['android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone'];
+      const isMobileUA = mobileKeywords.some(keyword => userAgent.includes(keyword));
+      const isMobileScreen = window.innerWidth <= 768;
+      setIsMobile(isMobileUA || isMobileScreen);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Generate the smartscan URL using the token
   const smartscanUrl = token ? `https://smartscan.drivex.io/?urlId=${token}&lang=en` : "";
@@ -35,6 +52,10 @@ const Inspection = () => {
 
   const openInNewTab = () => {
     window.open(smartscanUrl, '_blank');
+  };
+
+  const startInspection = () => {
+    window.location.href = smartscanUrl;
   };
 
   const title = token ? "Vehicle Self-Inspection" : "Invalid link";
@@ -63,39 +84,70 @@ const Inspection = () => {
             </Card>
           ) : (
             <div className="space-y-6">
-              {/* QR Code Card - Primary method */}
-              <Card className="border-primary/20 bg-primary/5">
-                <CardHeader className="text-center">
-                  <CardTitle className="flex items-center justify-center gap-2">
-                    <Smartphone className="h-6 w-6 text-primary" />
-                    Vehicle Self-Inspection
-                  </CardTitle>
-                  <CardDescription>
-                    Scan the QR code below with your smartphone to start the inspection
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center space-y-4">
-                  <div className="p-6 bg-white rounded-xl shadow-md border">
-                    <QRCode
-                      value={smartscanUrl}
-                      size={240}
-                      style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                    />
-                  </div>
-                  <p className="text-sm text-muted-foreground text-center max-w-md">
-                    Point your phone's camera at the QR code to automatically open the inspection interface
-                  </p>
-                </CardContent>
-              </Card>
+              {isMobile ? (
+                /* Mobile View - Direct Action Button */
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardHeader className="text-center">
+                    <CardTitle className="flex items-center justify-center gap-2">
+                      <Camera className="h-6 w-6 text-primary" />
+                      Ready to Inspect Your Vehicle
+                    </CardTitle>
+                    <CardDescription>
+                      You're on your smartphone - perfect! Start photographing your windshield damage now.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="text-center space-y-4">
+                    <div className="p-6 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl border">
+                      <Camera className="h-16 w-16 mx-auto text-primary mb-4" />
+                      <p className="text-muted-foreground mb-4">
+                        Tap the button below to start the guided photo capture process
+                      </p>
+                      <Button 
+                        onClick={startInspection}
+                        size="lg"
+                        className="w-full h-14 text-lg font-semibold"
+                      >
+                        📸 Go Photograph Your Car Right Now
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                /* Desktop View - QR Code */
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardHeader className="text-center">
+                    <CardTitle className="flex items-center justify-center gap-2">
+                      <Smartphone className="h-6 w-6 text-primary" />
+                      Vehicle Self-Inspection
+                    </CardTitle>
+                    <CardDescription>
+                      Scan the QR code below with your smartphone to start the inspection
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col items-center space-y-4">
+                    <div className="p-6 bg-white rounded-xl shadow-md border">
+                      <QRCode
+                        value={smartscanUrl}
+                        size={240}
+                        style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground text-center max-w-md">
+                      Point your phone's camera at the QR code to automatically open the inspection interface
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
 
-              {/* Alternative sharing methods */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Can't scan the QR code?</CardTitle>
-                  <CardDescription>
-                    Send the inspection link directly to your phone
-                  </CardDescription>
-                </CardHeader>
+              {/* Alternative sharing methods - Show for desktop or as backup for mobile */}
+              {!isMobile && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Can't scan the QR code?</CardTitle>
+                    <CardDescription>
+                      Send the inspection link directly to your phone
+                    </CardDescription>
+                  </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Button 
@@ -149,6 +201,7 @@ const Inspection = () => {
                   </div>
                 </CardContent>
               </Card>
+              )}
 
               {/* Instructions */}
               <Card>
@@ -156,33 +209,69 @@ const Inspection = () => {
                   <CardTitle>How it works</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
-                      1
-                    </div>
-                    <div>
-                      <p className="font-medium">Access on your phone</p>
-                      <p className="text-sm text-muted-foreground">Scan QR code or use SMS/WhatsApp to get the link</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
-                      2
-                    </div>
-                    <div>
-                      <p className="font-medium">Take guided photos</p>
-                      <p className="text-sm text-muted-foreground">Follow instructions to capture your windshield damage</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
-                      3
-                    </div>
-                    <div>
-                      <p className="font-medium">Get instant results</p>
-                      <p className="text-sm text-muted-foreground">AI assessment with repair recommendations and pricing</p>
-                    </div>
-                  </div>
+                  {isMobile ? (
+                    /* Mobile Instructions */
+                    <>
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
+                          1
+                        </div>
+                        <div>
+                          <p className="font-medium">Start the camera</p>
+                          <p className="text-sm text-muted-foreground">Tap the button above to launch the inspection tool</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
+                          2
+                        </div>
+                        <div>
+                          <p className="font-medium">Follow the guide</p>
+                          <p className="text-sm text-muted-foreground">Take photos of your windshield damage following the on-screen instructions</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
+                          3
+                        </div>
+                        <div>
+                          <p className="font-medium">Get instant results</p>
+                          <p className="text-sm text-muted-foreground">AI assessment with repair recommendations and pricing</p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    /* Desktop Instructions */
+                    <>
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
+                          1
+                        </div>
+                        <div>
+                          <p className="font-medium">Access on your phone</p>
+                          <p className="text-sm text-muted-foreground">Scan QR code or use SMS/WhatsApp to get the link</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
+                          2
+                        </div>
+                        <div>
+                          <p className="font-medium">Take guided photos</p>
+                          <p className="text-sm text-muted-foreground">Follow instructions to capture your windshield damage</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-medium">
+                          3
+                        </div>
+                        <div>
+                          <p className="font-medium">Get instant results</p>
+                          <p className="text-sm text-muted-foreground">AI assessment with repair recommendations and pricing</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </CardContent>
                 <CardFooter>
                   <Button asChild variant="secondary" className="w-full">
