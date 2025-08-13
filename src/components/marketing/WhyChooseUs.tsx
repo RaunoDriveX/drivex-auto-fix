@@ -153,6 +153,73 @@ const WhyChooseUs = () => {
           </Card>
         </div>
 
+        {/* Team section */}
+        <div className="mt-20 mb-16">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <Badge variant="secondary" className="mb-4 px-4 py-2">
+                Our Team
+              </Badge>
+              <h3 className="text-3xl font-bold text-foreground mb-6">
+                Trusted by drivers worldwide
+              </h3>
+              <p className="text-lg text-muted-foreground mb-6">
+                Our international team is already revolutionizing auto glass repair across multiple continents. 
+                From our headquarters to our partner networks, we're building the future of automotive maintenance.
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="font-medium">Europe</span>
+                  <span className="text-muted-foreground">- Germany, Netherlands, and expanding</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <span className="font-medium">North America</span>
+                  <span className="text-muted-foreground">- United States operations</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="font-medium">Latin America</span>
+                  <span className="text-muted-foreground">- Brazil market launch</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                  <span className="font-medium">Africa</span>
+                  <span className="text-muted-foreground">- Emerging market partnerships</span>
+                </div>
+              </div>
+
+              <div className="mt-8 p-6 bg-primary/5 rounded-lg border border-primary/10">
+                <div className="flex items-center gap-2 text-primary font-semibold mb-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Growing Fast
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Over 10,000+ successful repairs completed across our international network, 
+                  with 97% customer satisfaction rate.
+                </p>
+              </div>
+            </div>
+
+            <div className="relative">
+              <img
+                src="/lovable-uploads/5cafe942-1574-4628-a9df-559fb4bd6d49.png"
+                alt="DriveX international team members standing together with classic cars, representing our global presence"
+                className="w-full h-auto rounded-xl shadow-2xl"
+                loading="lazy"
+              />
+              <div className="absolute -bottom-4 -right-4 bg-white dark:bg-gray-900 p-4 rounded-lg shadow-lg border">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">4</div>
+                  <div className="text-sm text-muted-foreground">Continents</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Bottom CTA */}
         <div className="text-center mt-16">
           <h3 className="text-2xl font-bold text-foreground mb-4">
