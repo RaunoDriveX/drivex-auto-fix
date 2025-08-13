@@ -63,72 +63,81 @@ const Inspection = () => {
             </Card>
           ) : (
             <div className="space-y-6">
-              {/* Header Card */}
+              {/* QR Code Card - Primary method */}
               <Card className="border-primary/20 bg-primary/5">
                 <CardHeader className="text-center">
                   <CardTitle className="flex items-center justify-center gap-2">
                     <Smartphone className="h-6 w-6 text-primary" />
-                    Self-Service Vehicle Inspection
+                    Vehicle Self-Inspection
                   </CardTitle>
                   <CardDescription>
-                    Complete your windshield inspection using your smartphone. No technician visit required.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              {/* QR Code Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-center">Scan with your phone</CardTitle>
-                  <CardDescription className="text-center">
-                    Use your smartphone camera to scan this QR code and start the inspection
+                    Scan the QR code below with your smartphone to start the inspection
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center space-y-4">
-                  <div className="p-4 bg-white rounded-lg shadow-sm">
+                  <div className="p-6 bg-white rounded-xl shadow-md border">
                     <QRCode
                       value={smartscanUrl}
-                      size={200}
+                      size={240}
                       style={{ height: "auto", maxWidth: "100%", width: "100%" }}
                     />
                   </div>
-                  <p className="text-sm text-muted-foreground text-center max-w-sm">
-                    Point your phone's camera at the QR code above to automatically open the inspection interface
+                  <p className="text-sm text-muted-foreground text-center max-w-md">
+                    Point your phone's camera at the QR code to automatically open the inspection interface
                   </p>
                 </CardContent>
               </Card>
 
-              {/* Alternative Methods Card */}
+              {/* Alternative sharing methods */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Alternative sharing methods</CardTitle>
+                  <CardTitle>Can't scan the QR code?</CardTitle>
                   <CardDescription>
-                    Can't scan the QR code? Use one of these options instead
+                    Send the inspection link directly to your phone
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Button variant="outline" onClick={sendViaSMS} className="flex items-center gap-2">
-                      <MessageCircle className="h-4 w-4" />
+                    <Button 
+                      onClick={sendViaSMS} 
+                      className="flex items-center gap-2 h-12"
+                      variant="outline"
+                    >
+                      <MessageCircle className="h-5 w-5" />
                       Send via SMS
                     </Button>
-                    <Button variant="outline" onClick={sendViaWhatsApp} className="flex items-center gap-2">
-                      <MessageCircle className="h-4 w-4" />
+                    <Button 
+                      onClick={sendViaWhatsApp} 
+                      className="flex items-center gap-2 h-12"
+                      variant="outline"
+                    >
+                      <MessageCircle className="h-5 w-5" />
                       Send via WhatsApp
                     </Button>
-                    <Button variant="outline" onClick={copyToClipboard} className="flex items-center gap-2">
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <Button 
+                      onClick={copyToClipboard} 
+                      variant="ghost" 
+                      className="flex items-center gap-2 flex-1"
+                    >
                       <Copy className="h-4 w-4" />
                       Copy Link
                     </Button>
-                    <Button variant="outline" onClick={openInNewTab} className="flex items-center gap-2">
+                    <Button 
+                      onClick={openInNewTab} 
+                      variant="ghost" 
+                      className="flex items-center gap-2 flex-1"
+                    >
                       <ExternalLink className="h-4 w-4" />
-                      Open Link
+                      Open in Browser
                     </Button>
                   </div>
                   
                   {/* Direct URL display */}
                   <div className="mt-4 p-3 bg-muted/30 rounded-md">
-                    <Label className="text-xs text-muted-foreground">Direct link:</Label>
+                    <Label className="text-xs text-muted-foreground">Inspection Link:</Label>
                     <div className="flex items-center gap-2 mt-1">
                       <code className="text-xs bg-background px-2 py-1 rounded border flex-1 truncate">
                         {smartscanUrl}
@@ -141,10 +150,10 @@ const Inspection = () => {
                 </CardContent>
               </Card>
 
-              {/* Instructions Card */}
+              {/* Instructions */}
               <Card>
                 <CardHeader>
-                  <CardTitle>What happens next?</CardTitle>
+                  <CardTitle>How it works</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-start gap-3">
@@ -152,8 +161,8 @@ const Inspection = () => {
                       1
                     </div>
                     <div>
-                      <p className="font-medium">Access the inspection tool</p>
-                      <p className="text-sm text-muted-foreground">Scan the QR code or use one of the sharing options above</p>
+                      <p className="font-medium">Access on your phone</p>
+                      <p className="text-sm text-muted-foreground">Scan QR code or use SMS/WhatsApp to get the link</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -161,8 +170,8 @@ const Inspection = () => {
                       2
                     </div>
                     <div>
-                      <p className="font-medium">Follow guided capture</p>
-                      <p className="text-sm text-muted-foreground">Take photos of your windshield damage following the on-screen instructions</p>
+                      <p className="font-medium">Take guided photos</p>
+                      <p className="text-sm text-muted-foreground">Follow instructions to capture your windshield damage</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -170,8 +179,8 @@ const Inspection = () => {
                       3
                     </div>
                     <div>
-                      <p className="font-medium">Get instant AI assessment</p>
-                      <p className="text-sm text-muted-foreground">Receive repair recommendations and partner pricing in minutes</p>
+                      <p className="font-medium">Get instant results</p>
+                      <p className="text-sm text-muted-foreground">AI assessment with repair recommendations and pricing</p>
                     </div>
                   </div>
                 </CardContent>
