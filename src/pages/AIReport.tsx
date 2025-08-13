@@ -10,6 +10,7 @@ import CallCenterCTA from "@/components/CallCenterCTA";
 import CompareOptions from "@/components/CompareOptions";
 import LeadForm from "@/components/marketing/LeadForm";
 import { ShieldCheck } from "lucide-react";
+
 function analyzeFromToken(token: string) {
   let h = 0;
   for (let i = 0; i < token.length; i++) h = (h * 31 + token.charCodeAt(i)) >>> 0;
@@ -20,7 +21,7 @@ function analyzeFromToken(token: string) {
     ? [
         "Chip diameter below 2.5 cm",
         "Crack length under 6 cm",
-        "Not in driver’s critical view",
+        "Not in driver's critical view",
         "No edge impact detected",
       ]
     : [
@@ -32,7 +33,6 @@ function analyzeFromToken(token: string) {
   return { decision, confidence: Math.min(0.97, confidence), factors } as const;
 }
 
-
 const AIReport = () => {
   const { token } = useParams<{ token: string }>();
   const result = useMemo(() => ({
@@ -41,11 +41,11 @@ const AIReport = () => {
     factors: [
       "Chip diameter below 2.5 cm",
       "Crack length under 6 cm",
-      "Not in driver’s critical view",
+      "Not in driver's critical view",
       "No edge impact detected",
     ],
   }), []);
-  const [postalCode, setPostalCode] = useState("");
+  const [address, setAddress] = useState("");
   const [partnersVisible, setPartnersVisible] = useState(false);
   const [showReplacement, setShowReplacement] = useState(false);
   const [selectedShop, setSelectedShop] = useState<{id: string, name: string} | null>(null);
@@ -66,6 +66,20 @@ const AIReport = () => {
     articleSection: result.decision === "repair" ? "Repair" : "Replacement",
   };
 
+  // Mock addresses including Staapli 3
+  const mockAddresses = [
+    "Staapli 3, Tallinn",
+    "Staapli 3-1, Tallinn", 
+    "Staapli 3A, Tallinn",
+    "Narva mnt 15, Tallinn",
+    "Viru väljak 4, Tallinn",
+    "Pärnu mnt 142, Tallinn",
+    "Kadaka tee 76, Tallinn"
+  ];
+
+  const filteredAddresses = address ? mockAddresses.filter(addr => 
+    addr.toLowerCase().includes(address.toLowerCase())
+  ) : [];
 
   return (
     <>
@@ -87,9 +101,9 @@ const AIReport = () => {
                 {result.decision === "repair" ? "Our AI recommends to repair this windshield" : "Our AI recommends windshield replacement"}
               </h1>
               <p className="mt-2 text-muted-foreground">
-                {result.decision === "repair" ? "Save 85% of costs compared to a replacement." : "We’ll ensure the right glass and calibration for your vehicle."}
+                {result.decision === "repair" ? "Save 85% of costs compared to a replacement." : "We'll ensure the right glass and calibration for your vehicle."}
               </p>
-              <p className="text-muted-foreground">We’ll send your inspection result, booking, and pricing via SMS or email.</p>
+              <p className="text-muted-foreground">We'll send your inspection result, booking, and pricing via SMS or email.</p>
             </header>
 
             <div className="space-y-6">
@@ -121,7 +135,7 @@ const AIReport = () => {
 
             </div>
 
-            <section aria-label="Find partners by postal code" className="mt-8 animate-fade-in">
+            <section aria-label="Find partners by address" className="mt-8 animate-fade-in">
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between gap-3">
@@ -131,7 +145,7 @@ const AIReport = () => {
                       Verified by DriveX
                     </Badge>
                   </div>
-                  <CardDescription>Enter your postal code to see relevant repair offers.</CardDescription>
+                  <CardDescription>Enter your address to see relevant repair offers.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form
@@ -143,17 +157,33 @@ const AIReport = () => {
                       }, 0);
                     }}
                     className="flex flex-col sm:flex-row gap-3"
-                    aria-label="Postal code form"
+                    aria-label="Address form"
                   >
-                    <div className="flex-1">
-                      <Label htmlFor="postal">Postal code</Label>
+                    <div className="flex-1 relative">
+                      <Label htmlFor="address">Address</Label>
                       <Input
-                        id="postal"
-                        placeholder="e.g., 10115"
-                        value={postalCode}
-                        onChange={(e) => setPostalCode(e.target.value)}
-                        autoComplete="postal-code"
+                        id="address"
+                        placeholder="e.g., Staapli 3, Tallinn"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        autoComplete="street-address"
                       />
+                      {address && filteredAddresses.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 bg-background border border-input rounded-md mt-1 shadow-lg z-10">
+                          {filteredAddresses.slice(0, 5).map((addr, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              className="w-full text-left px-3 py-2 hover:bg-accent hover:text-accent-foreground first:rounded-t-md last:rounded-b-md"
+                              onClick={() => {
+                                setAddress(addr);
+                              }}
+                            >
+                              {addr}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <Button type="submit" className="sm:self-end">Show partners</Button>
                   </form>
@@ -166,7 +196,7 @@ const AIReport = () => {
                 <section aria-label="Partner offers" className="mt-6">
                   <CompareOptions 
                     decision="repair" 
-                    postalCode={postalCode} 
+                    postalCode={address} 
                     showReplacement={showReplacement} 
                     onRequestReplacement={() => setShowReplacement(true)}
                     onBookSlot={(shopId, shopName) => {
