@@ -101,7 +101,10 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
                       <div className={`h-9 w-9 rounded-md grid place-items-center text-xs font-semibold ${s.id === 'rgm' ? 'bg-primary/10' : s.id === 'cgc' ? 'bg-accent/10' : 'bg-secondary/20'}`} aria-label={`${s.name} logo`}>
                         {s.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
                       </div>
-                      <div className="font-medium">{s.name}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium">{s.name}</div>
+                        <Badge variant="secondary">{s.type}</Badge>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {s.id === repairBestPrice && <Badge>Best price</Badge>}
@@ -112,6 +115,11 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
                   <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Next slot: {s.nextSlot}</div>
                     <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {s.type === 'Mobile' ? 'Comes to you' : `${s.distanceKm?.toFixed(1)} km`}</div>
+                    {s.type === 'Mobile' ? (
+                      <div className="flex items-center gap-1"><Truck className="h-3.5 w-3.5" /> Mobile service at your location</div>
+                    ) : (
+                      <div className="flex items-center gap-1"><Store className="h-3.5 w-3.5" /> Stationary workshop</div>
+                    )}
                     <div>Rating: <span className="text-foreground font-medium">{s.rating.toFixed(1)}</span> ({s.reviews})</div>
                   </div>
                   <div className="mt-3 flex items-center justify-end">
