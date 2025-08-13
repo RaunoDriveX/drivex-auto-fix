@@ -41,37 +41,21 @@ const LeadForm = () => {
                 <Label htmlFor="name">Full name</Label>
                 <Input id="name" name="name" placeholder="Jane Doe" required />
               </div>
-              <div className="grid gap-2 sm:grid-cols-2 sm:gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" placeholder="jane@example.com" required />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" name="phone" type="tel" placeholder="(555) 555-5555" />
-                </div>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2 sm:gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="vehicle">Vehicle</Label>
-                  <Input id="vehicle" name="vehicle" placeholder="2019 Toyota Camry" />
-                </div>
-                <div className="grid gap-2">
-                  <Label>Insurance</Label>
-                  <Select name="insured">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="insured">Insured</SelectItem>
-                      <SelectItem value="uninsured">Uninsured</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="email" type="email" placeholder="jane@example.com" required />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="desc">Damage details</Label>
-                <Textarea id="desc" name="desc" placeholder="Briefly describe the chip, crack, or breakage." rows={4} />
+                <Label>Insurance</Label>
+                <Select name="insured">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="insured">Insured</SelectItem>
+                    <SelectItem value="uninsured">Uninsured</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid gap-2">
                 <Label>Preferred contact</Label>
