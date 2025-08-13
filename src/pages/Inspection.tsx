@@ -212,14 +212,6 @@ const Inspection = () => {
                     </>
                   )}
                 </CardContent>
-                <CardFooter className="flex gap-3">
-                  <Button asChild variant="secondary" className="flex-1">
-                    <Link to="/">Return to homepage</Link>
-                  </Button>
-                  <Button asChild className="flex-1">
-                    <Link to="/report">Move to Results</Link>
-                  </Button>
-                </CardFooter>
               </Card>
 
               {/* Alternative sharing methods - Show for desktop or as backup for mobile */}
@@ -285,6 +277,18 @@ const Inspection = () => {
                 </CardContent>
               </Card>
               )}
+
+              {/* Bottom navigation */}
+              <Card>
+                <CardFooter className="flex gap-3">
+                  <Button asChild variant="secondary" className="flex-1">
+                    <Link to="/">Return to homepage</Link>
+                  </Button>
+                  <Button asChild className="flex-1">
+                    <Link to="/report">Move to Results</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
             </div>
           )}
         </div>
