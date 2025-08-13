@@ -1,6 +1,29 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
 import CallCenterCTA from "@/components/CallCenterCTA";
 
 const Hero = () => {
+  const navigate = useNavigate();
+  const [licensePlate, setLicensePlate] = useState("");
+  const [phone, setPhone] = useState("");
+
+  function generateToken(length = 24) {
+    const bytes = new Uint8Array(length);
+    crypto.getRandomValues(bytes);
+    return btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+  }
+
+  const handleStart = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const token = generateToken();
+    navigate(`/inspection/${token}`);
+  };
   return (
     <section className="relative bg-background overflow-hidden">
       {/* Background banner image */}
@@ -27,20 +50,36 @@ const Hero = () => {
             Order a DIY resin kit.
           </p>
           
-          <div className="flex flex-wrap gap-4 mt-8">
-            <a 
-              href="/report/eo3w_x1IBgPaUDj8gsUVkI2qL8rG0gSx" 
-              className="px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors text-lg"
-            >
-              Start Your Assessment
-            </a>
-            <a 
-              href="/inspection/test123" 
-              className="px-8 py-4 bg-white/20 text-white font-semibold rounded-lg hover:bg-white/30 transition-colors text-lg backdrop-blur-sm border border-white/20"
-            >
-              Begin Inspection
-            </a>
-          </div>
+          <form onSubmit={handleStart} className="mt-8 grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+            <div className="grid gap-2">
+              <Label htmlFor="hero-license" className="text-white">License plate</Label>
+              <Input 
+                id="hero-license" 
+                name="licensePlate" 
+                placeholder="ABC-123" 
+                value={licensePlate}
+                onChange={(e) => setLicensePlate(e.target.value)}
+                required 
+                className="bg-white/95 border-white/20" 
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="hero-phone" className="text-white">Phone number</Label>
+              <Input 
+                id="hero-phone" 
+                name="phone" 
+                type="tel" 
+                placeholder="(555) 555-5555" 
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required 
+                className="bg-white/95 border-white/20" 
+              />
+            </div>
+            <Button size="lg" type="submit" className="bg-primary hover:bg-primary/90">
+              Begin damage assessment
+            </Button>
+          </form>
 
           <div className="mt-6">
             <CallCenterCTA />
