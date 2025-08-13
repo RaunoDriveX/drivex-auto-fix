@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { Phone, UserCheck } from "lucide-react";
 
 export type CallCenterCTAProps = {
   token?: string;
@@ -48,9 +49,16 @@ export default function CallCenterCTA({ token, decision, phoneNumber = DEFAULT_N
 
   return (
     <>
-      <Button size={size} variant={variant} onClick={() => { setOpen(true); setStatus("idle"); }}>
-        Call us now to get your car fixed
-      </Button>
+      <div 
+        className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+        onClick={() => { setOpen(true); setStatus("idle"); }}
+      >
+        <UserCheck className="h-6 w-6 text-white" />
+        <div className="flex items-center gap-2">
+          <Phone className="h-5 w-5 text-white" />
+          <span className="text-2xl font-bold text-white">{phoneNumber}</span>
+        </div>
+      </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
