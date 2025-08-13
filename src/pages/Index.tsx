@@ -1,4 +1,6 @@
 import { Helmet } from "react-helmet-async";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import Hero from "@/components/marketing/Hero";
 import Workflow from "@/components/marketing/Workflow";
 import WhyChooseUs, { CustomerSegments } from "@/components/marketing/WhyChooseUs";
@@ -29,6 +31,8 @@ const Index = () => {
         <script type="application/ld+json">{JSON.stringify(orgJsonLd)}</script>
       </Helmet>
 
+      <Header />
+
       <header>
         <Hero />
       </header>
@@ -54,6 +58,8 @@ const Index = () => {
           </div>
         </section>
       </main>
+
+      <Footer />
     </>
   );
 };
