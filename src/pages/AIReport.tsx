@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,6 +44,7 @@ const AIReport = () => {
   }), []);
   const [postalCode, setPostalCode] = useState("");
   const [partnersVisible, setPartnersVisible] = useState(false);
+  const offersRef = useRef<HTMLDivElement | null>(null);
   const reportUrl = "https://admin.drivex.ee/access/b54PrNNRWlX2xutBBJc1AvHW";
   const canonical = typeof window !== "undefined" ? window.location.href : "/report/mock";
   const jsonLd = {
@@ -122,7 +123,13 @@ const AIReport = () => {
                 </CardHeader>
                 <CardContent>
                   <form
-                    onSubmit={(e) => { e.preventDefault(); setPartnersVisible(true); }}
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      setPartnersVisible(true);
+                      setTimeout(() => {
+                        offersRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }, 0);
+                    }}
                     className="flex flex-col sm:flex-row gap-3"
                     aria-label="Postal code form"
                   >
@@ -143,9 +150,11 @@ const AIReport = () => {
             </section>
 
             {partnersVisible && (
-              <section aria-label="Compare repair and replacement options" className="mt-6">
-                <CompareOptions decision="repair" />
-              </section>
+              <div ref={offersRef}>
+                <section aria-label="Partner offers" className="mt-6">
+                  <CompareOptions decision="repair" postalCode={postalCode} />
+                </section>
+              </div>
             )}
           </article>
         </div>

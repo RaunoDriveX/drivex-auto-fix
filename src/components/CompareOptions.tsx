@@ -6,16 +6,17 @@ import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck 
 
 export type CompareOptionsProps = {
   decision: "repair" | "replacement";
+  postalCode?: string;
 };
 
-export default function CompareOptions({ decision }: CompareOptionsProps) {
+export default function CompareOptions({ decision, postalCode }: CompareOptionsProps) {
   const isRepairRecommended = decision === "repair";
 
   return (
     <section aria-labelledby="compare-options-heading" className="mt-10">
       <div className="mb-4 flex items-center justify-between">
         <h2 id="compare-options-heading" className="text-2xl font-semibold text-foreground">
-          Compare options
+          Partner offers near {postalCode ? postalCode : "your area"}
         </h2>
         <Badge variant="secondary" className="hidden sm:inline-flex">
           <BadgeCheck className="h-3.5 w-3.5 mr-1" />
