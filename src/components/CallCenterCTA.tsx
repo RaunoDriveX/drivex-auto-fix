@@ -53,10 +53,11 @@ export default function CallCenterCTA({ token, decision, phoneNumber = DEFAULT_N
         className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
         onClick={() => { setOpen(true); setStatus("idle"); }}
       >
-        <UserCheck className="h-6 w-6 text-white" />
+        <UserCheck className="h-5 w-5 text-accent" />
+        <span className="text-white">Or call us now:</span>
         <div className="flex items-center gap-2">
-          <Phone className="h-5 w-5 text-white" />
-          <span className="text-2xl font-bold text-white">{phoneNumber}</span>
+          <Phone className="h-5 w-5 text-accent" />
+          <span className="text-xl font-bold text-accent">{phoneNumber}</span>
         </div>
       </div>
 
