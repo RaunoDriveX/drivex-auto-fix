@@ -142,70 +142,6 @@ const Inspection = () => {
                 </Card>
               )}
 
-              {/* Alternative sharing methods - Show for desktop or as backup for mobile */}
-              {!isMobile && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Can't scan the QR code?</CardTitle>
-                    <CardDescription>
-                      Send the inspection link directly to your phone
-                    </CardDescription>
-                  </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Button 
-                      onClick={sendViaSMS} 
-                      className="flex items-center gap-2 h-12"
-                      variant="outline"
-                    >
-                      <MessageCircle className="h-5 w-5" />
-                      Send via SMS
-                    </Button>
-                    <Button 
-                      onClick={sendViaWhatsApp} 
-                      className="flex items-center gap-2 h-12"
-                      variant="outline"
-                    >
-                      <MessageCircle className="h-5 w-5" />
-                      Send via WhatsApp
-                    </Button>
-                  </div>
-                  
-                  <div className="flex gap-3">
-                    <Button 
-                      onClick={copyToClipboard} 
-                      variant="ghost" 
-                      className="flex items-center gap-2 flex-1"
-                    >
-                      <Copy className="h-4 w-4" />
-                      Copy Link
-                    </Button>
-                    <Button 
-                      onClick={openInNewTab} 
-                      variant="ghost" 
-                      className="flex items-center gap-2 flex-1"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      Open in Browser
-                    </Button>
-                  </div>
-                  
-                  {/* Direct URL display */}
-                  <div className="mt-4 p-3 bg-muted/30 rounded-md">
-                    <Label className="text-xs text-muted-foreground">Inspection Link:</Label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <code className="text-xs bg-background px-2 py-1 rounded border flex-1 truncate">
-                        {smartscanUrl}
-                      </code>
-                      <Button size="sm" variant="ghost" onClick={copyToClipboard}>
-                        <Copy className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              )}
-
               {/* Instructions */}
               <Card>
                 <CardHeader>
@@ -285,6 +221,70 @@ const Inspection = () => {
                   </Button>
                 </CardFooter>
               </Card>
+
+              {/* Alternative sharing methods - Show for desktop or as backup for mobile */}
+              {!isMobile && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Can't scan the QR code?</CardTitle>
+                    <CardDescription>
+                      Send the inspection link directly to your phone
+                    </CardDescription>
+                  </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Button 
+                      onClick={sendViaSMS} 
+                      className="flex items-center gap-2 h-12"
+                      variant="outline"
+                    >
+                      <MessageCircle className="h-5 w-5" />
+                      Send via SMS
+                    </Button>
+                    <Button 
+                      onClick={sendViaWhatsApp} 
+                      className="flex items-center gap-2 h-12"
+                      variant="outline"
+                    >
+                      <MessageCircle className="h-5 w-5" />
+                      Send via WhatsApp
+                    </Button>
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <Button 
+                      onClick={copyToClipboard} 
+                      variant="ghost" 
+                      className="flex items-center gap-2 flex-1"
+                    >
+                      <Copy className="h-4 w-4" />
+                      Copy Link
+                    </Button>
+                    <Button 
+                      onClick={openInNewTab} 
+                      variant="ghost" 
+                      className="flex items-center gap-2 flex-1"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Open in Browser
+                    </Button>
+                  </div>
+                  
+                  {/* Direct URL display */}
+                  <div className="mt-4 p-3 bg-muted/30 rounded-md">
+                    <Label className="text-xs text-muted-foreground">Inspection Link:</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <code className="text-xs bg-background px-2 py-1 rounded border flex-1 truncate">
+                        {smartscanUrl}
+                      </code>
+                      <Button size="sm" variant="ghost" onClick={copyToClipboard}>
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              )}
             </div>
           )}
         </div>
