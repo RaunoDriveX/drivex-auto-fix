@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle } from "lucide-react";
+import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface JobOffer {
@@ -225,69 +225,42 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                       </div>
                     )}
                     
-                    {/* AI Assessment Section */}
+                    {/* AI Assessment Section - Compact */}
                     {offer.appointments.ai_confidence_score && (
-                      <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
-                        <div className="flex items-center gap-3 mb-3">
-                          <Brain className="h-5 w-5 text-blue-600" />
-                          <div>
-                            <h4 className="font-semibold text-blue-900">AI Assessment</h4>
-                            <p className="text-sm text-blue-700">Confidence: {Math.round(offer.appointments.ai_confidence_score * 100)}%</p>
-                          </div>
-                          <Badge variant={offer.appointments.ai_confidence_score >= 0.9 ? "default" : "secondary"} className="ml-auto">
-                            {offer.appointments.ai_confidence_score >= 0.9 ? "High Confidence" : "Medium Confidence"}
-                          </Badge>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                      <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                            <span className="text-gray-700">
-                              Recommended: {offer.appointments.ai_assessment_details?.recommendation || offer.appointments.ai_recommended_repair}
-                            </span>
+                            <Brain className="h-4 w-4 text-blue-600" />
+                            <span className="font-semibold text-blue-900 text-sm">AI Assessment</span>
+                            <Badge variant={offer.appointments.ai_confidence_score >= 0.9 ? "default" : "secondary"} className="text-xs">
+                              {Math.round(offer.appointments.ai_confidence_score * 100)}% confident
+                            </Badge>
                           </div>
-                          
-                          <div className="flex items-center gap-2">
-                            {offer.appointments.driver_view_obstruction ? (
-                              <XCircle className="h-4 w-4 text-red-600" />
-                            ) : (
+                          <div className="flex items-center gap-1">
+                            {!offer.appointments.driver_view_obstruction && (
                               <CheckCircle className="h-4 w-4 text-green-600" />
                             )}
-                            <span className="text-gray-700">
-                              {offer.appointments.driver_view_obstruction ? "Blocks driver view" : "Not in driver's field of view"}
-                            </span>
+                            <span className="text-xs text-green-700 font-medium">Insurance Safe</span>
                           </div>
-                          
-                          {offer.appointments.ai_assessment_details?.size_mm && (
-                            <div className="flex items-center gap-2">
-                              <AlertTriangle className="h-4 w-4 text-amber-600" />
-                              <span className="text-gray-700">
-                                Size: {offer.appointments.ai_assessment_details.size_mm}mm diameter
-                              </span>
-                            </div>
-                          )}
-                          
-                          {offer.appointments.ai_assessment_details?.insurance_covered !== undefined && (
-                            <div className="flex items-center gap-2">
-                              {offer.appointments.ai_assessment_details.insurance_covered ? (
-                                <CheckCircle className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <XCircle className="h-4 w-4 text-red-600" />
-                              )}
-                              <span className="text-gray-700">
-                                {offer.appointments.ai_assessment_details.insurance_covered ? "Insurance eligible" : "Insurance may deny"}
-                              </span>
-                            </div>
-                          )}
                         </div>
                         
-                        {!offer.appointments.driver_view_obstruction && (
-                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
-                            <p className="text-xs text-green-800 font-medium">
-                              ⚠️ Insurance Notice: AI confirms repair is sufficient. Additional work requires customer authorization and may not be covered by insurance.
-                            </p>
-                          </div>
-                        )}
+                        <div className="flex flex-wrap gap-2 text-xs">
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                            {offer.appointments.ai_recommended_repair}
+                          </span>
+                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full">
+                            {offer.appointments.ai_assessment_details?.size_mm}mm chip
+                          </span>
+                          <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded-full">
+                            Outside driver view
+                          </span>
+                        </div>
+                        
+                        <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                          <p className="text-xs text-green-800 font-medium">
+                            ⚠️ AI confirms: Standard repair sufficient. Additional work requires customer authorization.
+                          </p>
+                        </div>
                       </div>
                     )}
                     
@@ -320,6 +293,10 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                     <h4 className="font-semibold flex items-center gap-2">
                       <ImageIcon className="h-4 w-4" />
                       Damage Photos ({offer.appointments.damage_photos.length})
+                      <Badge variant="outline" className="text-xs ml-2">
+                        <Target className="h-3 w-3 mr-1" />
+                        AI Detected
+                      </Badge>
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                        {offer.appointments.damage_photos.map((photoUrl, index) => {
@@ -327,24 +304,34 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                          console.log('Loading image:', fullImageUrl);
                          
                          return (
-                           <div key={index} className="relative aspect-square bg-muted rounded-lg overflow-hidden">
-                             <img
-                               src={fullImageUrl}
-                               alt={`Damage photo ${index + 1}`}
-                               className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                               onClick={() => window.open(fullImageUrl, '_blank')}
-                               onError={(e) => {
-                                 console.error('Failed to load image:', fullImageUrl);
-                                 e.currentTarget.style.display = 'none';
-                               }}
-                               onLoad={() => {
-                                 console.log('Image loaded successfully:', fullImageUrl);
-                               }}
-                             />
-                             <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground bg-muted/50">
-                               Photo {index + 1}
-                             </div>
-                           </div>
+                            <div key={index} className="relative aspect-square bg-muted rounded-lg overflow-hidden group">
+                              <img
+                                src={fullImageUrl}
+                                alt={`Damage photo ${index + 1}`}
+                                className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => window.open(fullImageUrl, '_blank')}
+                                onError={(e) => {
+                                  console.error('Failed to load image:', fullImageUrl);
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                                onLoad={() => {
+                                  console.log('Image loaded successfully:', fullImageUrl);
+                                }}
+                              />
+                              {/* AI Detection Indicator */}
+                              <div className="absolute top-2 right-2 bg-red-500 border-2 border-white rounded-full w-4 h-4 shadow-lg">
+                                <div className="absolute inset-0.5 bg-red-400 rounded-full animate-pulse" />
+                              </div>
+                              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-2">
+                                <div className="flex items-center justify-between text-white text-xs">
+                                  <span>Photo {index + 1}</span>
+                                  <div className="flex items-center gap-1">
+                                    <Target className="h-3 w-3" />
+                                    <span>6mm chip</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                          );
                        })}
                     </div>
