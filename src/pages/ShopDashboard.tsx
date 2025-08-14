@@ -26,37 +26,64 @@ const ShopDashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check authentication and fetch shop data
-    const initializeAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.user) {
-        navigate("/shop-auth");
-        return;
-      }
-      
-      setUser(session.user);
-      await fetchShopData(session.user.email!);
-    };
-
-    // Set up auth state listener
+    console.log('ShopDashboard: Initializing auth...');
+    
+    // Set up auth state listener FIRST to prevent missing events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        console.log('ShopDashboard: Auth state change:', event, !!session);
+        
         if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setShopData(null);
+          setLoading(false);
           navigate("/shop-auth");
         } else if (session?.user) {
           setUser(session.user);
-          await fetchShopData(session.user.email!);
+          // Defer data fetching to prevent authentication deadlock
+          setTimeout(() => {
+            fetchShopData(session.user.email!);
+          }, 0);
+        } else {
+          setUser(null);
+          setShopData(null);
+          setLoading(false);
         }
       }
     );
 
+    // THEN check for existing session
+    const initializeAuth = async () => {
+      try {
+        console.log('ShopDashboard: Checking existing session...');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user) {
+          console.log('ShopDashboard: No session found, redirecting to auth');
+          navigate("/shop-auth");
+          return;
+        }
+        
+        console.log('ShopDashboard: Found existing session for:', session.user.email);
+        setUser(session.user);
+        await fetchShopData(session.user.email!);
+      } catch (error) {
+        console.error('ShopDashboard: Error during auth initialization:', error);
+        setLoading(false);
+        navigate("/shop-auth");
+      }
+    };
+
     initializeAuth();
     
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('ShopDashboard: Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const fetchShopData = async (email: string) => {
+    console.log('ShopDashboard: Fetching shop data for:', email);
     try {
       const { data: shop, error } = await supabase
         .from('shops')
@@ -65,18 +92,21 @@ const ShopDashboard = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') {
+        console.error('ShopDashboard: Database error:', error);
         throw error;
       }
 
+      console.log('ShopDashboard: Shop data fetched:', !!shop);
       setShopData(shop);
     } catch (error: any) {
-      console.error('Error fetching shop data:', error);
+      console.error('ShopDashboard: Error fetching shop data:', error);
       toast({
         title: "Error",
         description: "Failed to load shop data",
         variant: "destructive"
       });
     } finally {
+      console.log('ShopDashboard: Setting loading to false');
       setLoading(false);
     }
   };
