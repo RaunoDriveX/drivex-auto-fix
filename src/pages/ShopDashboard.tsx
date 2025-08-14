@@ -28,25 +28,28 @@ const ShopDashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log('ShopDashboard: Initializing auth...');
+    console.log('ShopDashboard: Component mounted, initializing...');
     
     // Set up auth state listener FIRST to prevent missing events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('ShopDashboard: Auth state change:', event, !!session);
+        console.log('ShopDashboard: Auth state change:', event, 'Session exists:', !!session);
         
         if (event === 'SIGNED_OUT') {
+          console.log('ShopDashboard: User signed out, redirecting...');
           setUser(null);
           setShopData(null);
           setLoading(false);
           navigate("/shop-auth");
         } else if (session?.user) {
+          console.log('ShopDashboard: User authenticated:', session.user.email);
           setUser(session.user);
           // Defer data fetching to prevent authentication deadlock
           setTimeout(() => {
             fetchShopData(session.user.email!);
           }, 0);
         } else {
+          console.log('ShopDashboard: No session, setting loading false');
           setUser(null);
           setShopData(null);
           setLoading(false);
@@ -62,6 +65,7 @@ const ShopDashboard = () => {
         
         if (!session?.user) {
           console.log('ShopDashboard: No session found, redirecting to auth');
+          setLoading(false);
           navigate("/shop-auth");
           return;
         }
@@ -145,12 +149,25 @@ const ShopDashboard = () => {
     }
   };
 
+  console.log('ShopDashboard: Render - loading:', loading, 'user:', !!user, 'shopData:', !!shopData);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="mt-2 text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    console.log('ShopDashboard: No user, should redirect but showing message');
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Redirecting to authentication...</p>
         </div>
       </div>
     );
