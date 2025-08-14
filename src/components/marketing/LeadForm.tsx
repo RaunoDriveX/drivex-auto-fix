@@ -116,7 +116,6 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
 
         if (emailError) {
           console.error('Error sending confirmation email:', emailError);
-          // Don't fail the booking if email fails
         }
 
         // Update appointment to mark confirmation email as sent
@@ -126,6 +125,34 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
           .eq('id', appointment.id);
       } catch (emailError) {
         console.error('Error with confirmation email:', emailError);
+      }
+
+      // Trigger AI job allocation to shops
+      try {
+        const { error: allocationError } = await supabase.functions.invoke('allocate-job', {
+          body: {
+            appointmentId: appointment.id,
+            serviceType: jobType,
+            damageType: 'chip', // This could be determined from AI analysis
+            vehicleInfo: {
+              make: 'Toyota', // This would come from form or AI analysis
+              model: 'Camry',
+              year: 2020
+            },
+            customerLocation: {
+              latitude: 52.3676, // Amsterdam coordinates as example
+              longitude: 4.9041
+            }
+          }
+        });
+
+        if (allocationError) {
+          console.error('Error in job allocation:', allocationError);
+        } else {
+          console.log('Job successfully allocated to eligible shops');
+        }
+      } catch (allocationError) {
+        console.error('Error with job allocation:', allocationError);
       }
 
       toast.success("Booking confirmed! Check your email for confirmation details.");

@@ -113,6 +113,62 @@ export type Database = {
         }
         Relationships: []
       }
+      job_offers: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          decline_reason: string | null
+          estimated_completion_time: unknown | null
+          expires_at: string
+          id: string
+          notes: string | null
+          offered_at: string
+          offered_price: number
+          responded_at: string | null
+          shop_id: string
+          status: Database["public"]["Enums"]["job_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          estimated_completion_time?: unknown | null
+          expires_at: string
+          id?: string
+          notes?: string | null
+          offered_at?: string
+          offered_price: number
+          responded_at?: string | null
+          shop_id: string
+          status?: Database["public"]["Enums"]["job_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          estimated_completion_time?: unknown | null
+          expires_at?: string
+          id?: string
+          notes?: string | null
+          offered_at?: string
+          offered_price?: number
+          responded_at?: string | null
+          shop_id?: string
+          status?: Database["public"]["Enums"]["job_status"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_offers_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_pricing: {
         Row: {
           base_price: number
@@ -202,6 +258,42 @@ export type Database = {
           },
         ]
       }
+      shop_notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          id: string
+          message: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          read_at: string | null
+          sent_at: string
+          shop_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          message: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          read_at?: string | null
+          sent_at?: string
+          shop_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          message?: string
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          read_at?: string | null
+          sent_at?: string
+          shop_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       shop_reviews: {
         Row: {
           appointment_id: string | null
@@ -258,7 +350,9 @@ export type Database = {
       }
       shops: {
         Row: {
+          acceptance_rate: number | null
           address: string
+          average_lead_time_days: number | null
           business_hours: Json | null
           city: string
           created_at: string
@@ -268,18 +362,32 @@ export type Database = {
           insurance_approved: boolean | null
           is_certified: boolean | null
           is_mobile_service: boolean | null
+          jobs_accepted_count: number | null
+          jobs_declined_count: number | null
+          jobs_offered_count: number | null
+          last_job_offered_at: string | null
           latitude: number | null
           longitude: number | null
           name: string
+          performance_tier: string | null
           phone: string | null
           postal_code: string
+          quality_score: number | null
           rating: number | null
+          repair_types: Database["public"]["Enums"]["repair_type"] | null
+          response_time_minutes: number | null
+          service_capability:
+            | Database["public"]["Enums"]["service_capability"]
+            | null
+          spare_parts_stock: Json | null
           total_reviews: number | null
           updated_at: string
           website: string | null
         }
         Insert: {
+          acceptance_rate?: number | null
           address: string
+          average_lead_time_days?: number | null
           business_hours?: Json | null
           city: string
           created_at?: string
@@ -289,18 +397,32 @@ export type Database = {
           insurance_approved?: boolean | null
           is_certified?: boolean | null
           is_mobile_service?: boolean | null
+          jobs_accepted_count?: number | null
+          jobs_declined_count?: number | null
+          jobs_offered_count?: number | null
+          last_job_offered_at?: string | null
           latitude?: number | null
           longitude?: number | null
           name: string
+          performance_tier?: string | null
           phone?: string | null
           postal_code: string
+          quality_score?: number | null
           rating?: number | null
+          repair_types?: Database["public"]["Enums"]["repair_type"] | null
+          response_time_minutes?: number | null
+          service_capability?:
+            | Database["public"]["Enums"]["service_capability"]
+            | null
+          spare_parts_stock?: Json | null
           total_reviews?: number | null
           updated_at?: string
           website?: string | null
         }
         Update: {
+          acceptance_rate?: number | null
           address?: string
+          average_lead_time_days?: number | null
           business_hours?: Json | null
           city?: string
           created_at?: string
@@ -310,15 +432,75 @@ export type Database = {
           insurance_approved?: boolean | null
           is_certified?: boolean | null
           is_mobile_service?: boolean | null
+          jobs_accepted_count?: number | null
+          jobs_declined_count?: number | null
+          jobs_offered_count?: number | null
+          last_job_offered_at?: string | null
           latitude?: number | null
           longitude?: number | null
           name?: string
+          performance_tier?: string | null
           phone?: string | null
           postal_code?: string
+          quality_score?: number | null
           rating?: number | null
+          repair_types?: Database["public"]["Enums"]["repair_type"] | null
+          response_time_minutes?: number | null
+          service_capability?:
+            | Database["public"]["Enums"]["service_capability"]
+            | null
+          spare_parts_stock?: Json | null
           total_reviews?: number | null
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      windshield_parts: {
+        Row: {
+          aftermarket_price: number | null
+          availability_status: string | null
+          created_at: string
+          description: string | null
+          id: string
+          lead_time_days: number | null
+          make: string
+          model: string
+          oem_price: number | null
+          part_number: string
+          updated_at: string
+          year_from: number
+          year_to: number
+        }
+        Insert: {
+          aftermarket_price?: number | null
+          availability_status?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_time_days?: number | null
+          make: string
+          model: string
+          oem_price?: number | null
+          part_number: string
+          updated_at?: string
+          year_from: number
+          year_to: number
+        }
+        Update: {
+          aftermarket_price?: number | null
+          availability_status?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_time_days?: number | null
+          make?: string
+          model?: string
+          oem_price?: number | null
+          part_number?: string
+          updated_at?: string
+          year_from?: number
+          year_to?: number
         }
         Relationships: []
       }
@@ -330,7 +512,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      job_status:
+        | "pending"
+        | "offered"
+        | "accepted"
+        | "declined"
+        | "expired"
+        | "completed"
+      notification_type: "job_offer" | "job_update" | "payment"
+      repair_type: "chip_repair" | "crack_repair" | "both_repairs"
+      service_capability: "repair_only" | "replacement_only" | "both"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -457,6 +648,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      job_status: [
+        "pending",
+        "offered",
+        "accepted",
+        "declined",
+        "expired",
+        "completed",
+      ],
+      notification_type: ["job_offer", "job_update", "payment"],
+      repair_type: ["chip_repair", "crack_repair", "both_repairs"],
+      service_capability: ["repair_only", "replacement_only", "both"],
+    },
   },
 } as const
