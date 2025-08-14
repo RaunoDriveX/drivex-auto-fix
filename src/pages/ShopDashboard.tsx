@@ -163,7 +163,7 @@ const ShopDashboard = () => {
         <meta name="description" content="Manage your repair shop settings, availability, pricing, and job offers." />
       </Helmet>
       
-      <div className="min-h-screen bg-background flex w-full">
+      <div className="min-h-screen bg-background">
         {/* Header */}
         <header className="bg-card border-b fixed top-0 left-0 right-0 z-10">
           <div className="container mx-auto px-4 py-4">
@@ -195,15 +195,17 @@ const ShopDashboard = () => {
           </div>
         </header>
 
-        {/* Sidebar */}
-        <ShopSidebar 
-          activeSection={activeSection} 
-          onSectionChange={setActiveSection}
-          shopData={shopData}
-        />
+        <div className="flex pt-20">
 
-        {/* Main Content */}
-        <main className="flex-1 pt-24 p-8 overflow-auto">
+          {/* Sidebar */}
+          <ShopSidebar 
+            activeSection={activeSection} 
+            onSectionChange={setActiveSection}
+            shopData={shopData}
+          />
+
+          {/* Main Content */}
+          <main className="flex-1 p-8 overflow-auto">
           {shopData && (
             <>
               {/* ACTIVE JOB OFFERS SECTION - Always visible at top */}
@@ -251,7 +253,8 @@ const ShopDashboard = () => {
               </div>
             </div>
           )}
-        </main>
+          </main>
+        </div>
       </div>
     </SidebarProvider>
   );

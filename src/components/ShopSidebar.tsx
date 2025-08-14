@@ -29,8 +29,7 @@ export function ShopSidebar({ activeSection, onSectionChange, shopData }: ShopSi
   const { state } = useSidebar();
 
   return (
-    <Sidebar collapsible="icon"
-    >
+    <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Shop Management</SidebarGroupLabel>
