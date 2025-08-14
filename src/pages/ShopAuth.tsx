@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Wrench } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const ShopAuth = () => {
@@ -143,7 +144,10 @@ const ShopAuth = () => {
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Shop Portal</CardTitle>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Wrench className="h-6 w-6 text-primary" />
+              <CardTitle className="text-2xl">Shop Portal</CardTitle>
+            </div>
             <CardDescription>
               Access your repair shop dashboard
             </CardDescription>

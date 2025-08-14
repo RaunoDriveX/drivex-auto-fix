@@ -114,11 +114,16 @@ const ShopDashboard = () => {
         <header className="bg-card border-b">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold">Shop Dashboard</h1>
-                <p className="text-muted-foreground">
-                  {shopData?.name || user?.email}
-                </p>
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/10 p-2 rounded-lg">
+                  <Wrench className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold">Shop Dashboard</h1>
+                  <p className="text-muted-foreground">
+                    {shopData?.name || user?.email}
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-4">
                 {shopData?.performance_tier && (
