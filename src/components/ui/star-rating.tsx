@@ -39,16 +39,17 @@ export function StarRating({
       return (
         <Star 
           key={index} 
-          className={cn(sizeClasses[size], "fill-yellow-400 text-yellow-400")} 
+          className={cn(sizeClasses[size], "fill-yellow-400 text-yellow-400 stroke-yellow-500")} 
+          strokeWidth={1.5}
         />
       );
     } else if (difference >= 0.75) {
       // Almost full star (75%+)
       return (
         <div key={index} className="relative">
-          <Star className={cn(sizeClasses[size], "text-muted-foreground")} />
+          <Star className={cn(sizeClasses[size], "text-muted-foreground stroke-muted-foreground")} strokeWidth={1.5} />
           <div className="absolute inset-0 overflow-hidden" style={{ clipPath: "polygon(0 0, 90% 0, 90% 100%, 0 100%)" }}>
-            <Star className={cn(sizeClasses[size], "fill-yellow-400 text-yellow-400")} />
+            <Star className={cn(sizeClasses[size], "fill-yellow-400 text-yellow-400 stroke-yellow-500")} strokeWidth={1.5} />
           </div>
         </div>
       );
@@ -56,9 +57,9 @@ export function StarRating({
       // Half star (50%+)
       return (
         <div key={index} className="relative">
-          <Star className={cn(sizeClasses[size], "text-muted-foreground")} />
+          <Star className={cn(sizeClasses[size], "text-muted-foreground stroke-muted-foreground")} strokeWidth={1.5} />
           <div className="absolute inset-0 overflow-hidden" style={{ clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)" }}>
-            <Star className={cn(sizeClasses[size], "fill-yellow-400 text-yellow-400")} />
+            <Star className={cn(sizeClasses[size], "fill-yellow-400 text-yellow-400 stroke-yellow-500")} strokeWidth={1.5} />
           </div>
         </div>
       );
@@ -66,9 +67,9 @@ export function StarRating({
       // Quarter star (25%+)
       return (
         <div key={index} className="relative">
-          <Star className={cn(sizeClasses[size], "text-muted-foreground")} />
+          <Star className={cn(sizeClasses[size], "text-muted-foreground stroke-muted-foreground")} strokeWidth={1.5} />
           <div className="absolute inset-0 overflow-hidden" style={{ clipPath: "polygon(0 0, 25% 0, 25% 100%, 0 100%)" }}>
-            <Star className={cn(sizeClasses[size], "fill-yellow-400 text-yellow-400")} />
+            <Star className={cn(sizeClasses[size], "fill-yellow-400 text-yellow-400 stroke-yellow-500")} strokeWidth={1.5} />
           </div>
         </div>
       );
@@ -77,7 +78,8 @@ export function StarRating({
       return (
         <Star 
           key={index} 
-          className={cn(sizeClasses[size], "text-muted-foreground")} 
+          className={cn(sizeClasses[size], "text-muted-foreground stroke-muted-foreground")} 
+          strokeWidth={1.5}
         />
       );
     }
