@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       appointments: {
         Row: {
+          adas_calibration_reason: string | null
           additional_notes: string | null
           ai_assessment_details: Json | null
           ai_confidence_score: number | null
@@ -34,6 +35,7 @@ export type Database = {
           is_insurance_claim: boolean | null
           notes: string | null
           reminder_email_sent: boolean | null
+          requires_adas_calibration: boolean | null
           service_type: string
           shop_id: string
           shop_name: string
@@ -43,6 +45,7 @@ export type Database = {
           vehicle_info: Json | null
         }
         Insert: {
+          adas_calibration_reason?: string | null
           additional_notes?: string | null
           ai_assessment_details?: Json | null
           ai_confidence_score?: number | null
@@ -61,6 +64,7 @@ export type Database = {
           is_insurance_claim?: boolean | null
           notes?: string | null
           reminder_email_sent?: boolean | null
+          requires_adas_calibration?: boolean | null
           service_type?: string
           shop_id: string
           shop_name: string
@@ -70,6 +74,7 @@ export type Database = {
           vehicle_info?: Json | null
         }
         Update: {
+          adas_calibration_reason?: string | null
           additional_notes?: string | null
           ai_assessment_details?: Json | null
           ai_confidence_score?: number | null
@@ -88,6 +93,7 @@ export type Database = {
           is_insurance_claim?: boolean | null
           notes?: string | null
           reminder_email_sent?: boolean | null
+          requires_adas_calibration?: boolean | null
           service_type?: string
           shop_id?: string
           shop_name?: string
@@ -178,6 +184,7 @@ export type Database = {
       }
       job_offers: {
         Row: {
+          adas_calibration_notes: string | null
           appointment_id: string | null
           created_at: string
           decline_reason: string | null
@@ -187,12 +194,14 @@ export type Database = {
           notes: string | null
           offered_at: string
           offered_price: number
+          requires_adas_calibration: boolean | null
           responded_at: string | null
           shop_id: string
           status: Database["public"]["Enums"]["job_status"] | null
           updated_at: string
         }
         Insert: {
+          adas_calibration_notes?: string | null
           appointment_id?: string | null
           created_at?: string
           decline_reason?: string | null
@@ -202,12 +211,14 @@ export type Database = {
           notes?: string | null
           offered_at?: string
           offered_price: number
+          requires_adas_calibration?: boolean | null
           responded_at?: string | null
           shop_id: string
           status?: Database["public"]["Enums"]["job_status"] | null
           updated_at?: string
         }
         Update: {
+          adas_calibration_notes?: string | null
           appointment_id?: string | null
           created_at?: string
           decline_reason?: string | null
@@ -217,6 +228,7 @@ export type Database = {
           notes?: string | null
           offered_at?: string
           offered_price?: number
+          requires_adas_calibration?: boolean | null
           responded_at?: string | null
           shop_id?: string
           status?: Database["public"]["Enums"]["job_status"] | null
@@ -575,6 +587,7 @@ export type Database = {
       shops: {
         Row: {
           acceptance_rate: number | null
+          adas_calibration_capability: boolean | null
           address: string
           average_lead_time_days: number | null
           business_hours: Json | null
@@ -616,6 +629,7 @@ export type Database = {
         }
         Insert: {
           acceptance_rate?: number | null
+          adas_calibration_capability?: boolean | null
           address: string
           average_lead_time_days?: number | null
           business_hours?: Json | null
@@ -657,6 +671,7 @@ export type Database = {
         }
         Update: {
           acceptance_rate?: number | null
+          adas_calibration_capability?: boolean | null
           address?: string
           average_lead_time_days?: number | null
           business_hours?: Json | null
@@ -787,7 +802,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      detect_adas_calibration_needs: {
+        Args: {
+          damage_location?: string
+          damage_type: string
+          vehicle_make: string
+          vehicle_model: string
+          vehicle_year: number
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       achievement_type:
