@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Quote } from "lucide-react";
 import { StarRating } from "@/components/ui/star-rating";
+import { Link } from "react-router-dom";
 
 const Testimonials = () => {
   const testimonials = [
@@ -89,12 +90,12 @@ const Testimonials = () => {
             Join thousands of drivers who chose the smart way to repair their auto glass
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <a 
-              href="/report/eo3w_x1IBgPaUDj8gsUVkI2qL8rG0gSx" 
+            <Link 
+              to="/report/eo3w_x1IBgPaUDj8gsUVkI2qL8rG0gSx" 
               className="px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
             >
               Start Your Assessment
-            </a>
+            </Link>
             <a 
               href="mailto:fleet@drivex.com" 
               className="px-8 py-4 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/5 transition-colors"

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Phone, AlertCircle, Users, TrendingUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -175,12 +176,8 @@ const CallCenterToolbarWidget = () => {
           </div>
 
           <div className="pt-2 border-t border-border">
-            <Button 
-              size="sm" 
-              className="w-full" 
-              onClick={() => window.location.href = '/shop-dashboard'}
-            >
-              View Full Dashboard
+            <Button size="sm" className="w-full" asChild>
+              <Link to="/shop-dashboard">View Full Dashboard</Link>
             </Button>
           </div>
         </div>
