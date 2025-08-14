@@ -20,12 +20,16 @@ import ShopCalendarView from "@/components/shop/ShopCalendarView";
 import { ShopSidebar } from "@/components/ShopSidebar";
 
 const ShopDashboard = () => {
+  console.log('🔥 ShopDashboard component is loading!');
+  
   const [user, setUser] = useState<User | null>(null);
   const [shopData, setShopData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("location");
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  console.log('🔥 State initialized - loading:', loading);
 
   useEffect(() => {
     console.log('ShopDashboard: Component mounted, initializing...');
@@ -149,7 +153,7 @@ const ShopDashboard = () => {
     }
   };
 
-  console.log('ShopDashboard: Render - loading:', loading, 'user:', !!user, 'shopData:', !!shopData);
+  console.log('🔥 ShopDashboard: About to render - loading:', loading, 'user:', !!user, 'shopData:', !!shopData);
 
   if (loading) {
     return (
