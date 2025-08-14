@@ -23,6 +23,7 @@ const ShopDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [shopData, setShopData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("offers");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -179,7 +180,7 @@ const ShopDashboard = () => {
               {/* Left Vertical Toolbar */}
               <div className="w-64 bg-card border rounded-lg p-4">
                 <nav className="space-y-2">
-                  <Tabs defaultValue="offers" orientation="vertical" className="w-full">
+                  <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
                     <TabsList className="grid w-full grid-rows-7 h-auto bg-transparent p-0 gap-1">
                       <TabsTrigger 
                         value="offers" 
@@ -237,8 +238,9 @@ const ShopDashboard = () => {
 
               {/* Right Content Area */}
               <div className="flex-1 bg-card border rounded-lg p-6">
-                <Tabs defaultValue="offers" className="w-full">
-                  <TabsContent value="offers" className="mt-0">
+                {/* Dynamic content based on active tab */}
+                {activeTab === 'offers' && (
+                  <div>
                     <div className="mb-6">
                       <div className="flex items-center gap-3">
                         <div className="bg-primary/10 p-2 rounded-lg">
@@ -253,32 +255,32 @@ const ShopDashboard = () => {
                       </div>
                     </div>
                     <ShopJobOffers shopId={shopData.id} shop={shopData} />
-                  </TabsContent>
+                  </div>
+                )}
 
-                  <TabsContent value="calendar" className="mt-0">
-                    <ShopCalendarView shopId={shopData.id} />
-                  </TabsContent>
+                {activeTab === 'calendar' && (
+                  <ShopCalendarView shopId={shopData.id} />
+                )}
 
-                  <TabsContent value="location" className="mt-0">
-                    <ShopLocationSettings shopData={shopData} onUpdate={fetchShopData} />
-                  </TabsContent>
+                {activeTab === 'location' && (
+                  <ShopLocationSettings shopData={shopData} onUpdate={fetchShopData} />
+                )}
 
-                  <TabsContent value="availability" className="mt-0">
-                    <ShopAvailabilitySettings shopId={shopData.id} />
-                  </TabsContent>
+                {activeTab === 'availability' && (
+                  <ShopAvailabilitySettings shopId={shopData.id} />
+                )}
 
-                  <TabsContent value="pricing" className="mt-0">
-                    <ShopPricingSettings shopId={shopData.id} />
-                  </TabsContent>
+                {activeTab === 'pricing' && (
+                  <ShopPricingSettings shopId={shopData.id} />
+                )}
 
-                  <TabsContent value="services" className="mt-0">
-                    <ShopServiceSettings shopData={shopData} onUpdate={fetchShopData} />
-                  </TabsContent>
+                {activeTab === 'services' && (
+                  <ShopServiceSettings shopData={shopData} onUpdate={fetchShopData} />
+                )}
 
-                  <TabsContent value="upsells" className="mt-0">
-                    <ShopUpsellSettings shopId={shopData.id} />
-                  </TabsContent>
-                </Tabs>
+                {activeTab === 'upsells' && (
+                  <ShopUpsellSettings shopId={shopData.id} />
+                )}
               </div>
             </div>
           )}
