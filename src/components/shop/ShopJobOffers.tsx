@@ -216,16 +216,6 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                         )}
                       </div>
                     )}
-                    
-                    {/* Customer Details */}
-                    <div className="space-y-1">
-                      <p className="text-base text-muted-foreground">Customer: {offer.appointments.customer_name}</p>
-                      <p className="text-sm text-muted-foreground">{offer.appointments.customer_email}</p>
-                      {offer.appointments.customer_phone && (
-                        <p className="text-sm text-muted-foreground">{offer.appointments.customer_phone}</p>
-                      )}
-                    </div>
-
                     {/* Badges */}
                     <div className="flex gap-2 mt-3">
                       {offer.appointments.is_insurance_claim && (
