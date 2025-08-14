@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       appointments: {
         Row: {
+          additional_notes: string | null
           appointment_date: string
           appointment_time: string
           confirmation_email_sent: boolean | null
@@ -23,6 +24,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string | null
+          damage_photos: string[] | null
           damage_type: string | null
           id: string
           is_insurance_claim: boolean | null
@@ -37,6 +39,7 @@ export type Database = {
           vehicle_info: Json | null
         }
         Insert: {
+          additional_notes?: string | null
           appointment_date: string
           appointment_time: string
           confirmation_email_sent?: boolean | null
@@ -44,6 +47,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone?: string | null
+          damage_photos?: string[] | null
           damage_type?: string | null
           id?: string
           is_insurance_claim?: boolean | null
@@ -58,6 +62,7 @@ export type Database = {
           vehicle_info?: Json | null
         }
         Update: {
+          additional_notes?: string | null
           appointment_date?: string
           appointment_time?: string
           confirmation_email_sent?: boolean | null
@@ -65,6 +70,7 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           customer_phone?: string | null
+          damage_photos?: string[] | null
           damage_type?: string | null
           id?: string
           is_insurance_claim?: boolean | null

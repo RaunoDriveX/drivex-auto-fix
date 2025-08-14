@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Clock, MapPin, Car, DollarSign, Calendar } from "lucide-react";
+import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface JobOffer {
@@ -27,6 +27,9 @@ interface JobOffer {
     appointment_time: string;
     vehicle_info: any;
     notes: string;
+    is_insurance_claim: boolean;
+    damage_photos: string[];
+    additional_notes: string;
   };
 }
 
@@ -60,7 +63,10 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
             appointment_date,
             appointment_time,
             vehicle_info,
-            notes
+            notes,
+            is_insurance_claim,
+            damage_photos,
+            additional_notes
           )
         `)
         .eq('shop_id', shopId)
@@ -179,76 +185,177 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-6">
           {jobOffers.map((offer) => (
-            <Card key={offer.id} className="border-l-4 border-l-primary">
+            <Card key={offer.id} className="border-l-4 border-l-primary overflow-hidden">
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{offer.appointments.service_type}</CardTitle>
-                    <CardDescription>
-                      {offer.appointments.damage_type && `${offer.appointments.damage_type} - `}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <CardTitle className="text-xl">{offer.appointments.service_type}</CardTitle>
+                      {offer.appointments.is_insurance_claim && (
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <CreditCard className="h-3 w-3" />
+                          Insurance Claim
+                        </Badge>
+                      )}
+                      {offer.appointments.damage_type && (
+                        <Badge variant="outline" className="flex items-center gap-1">
+                          <AlertTriangle className="h-3 w-3" />
+                          {offer.appointments.damage_type}
+                        </Badge>
+                      )}
+                    </div>
+                    <CardDescription className="text-base">
                       Customer: {offer.appointments.customer_name}
                     </CardDescription>
                   </div>
-                  <Badge variant={getStatusColor(offer.expires_at)}>
+                  <Badge variant={getStatusColor(offer.expires_at)} className="text-sm">
                     {formatTimeRemaining(offer.expires_at)}
                   </Badge>
                 </div>
               </CardHeader>
               
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">${offer.offered_price}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>{new Date(offer.appointments.appointment_date).toLocaleDateString()}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span>{offer.appointments.appointment_time}</span>
-                  </div>
-                  
-                  {offer.estimated_completion_time && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>Est. {offer.estimated_completion_time}</span>
+              <CardContent className="space-y-6">
+                {/* Damage Photos */}
+                {offer.appointments.damage_photos && offer.appointments.damage_photos.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4" />
+                      Damage Photos ({offer.appointments.damage_photos.length})
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {offer.appointments.damage_photos.map((photoUrl, index) => (
+                        <div key={index} className="relative aspect-square bg-muted rounded-lg overflow-hidden">
+                          <img
+                            src={photoUrl}
+                            alt={`Damage photo ${index + 1}`}
+                            className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => window.open(photoUrl, '_blank')}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
+                )}
+
+                {/* Job Details Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Left Column - Job Info */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-lg">Job Details</h4>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <DollarSign className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="font-medium text-lg">${offer.offered_price}</p>
+                          <p className="text-sm text-muted-foreground">Offered Price</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <Calendar className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <p className="font-medium">{new Date(offer.appointments.appointment_date).toLocaleDateString()}</p>
+                          <p className="text-sm text-muted-foreground">Appointment Date</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <Clock className="h-5 w-5 text-orange-600" />
+                        <div>
+                          <p className="font-medium">{offer.appointments.appointment_time}</p>
+                          <p className="text-sm text-muted-foreground">Appointment Time</p>
+                        </div>
+                      </div>
+                      
+                      {offer.estimated_completion_time && (
+                        <div className="flex items-center gap-3">
+                          <Clock className="h-5 w-5 text-purple-600" />
+                          <div>
+                            <p className="font-medium">{offer.estimated_completion_time}</p>
+                            <p className="text-sm text-muted-foreground">Estimated Duration</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right Column - Customer Info */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-lg">Customer Information</h4>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Mail className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <p className="font-medium">{offer.appointments.customer_email}</p>
+                          <p className="text-sm text-muted-foreground">Email Address</p>
+                        </div>
+                      </div>
+                      
+                      {offer.appointments.customer_phone && (
+                        <div className="flex items-center gap-3">
+                          <Phone className="h-5 w-5 text-green-600" />
+                          <div>
+                            <p className="font-medium">{offer.appointments.customer_phone}</p>
+                            <p className="text-sm text-muted-foreground">Phone Number</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {offer.appointments.vehicle_info && (
+                        <div className="flex items-center gap-3">
+                          <Car className="h-5 w-5 text-gray-600" />
+                          <div>
+                            <p className="font-medium">
+                              {offer.appointments.vehicle_info.make} {offer.appointments.vehicle_info.model}
+                              {offer.appointments.vehicle_info.year && ` (${offer.appointments.vehicle_info.year})`}
+                            </p>
+                            <p className="text-sm text-muted-foreground">Vehicle</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                {offer.appointments.vehicle_info && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Car className="h-4 w-4 text-muted-foreground" />
-                    <span>
-                      {offer.appointments.vehicle_info.make} {offer.appointments.vehicle_info.model} 
-                      {offer.appointments.vehicle_info.year && ` (${offer.appointments.vehicle_info.year})`}
-                    </span>
+                {/* Notes Section */}
+                {(offer.appointments.notes || offer.appointments.additional_notes || offer.notes) && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">Additional Information</h4>
+                    
+                    {offer.appointments.notes && (
+                      <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                        <p className="text-sm font-medium text-blue-900 mb-1">Customer Notes:</p>
+                        <p className="text-sm text-blue-800">{offer.appointments.notes}</p>
+                      </div>
+                    )}
+
+                    {offer.appointments.additional_notes && (
+                      <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                        <p className="text-sm font-medium text-amber-900 mb-1">Additional Notes:</p>
+                        <p className="text-sm text-amber-800">{offer.appointments.additional_notes}</p>
+                      </div>
+                    )}
+
+                    {offer.notes && (
+                      <div className="bg-primary/5 border border-primary/20 p-4 rounded-lg">
+                        <p className="text-sm font-medium text-primary mb-1">DriveX Notes:</p>
+                        <p className="text-sm text-primary/80">{offer.notes}</p>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {offer.appointments.notes && (
-                  <div className="bg-muted/50 p-3 rounded-md">
-                    <p className="text-sm"><strong>Customer Notes:</strong> {offer.appointments.notes}</p>
-                  </div>
-                )}
-
-                {offer.notes && (
-                  <div className="bg-primary/5 p-3 rounded-md">
-                    <p className="text-sm"><strong>DriveX Notes:</strong> {offer.notes}</p>
-                  </div>
-                )}
-
-                <div className="flex gap-2">
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 border-t">
                   <Button 
                     onClick={() => handleJobResponse(offer.id, 'accept')}
                     disabled={respondingTo === offer.id}
-                    className="flex-1"
+                    className="flex-1 text-lg py-6"
+                    size="lg"
                   >
                     {respondingTo === offer.id ? "Processing..." : "Accept Job"}
                   </Button>
@@ -258,7 +365,8 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                       <Button 
                         variant="outline" 
                         disabled={respondingTo === offer.id}
-                        className="flex-1"
+                        className="flex-1 text-lg py-6"
+                        size="lg"
                       >
                         Decline
                       </Button>
