@@ -29,10 +29,22 @@ const CallCenterToolbarWidget = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchToolbarStats();
+    // Add error boundary for data fetching
+    const loadData = async () => {
+      try {
+        await fetchToolbarStats();
+      } catch (error) {
+        console.error('CallCenter widget failed to load:', error);
+        setLoading(false);
+      }
+    };
+    
+    loadData();
     
     // Refresh every 30 seconds
-    const interval = setInterval(fetchToolbarStats, 30000);
+    const interval = setInterval(() => {
+      loadData();
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 

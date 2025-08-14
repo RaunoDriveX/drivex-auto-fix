@@ -6,10 +6,15 @@ import CallCenterToolbarWidget from "@/components/call-center/CallCenterToolbarW
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation();
   
-  // Show call center widget only on shop-related pages
-  const showCallCenter = location.pathname.startsWith('/shop');
+  // Safely check location to avoid white screen issues
+  let showCallCenter = false;
+  try {
+    const location = useLocation();
+    showCallCenter = location.pathname.startsWith('/shop');
+  } catch (error) {
+    console.log('Header: Location hook error, defaulting to hide call center');
+  }
 
   const navLinks = [
     { name: "Home", href: "/" },
