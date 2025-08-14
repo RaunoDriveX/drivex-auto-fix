@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench, AlertCircle } from "lucide-react";
+import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
 
@@ -175,18 +175,18 @@ const ShopDashboard = () => {
         <main className="container mx-auto px-4 py-8">
           {shopData && (
             <>
-              {/* URGENT JOB OFFERS SECTION - Always visible at top */}
+              {/* ACTIVE JOB OFFERS SECTION - Always visible at top */}
               <div className="mb-8">
-                <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
-                  <CardHeader className="pb-4">
+                <Card className="border-l-4 border-l-primary">
+                  <CardHeader>
                     <div className="flex items-center gap-3">
-                      <div className="bg-primary/10 p-3 rounded-lg">
-                        <AlertCircle className="h-6 w-6 text-primary" />
+                      <div className="bg-primary/10 p-2 rounded-lg">
+                        <Wrench className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <CardTitle className="text-xl text-primary">🚨 Urgent Job Offers</CardTitle>
-                        <CardDescription className="text-lg">
-                          New repair requests requiring immediate attention
+                        <CardTitle className="text-xl">Active Job Offers</CardTitle>
+                        <CardDescription>
+                          New repair requests requiring your response
                         </CardDescription>
                       </div>
                     </div>
