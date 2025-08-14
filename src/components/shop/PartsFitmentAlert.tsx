@@ -43,13 +43,25 @@ const PartsFitmentAlert = ({ vehicleInfo, damageType, jobOfferId, shopId, onPart
   const { toast } = useToast();
 
   useEffect(() => {
-    checkPartsFitment();
+    // Safely check parts fitment with error handling
+    if (vehicleInfo?.make && vehicleInfo?.year && damageType) {
+      checkPartsFitment();
+    } else {
+      setLoading(false);
+    }
   }, [vehicleInfo, damageType]);
 
   const checkPartsFitment = async () => {
     try {
       setLoading(true);
       
+      // Validate inputs before making the call
+      if (!vehicleInfo?.make || !vehicleInfo?.year || !damageType) {
+        console.log('Missing required vehicle info for parts fitment check');
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.rpc('check_oem_requirements', {
         _vehicle_make: vehicleInfo.make,
         _vehicle_model: vehicleInfo.model || null,
@@ -57,15 +69,19 @@ const PartsFitmentAlert = ({ vehicleInfo, damageType, jobOfferId, shopId, onPart
         _damage_type: damageType
       });
 
-      if (error) throw error;
-      setFitmentData(data as unknown as PartsFitmentData);
+      if (error) {
+        console.error('Parts fitment check error:', error);
+        // Don't throw error, just log it and continue
+        setLoading(false);
+        return;
+      }
+      
+      if (data) {
+        setFitmentData(data as unknown as PartsFitmentData);
+      }
     } catch (error) {
       console.error('Error checking parts fitment:', error);
-      toast({
-        title: "Error",
-        description: "Failed to check parts requirements",
-        variant: "destructive"
-      });
+      // Silently handle errors to prevent white screen
     } finally {
       setLoading(false);
     }
@@ -143,7 +159,8 @@ const PartsFitmentAlert = ({ vehicleInfo, damageType, jobOfferId, shopId, onPart
     );
   }
 
-  if (!fitmentData) return null;
+  // Safety check - don't render if no fitment data or missing required props
+  if (!fitmentData || !vehicleInfo?.make) return null;
 
   return (
     <div className="space-y-3">

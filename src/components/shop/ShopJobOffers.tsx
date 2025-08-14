@@ -448,12 +448,12 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                  )}
 
                   {/* Parts Fitment Alert */}
-                  {offer.appointments.vehicle_info && (
+                  {offer.appointments.vehicle_info?.make && offer.appointments.vehicle_info?.year && offer.appointments.damage_type && (
                     <PartsFitmentAlert
                       vehicleInfo={{
                         make: offer.appointments.vehicle_info.make,
                         model: offer.appointments.vehicle_info.model,
-                        year: offer.appointments.vehicle_info.year
+                        year: parseInt(offer.appointments.vehicle_info.year) || new Date().getFullYear()
                       }}
                       damageType={offer.appointments.damage_type}
                       jobOfferId={offer.id}
