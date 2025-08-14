@@ -16,6 +16,7 @@ import ShopAvailabilitySettings from "@/components/shop/ShopAvailabilitySettings
 import ShopPricingSettings from "@/components/shop/ShopPricingSettings";
 import ShopServiceSettings from "@/components/shop/ShopServiceSettings";
 import ShopJobOffers from "@/components/shop/ShopJobOffers";
+import ShopCalendarView from "@/components/shop/ShopCalendarView";
 
 const ShopDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -196,8 +197,12 @@ const ShopDashboard = () => {
               </Tabs>
             </div>
           ) : (
-            <Tabs defaultValue="jobs" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-5">
+            <Tabs defaultValue="calendar" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-6">
+                <TabsTrigger value="calendar" className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Calendar
+                </TabsTrigger>
                 <TabsTrigger value="jobs" className="flex items-center gap-2">
                   <Wrench className="h-4 w-4" />
                   Job Offers
@@ -219,6 +224,10 @@ const ShopDashboard = () => {
                   Services
                 </TabsTrigger>
               </TabsList>
+
+              <TabsContent value="calendar">
+                <ShopCalendarView shopId={shopData.id} />
+              </TabsContent>
 
               <TabsContent value="jobs">
                 <ShopJobOffers shopId={shopData.id} />
