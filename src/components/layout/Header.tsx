@@ -1,11 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, Phone, Mail } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import CallCenterToolbarWidget from "@/components/call-center/CallCenterToolbarWidget";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+  
+  // Show call center widget only on shop-related pages
+  const showCallCenter = location.pathname.startsWith('/shop');
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -55,7 +59,7 @@ const Header = () => {
 
           {/* Contact Info & Call Center */}
           <div className="hidden lg:flex items-center gap-4">
-            <CallCenterToolbarWidget />
+            {showCallCenter && <CallCenterToolbarWidget />}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Phone className="h-4 w-4" />
               <span>+372 58528824</span>
