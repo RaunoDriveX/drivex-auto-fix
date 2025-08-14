@@ -489,6 +489,7 @@ export type Database = {
           last_job_offered_at: string | null
           latitude: number | null
           level_tier: string | null
+          logo_url: string | null
           longitude: number | null
           monthly_bonus_rate: number | null
           name: string
@@ -529,6 +530,7 @@ export type Database = {
           last_job_offered_at?: string | null
           latitude?: number | null
           level_tier?: string | null
+          logo_url?: string | null
           longitude?: number | null
           monthly_bonus_rate?: number | null
           name: string
@@ -569,6 +571,7 @@ export type Database = {
           last_job_offered_at?: string | null
           latitude?: number | null
           level_tier?: string | null
+          logo_url?: string | null
           longitude?: number | null
           monthly_bonus_rate?: number | null
           name?: string
