@@ -11,11 +11,15 @@ import AIReport from "./pages/AIReport";
 import ShopAuth from "./pages/ShopAuth";
 import ShopDashboard from "./pages/ShopDashboard";
 import NotFound from "./pages/NotFound";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <HelmetProvider>
+const App = () => {
+  console.log("App component rendering...");
+  return (
+    <ErrorBoundary>
+      <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -35,6 +39,8 @@ const App = () => (
       </TooltipProvider>
     </QueryClientProvider>
   </HelmetProvider>
-);
+</ErrorBoundary>
+  );
+};
 
 export default App;
