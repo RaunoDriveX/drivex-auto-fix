@@ -175,132 +175,85 @@ const ShopDashboard = () => {
         <main className="container mx-auto px-4 py-8">
           {shopData && (
             <>
-              {/* ACTIVE JOB OFFERS SECTION - Always visible at top */}
-              <div className="mb-8">
-                <div className="bg-background">
-                  <div className="mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-primary/10 p-2 rounded-lg">
-                        <DollarSign className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-semibold leading-none tracking-tight">Active Job Offers</h2>
-                        <p className="text-sm text-muted-foreground">
-                          New repair requests requiring your response
-                        </p>
+              {/* Full Width Navigation Toolbar */}
+              <Tabs defaultValue="offers" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-6 h-12 bg-card border">
+                  <TabsTrigger value="offers" className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Active Job Offers
+                  </TabsTrigger>
+                  <TabsTrigger value="calendar" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Calendar
+                  </TabsTrigger>
+                  <TabsTrigger value="location" className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Location
+                  </TabsTrigger>
+                  <TabsTrigger value="availability" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Availability
+                  </TabsTrigger>
+                  <TabsTrigger value="pricing" className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Pricing
+                  </TabsTrigger>
+                  <TabsTrigger value="services" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Services
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Tab Content */}
+                <TabsContent value="offers" className="mt-6">
+                  <div className="bg-card border rounded-lg p-6">
+                    <div className="mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-primary/10 p-2 rounded-lg">
+                          <DollarSign className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-semibold leading-none tracking-tight">Active Job Offers</h2>
+                          <p className="text-sm text-muted-foreground">
+                            New repair requests requiring your response
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div>
                     <ShopJobOffers shopId={shopData.id} />
                   </div>
-                </div>
-              </div>
+                </TabsContent>
 
-              {/* SHOP MANAGEMENT SECTION with Sidebar Layout */}
-              <div className="bg-background">
-                <div className="mb-6">
-                  <h2 className="text-2xl font-semibold leading-none tracking-tight">Shop Management</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Manage your shop calendar, settings, and business details
-                  </p>
-                </div>
-
-                <div className="flex gap-6 min-h-[600px]">
-                  {/* Left Sidebar Navigation */}
-                  <div className="w-64 bg-card border rounded-lg p-4">
-                    <nav className="space-y-2">
-                      <Tabs defaultValue="calendar" orientation="vertical" className="w-full">
-                        <TabsList className="grid w-full grid-rows-5 h-auto bg-transparent p-0 gap-1">
-                          <TabsTrigger 
-                            value="calendar" 
-                            className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                          >
-                            <Clock className="h-4 w-4" />
-                            Calendar
-                          </TabsTrigger>
-                          <TabsTrigger 
-                            value="location" 
-                            className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                          >
-                            <MapPin className="h-4 w-4" />
-                            Location
-                          </TabsTrigger>
-                          <TabsTrigger 
-                            value="availability" 
-                            className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                          >
-                            <Clock className="h-4 w-4" />
-                            Availability
-                          </TabsTrigger>
-                          <TabsTrigger 
-                            value="pricing" 
-                            className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                          >
-                            <DollarSign className="h-4 w-4" />
-                            Pricing
-                          </TabsTrigger>
-                          <TabsTrigger 
-                            value="services" 
-                            className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                          >
-                            <Settings className="h-4 w-4" />
-                            Services
-                          </TabsTrigger>
-                        </TabsList>
-
-                        {/* Content Area */}
-                        <div className="hidden">
-                          <TabsContent value="calendar">
-                            <ShopCalendarView shopId={shopData.id} />
-                          </TabsContent>
-
-                          <TabsContent value="location">
-                            <ShopLocationSettings shopData={shopData} onUpdate={fetchShopData} />
-                          </TabsContent>
-
-                          <TabsContent value="availability">
-                            <ShopAvailabilitySettings shopId={shopData.id} />
-                          </TabsContent>
-
-                          <TabsContent value="pricing">
-                            <ShopPricingSettings shopId={shopData.id} />
-                          </TabsContent>
-
-                          <TabsContent value="services">
-                            <ShopServiceSettings shopData={shopData} onUpdate={fetchShopData} />
-                          </TabsContent>
-                        </div>
-                      </Tabs>
-                    </nav>
+                <TabsContent value="calendar" className="mt-6">
+                  <div className="bg-card border rounded-lg p-6">
+                    <ShopCalendarView shopId={shopData.id} />
                   </div>
+                </TabsContent>
 
-                  {/* Right Content Area */}
-                  <div className="flex-1 bg-card border rounded-lg p-6">
-                    <Tabs defaultValue="calendar" className="w-full">
-                      <TabsContent value="calendar" className="mt-0">
-                        <ShopCalendarView shopId={shopData.id} />
-                      </TabsContent>
-
-                      <TabsContent value="location" className="mt-0">
-                        <ShopLocationSettings shopData={shopData} onUpdate={fetchShopData} />
-                      </TabsContent>
-
-                      <TabsContent value="availability" className="mt-0">
-                        <ShopAvailabilitySettings shopId={shopData.id} />
-                      </TabsContent>
-
-                      <TabsContent value="pricing" className="mt-0">
-                        <ShopPricingSettings shopId={shopData.id} />
-                      </TabsContent>
-
-                      <TabsContent value="services" className="mt-0">
-                        <ShopServiceSettings shopData={shopData} onUpdate={fetchShopData} />
-                      </TabsContent>
-                    </Tabs>
+                <TabsContent value="location" className="mt-6">
+                  <div className="bg-card border rounded-lg p-6">
+                    <ShopLocationSettings shopData={shopData} onUpdate={fetchShopData} />
                   </div>
-                </div>
-              </div>
+                </TabsContent>
+
+                <TabsContent value="availability" className="mt-6">
+                  <div className="bg-card border rounded-lg p-6">
+                    <ShopAvailabilitySettings shopId={shopData.id} />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="pricing" className="mt-6">
+                  <div className="bg-card border rounded-lg p-6">
+                    <ShopPricingSettings shopId={shopData.id} />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="services" className="mt-6">
+                  <div className="bg-card border rounded-lg p-6">
+                    <ShopServiceSettings shopData={shopData} onUpdate={fetchShopData} />
+                  </div>
+                </TabsContent>
+              </Tabs>
             </>
           )}
 
@@ -320,86 +273,51 @@ const ShopDashboard = () => {
                 </div>
               </div>
               
-              {/* Setup Layout with Sidebar */}
-              <div className="flex gap-6 min-h-[600px]">
-                {/* Left Sidebar Navigation */}
-                <div className="w-64 bg-card border rounded-lg p-4">
-                  <nav className="space-y-2">
-                    <Tabs defaultValue="location" orientation="vertical" className="w-full">
-                      <TabsList className="grid w-full grid-rows-4 h-auto bg-transparent p-0 gap-1">
-                        <TabsTrigger 
-                          value="location" 
-                          className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                        >
-                          <MapPin className="h-4 w-4" />
-                          Location
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="availability" 
-                          className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                        >
-                          <Clock className="h-4 w-4" />
-                          Availability
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="pricing" 
-                          className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                        >
-                          <DollarSign className="h-4 w-4" />
-                          Pricing
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="services" 
-                          className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                        >
-                          <Settings className="h-4 w-4" />
-                          Services
-                        </TabsTrigger>
-                      </TabsList>
+              {/* Setup Navigation Toolbar */}
+              <Tabs defaultValue="location" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-4 h-12 bg-card border">
+                  <TabsTrigger value="location" className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Location
+                  </TabsTrigger>
+                  <TabsTrigger value="availability" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Availability
+                  </TabsTrigger>
+                  <TabsTrigger value="pricing" className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Pricing
+                  </TabsTrigger>
+                  <TabsTrigger value="services" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Services
+                  </TabsTrigger>
+                </TabsList>
 
-                      {/* Hidden content for setup */}
-                      <div className="hidden">
-                        <TabsContent value="location">
-                          <ShopLocationSettings shopData={null} onUpdate={() => fetchShopData(user?.email!)} />
-                        </TabsContent>
+                <TabsContent value="location" className="mt-6">
+                  <div className="bg-card border rounded-lg p-6">
+                    <ShopLocationSettings shopData={null} onUpdate={() => fetchShopData(user?.email!)} />
+                  </div>
+                </TabsContent>
 
-                        <TabsContent value="availability">
-                          <ShopAvailabilitySettings shopId={user?.email || 'temp'} />
-                        </TabsContent>
+                <TabsContent value="availability" className="mt-6">
+                  <div className="bg-card border rounded-lg p-6">
+                    <ShopAvailabilitySettings shopId={user?.email || 'temp'} />
+                  </div>
+                </TabsContent>
 
-                        <TabsContent value="pricing">
-                          <ShopPricingSettings shopId={user?.email || 'temp'} />
-                        </TabsContent>
+                <TabsContent value="pricing" className="mt-6">
+                  <div className="bg-card border rounded-lg p-6">
+                    <ShopPricingSettings shopId={user?.email || 'temp'} />
+                  </div>
+                </TabsContent>
 
-                        <TabsContent value="services">
-                          <ShopServiceSettings shopData={null} onUpdate={() => fetchShopData(user?.email!)} />
-                        </TabsContent>
-                      </div>
-                    </Tabs>
-                  </nav>
-                </div>
-
-                {/* Right Content Area */}
-                <div className="flex-1 bg-card border rounded-lg p-6">
-                  <Tabs defaultValue="location" className="w-full">
-                    <TabsContent value="location" className="mt-0">
-                      <ShopLocationSettings shopData={null} onUpdate={() => fetchShopData(user?.email!)} />
-                    </TabsContent>
-
-                    <TabsContent value="availability" className="mt-0">
-                      <ShopAvailabilitySettings shopId={user?.email || 'temp'} />
-                    </TabsContent>
-
-                    <TabsContent value="pricing" className="mt-0">
-                      <ShopPricingSettings shopId={user?.email || 'temp'} />
-                    </TabsContent>
-
-                    <TabsContent value="services" className="mt-0">
-                      <ShopServiceSettings shopData={null} onUpdate={() => fetchShopData(user?.email!)} />
-                    </TabsContent>
-                  </Tabs>
-                </div>
-              </div>
+                <TabsContent value="services" className="mt-6">
+                  <div className="bg-card border rounded-lg p-6">
+                    <ShopServiceSettings shopData={null} onUpdate={() => fetchShopData(user?.email!)} />
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           )}
         </main>
