@@ -238,9 +238,9 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">{/* Reduced gap from 6 to 4 and changed columns from 3 to 4 for better spacing */}
             {/* Calendar */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">{/* Increased calendar width */}
               <Calendar
                 mode="single"
                 selected={selectedDate}
@@ -283,8 +283,8 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
               />
             </div>
 
-            {/* Day Details */}
-            <div className="space-y-4">
+            {/* Day Details - Reduced width */}
+            <div className="lg:col-span-1 space-y-4">{/* Reduced from implicit span to explicit span-1 */}
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">
                   {format(selectedDate, 'MMMM d, yyyy')}
