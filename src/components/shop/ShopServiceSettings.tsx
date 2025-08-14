@@ -21,6 +21,7 @@ const ShopServiceSettings = ({ shopData, onUpdate }: ShopServiceSettingsProps) =
     is_mobile_service: shopData?.is_mobile_service || false,
     is_certified: shopData?.is_certified || false,
     insurance_approved: shopData?.insurance_approved || true,
+    adas_calibration_capability: shopData?.adas_calibration_capability || false,
     average_lead_time_days: shopData?.average_lead_time_days || 1,
     special_badges: shopData?.special_badges || []
   });
@@ -182,6 +183,17 @@ const ShopServiceSettings = ({ shopData, onUpdate }: ShopServiceSettingsProps) =
                   }
                 />
                 <Label htmlFor="insurance">Insurance Approved</Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="adas_calibration"
+                  checked={formData.adas_calibration_capability}
+                  onCheckedChange={(checked) => 
+                    setFormData(prev => ({ ...prev, adas_calibration_capability: checked as boolean }))
+                  }
+                />
+                <Label htmlFor="adas_calibration">ADAS Calibration Equipment</Label>
               </div>
             </div>
           </div>

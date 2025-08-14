@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import JobOfferUpsells from "./JobOfferUpsells";
+import { AdasCalibrationAlert } from "./AdasCalibrationAlert";
 
 interface JobOffer {
   id: string;
@@ -19,6 +20,8 @@ interface JobOffer {
   expires_at: string;
   estimated_completion_time: string | null;
   notes: string;
+  requires_adas_calibration?: boolean;
+  adas_calibration_notes?: string;
   appointments: {
     customer_name: string;
     customer_email: string;
@@ -41,9 +44,10 @@ interface JobOffer {
 
 interface ShopJobOffersProps {
   shopId: string;
+  shop?: any;
 }
 
-const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
+const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
   const [jobOffers, setJobOffers] = useState<JobOffer[]>([]);
   const [loading, setLoading] = useState(true);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
@@ -274,12 +278,17 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                           Insurance Claim
                         </Badge>
                       )}
-                      {offer.appointments.damage_type && (
-                        <Badge variant="outline" className="flex items-center gap-1">
-                          <AlertTriangle className="h-3 w-3" />
-                          {offer.appointments.damage_type}
-                        </Badge>
-                      )}
+                       {offer.appointments.damage_type && (
+                         <Badge variant="outline" className="flex items-center gap-1">
+                           <AlertTriangle className="h-3 w-3" />
+                           {offer.appointments.damage_type}
+                         </Badge>
+                       )}
+                       {offer.requires_adas_calibration && (
+                         <Badge variant="destructive" className="text-xs">
+                           ADAS Required
+                         </Badge>
+                       )}
                     </div>
                   </div>
                   <Badge variant={getStatusColor(offer.expires_at)} className="text-sm">
@@ -433,11 +442,19 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                         <p className="text-sm font-medium text-primary mb-1">DriveX Notes:</p>
                         <p className="text-sm text-primary/80">{offer.notes}</p>
                       </div>
-                    )}
-                  </div>
-                )}
+                     )}
+                   </div>
+                 )}
 
-                {/* Upsell Services Section */}
+                 {/* ADAS Calibration Alert */}
+                 <AdasCalibrationAlert
+                   requiresCalibration={offer.requires_adas_calibration || false}
+                   calibrationReason={offer.adas_calibration_notes || undefined}
+                   shopHasCapability={shop?.adas_calibration_capability || false}
+                   onDecline={() => handleJobResponse(offer.id, 'decline')}
+                 />
+
+                 {/* Upsell Services Section */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
                   <h4 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
                     <Plus className="h-4 w-4" />

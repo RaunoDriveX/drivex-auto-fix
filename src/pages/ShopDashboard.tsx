@@ -252,7 +252,7 @@ const ShopDashboard = () => {
                         </div>
                       </div>
                     </div>
-                    <ShopJobOffers shopId={shopData.id} />
+                    <ShopJobOffers shopId={shopData.id} shop={shopData} />
                   </TabsContent>
 
                   <TabsContent value="calendar" className="mt-0">
