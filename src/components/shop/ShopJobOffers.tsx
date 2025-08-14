@@ -247,16 +247,31 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                       Damage Photos ({offer.appointments.damage_photos.length})
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {offer.appointments.damage_photos.map((photoUrl, index) => (
-                        <div key={index} className="relative aspect-square bg-muted rounded-lg overflow-hidden">
-                          <img
-                            src={photoUrl.startsWith('/') ? `${window.location.origin}${photoUrl}` : photoUrl}
-                            alt={`Damage photo ${index + 1}`}
-                            className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => window.open(photoUrl.startsWith('/') ? `${window.location.origin}${photoUrl}` : photoUrl, '_blank')}
-                          />
-                        </div>
-                      ))}
+                       {offer.appointments.damage_photos.map((photoUrl, index) => {
+                         const fullImageUrl = photoUrl.startsWith('/') ? `${window.location.origin}${photoUrl}` : photoUrl;
+                         console.log('Loading image:', fullImageUrl);
+                         
+                         return (
+                           <div key={index} className="relative aspect-square bg-muted rounded-lg overflow-hidden">
+                             <img
+                               src={fullImageUrl}
+                               alt={`Damage photo ${index + 1}`}
+                               className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                               onClick={() => window.open(fullImageUrl, '_blank')}
+                               onError={(e) => {
+                                 console.error('Failed to load image:', fullImageUrl);
+                                 e.currentTarget.style.display = 'none';
+                               }}
+                               onLoad={() => {
+                                 console.log('Image loaded successfully:', fullImageUrl);
+                               }}
+                             />
+                             <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground bg-muted/50">
+                               Photo {index + 1}
+                             </div>
+                           </div>
+                         );
+                       })}
                     </div>
                   </div>
                 )}
