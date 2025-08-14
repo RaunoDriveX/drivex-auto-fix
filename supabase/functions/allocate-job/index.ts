@@ -53,6 +53,34 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Appointment not found: ${appointmentError?.message}`);
     }
 
+    // Detect ADAS calibration needs
+    let requiresAdasCalibration = false;
+    let adasCalibrationReason = '';
+    
+    if (appointment.vehicle_info) {
+      const { data: adasResult, error: adasError } = await supabase.functions.invoke('detect-adas-calibration', {
+        body: {
+          vehicleInfo: appointment.vehicle_info,
+          damageType: appointment.damage_type,
+          damageLocation: appointment.ai_assessment_details?.location
+        }
+      });
+
+      if (!adasError && adasResult) {
+        requiresAdasCalibration = adasResult.requiresCalibration;
+        adasCalibrationReason = adasResult.calibrationReason;
+        
+        // Update appointment with ADAS calibration requirement
+        await supabase
+          .from('appointments')
+          .update({
+            requires_adas_calibration: requiresAdasCalibration,
+            adas_calibration_reason: adasCalibrationReason
+          })
+          .eq('id', appointmentId);
+      }
+    }
+
     // Find eligible shops based on service capabilities
     let shopsQuery = supabase
       .from('shops')
@@ -72,6 +100,12 @@ const handler = async (req: Request): Promise<Response> => {
       shopsQuery = shopsQuery.in('service_capability', ['replacement_only', 'both']);
     }
 
+    // If ADAS calibration is required, filter to only calibration-capable shops
+    if (requiresAdasCalibration) {
+      shopsQuery = shopsQuery.eq('adas_calibration_capability', true);
+      console.log('Filtering to only ADAS calibration-capable shops for this job');
+    }
+
     const { data: eligibleShops, error: shopsError } = await shopsQuery;
 
     if (shopsError) {
@@ -79,16 +113,23 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!eligibleShops || eligibleShops.length === 0) {
-      console.log('No eligible shops found for this job');
+      const message = requiresAdasCalibration 
+        ? 'No ADAS calibration-capable shops found for this job'
+        : 'No eligible shops found for this job';
+      
+      console.log(message);
       return new Response(JSON.stringify({ 
         success: false, 
-        message: 'No eligible shops found',
+        message,
+        requiresAdasCalibration,
         jobOffers: []
       }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    console.log(`Found ${eligibleShops.length} eligible shops${requiresAdasCalibration ? ' with ADAS calibration capability' : ''}`);
 
     // Calculate pricing based on service type and parts availability
     let basePrice = serviceType === 'repair' ? 89 : 350;
@@ -154,6 +195,12 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
       
+      // ADAS calibration capability bonus for calibration-required jobs
+      if (requiresAdasCalibration && shop.adas_calibration_capability) {
+        score += 25; // Significant bonus for matching capability
+        console.log(`ADAS bonus applied to ${shop.name}: +25 points`);
+      }
+      
       // Distance factor (if location available)
       if (customerLocation && shop.latitude && shop.longitude) {
         const distance = calculateDistance(
@@ -203,7 +250,9 @@ const handler = async (req: Request): Promise<Response> => {
           offered_price: shopPrice,
           estimated_completion_time: `${completionHours} hours`,
           expires_at: offerExpiryTime.toISOString(),
-          status: 'offered'
+          status: 'offered',
+          requires_adas_calibration: requiresAdasCalibration,
+          adas_calibration_notes: adasCalibrationReason
         })
         .select()
         .single();
@@ -214,20 +263,30 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       // Send notification to shop
+      const notificationTitle = requiresAdasCalibration 
+        ? `New ${serviceType} job available (ADAS Required)`
+        : `New ${serviceType} job available`;
+      
+      const notificationMessage = requiresAdasCalibration
+        ? `${serviceType} job for ${vehicleInfo?.make || 'vehicle'} - €${shopPrice} (ADAS calibration required)`
+        : `${serviceType} job for ${vehicleInfo?.make || 'vehicle'} - €${shopPrice}`;
+
       const { error: notificationError } = await supabase
         .from('shop_notifications')
         .insert({
           shop_id: shop.id,
           notification_type: 'job_offer',
-          title: `New ${serviceType} job available`,
-          message: `${serviceType} job for ${vehicleInfo?.make || 'vehicle'} - €${shopPrice}`,
+          title: notificationTitle,
+          message: notificationMessage,
           data: {
             appointment_id: appointmentId,
             job_offer_id: jobOffer.id,
             service_type: serviceType,
             offered_price: shopPrice,
             expires_at: offerExpiryTime.toISOString(),
-            customer_location: appointment.city || 'Unknown'
+            customer_location: appointment.city || 'Unknown',
+            requires_adas_calibration: requiresAdasCalibration,
+            adas_calibration_reason: adasCalibrationReason
           }
         });
 
@@ -262,6 +321,8 @@ const handler = async (req: Request): Promise<Response> => {
       success: true,
       appointmentId,
       serviceType,
+      requiresAdasCalibration,
+      adasCalibrationReason,
       jobOffers,
       totalShopsContacted: jobOffers.length,
       allocationCompleted: true
