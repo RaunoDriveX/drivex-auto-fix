@@ -11,13 +11,16 @@ import { toast } from "sonner";
 import { format, addDays, isToday, isTomorrow } from "date-fns";
 import { CalendarIcon, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import CallCenterCTA from "@/components/CallCenterCTA";
 
 type LeadFormProps = {
   jobType?: "repair" | "replacement";
+  shopId?: string;
+  shopName?: string;
 };
 
-const LeadForm = ({ jobType = "repair" }: LeadFormProps) => {
+const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "DriveX Service Center" }: LeadFormProps) => {
   const [loading, setLoading] = useState(false);
   const [isInsuranceClaim, setIsInsuranceClaim] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -51,17 +54,92 @@ const LeadForm = ({ jobType = "repair" }: LeadFormProps) => {
     return format(date, "EEEE, MMM d");
   };
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      (toast as any).success?.("Booking confirmed! We'll contact you soon.") || toast("Booking confirmed! We'll contact you soon.");
+    
+    try {
+      const formData = new FormData(e.currentTarget);
+      const customerName = formData.get('name') as string;
+      const customerEmail = formData.get('email') as string;
+      const customerPhone = formData.get('phone') as string;
+      const isInsurance = formData.get('insuranceClaim') === 'yes';
+      const insurerName = formData.get('insurerName') as string;
+      
+      if (!selectedDate || !selectedTimeSlot) {
+        toast.error("Please select a date and time slot");
+        return;
+      }
+
+      // Extract time from slot (format: "09:00 - 09:30")
+      const timeSlot = selectedTimeSlot.split(' - ')[0];
+      
+      // Create appointment
+      const { data: appointment, error: appointmentError } = await supabase
+        .from('appointments')
+        .insert({
+          customer_name: customerName,
+          customer_email: customerEmail,
+          customer_phone: customerPhone,
+          shop_id: shopId,
+          shop_name: shopName,
+          service_type: jobType,
+          appointment_date: format(selectedDate, 'yyyy-MM-dd'),
+          appointment_time: timeSlot,
+          is_insurance_claim: isInsurance,
+          status: 'confirmed',
+          total_cost: jobType === "repair" ? 89 : 350
+        })
+        .select()
+        .single();
+
+      if (appointmentError) {
+        console.error('Error creating appointment:', appointmentError);
+        toast.error("Failed to create appointment. Please try again.");
+        return;
+      }
+
+      // Send confirmation email
+      try {
+        const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+          body: {
+            appointmentId: appointment.id,
+            customerName,
+            customerEmail,
+            shopName,
+            appointmentDate: format(selectedDate, 'yyyy-MM-dd'),
+            appointmentTime: timeSlot,
+            serviceType: jobType,
+            totalCost: appointment.total_cost
+          }
+        });
+
+        if (emailError) {
+          console.error('Error sending confirmation email:', emailError);
+          // Don't fail the booking if email fails
+        }
+
+        // Update appointment to mark confirmation email as sent
+        await supabase
+          .from('appointments')
+          .update({ confirmation_email_sent: true })
+          .eq('id', appointment.id);
+      } catch (emailError) {
+        console.error('Error with confirmation email:', emailError);
+      }
+
+      toast.success("Booking confirmed! Check your email for confirmation details.");
       (e.currentTarget as HTMLFormElement).reset();
       setSelectedDate(undefined);
       setSelectedTimeSlot("");
-      window.location.hash = "lead-form";
-    }, 600);
+      setIsInsuranceClaim("");
+      
+    } catch (error) {
+      console.error('Error during booking:', error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,6 +155,10 @@ const LeadForm = ({ jobType = "repair" }: LeadFormProps) => {
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" name="email" type="email" placeholder="jane@example.com" required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="phone">Phone number</Label>
+                <Input id="phone" name="phone" type="tel" placeholder="+31 6 12345678" required />
               </div>
               <div className="grid gap-2">
                 <Label>Is this an insurance claim?</Label>
