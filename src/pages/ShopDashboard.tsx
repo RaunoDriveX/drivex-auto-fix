@@ -208,43 +208,30 @@ const ShopDashboard = () => {
             <>
               {/* ACTIVE JOB OFFERS SECTION - Always visible at top */}
               <div className="mb-8">
-                <Card className="border-l-4 border-l-primary">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className="bg-primary/10 p-2 rounded-lg">
-                        <DollarSign className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl">Active Job Offers</CardTitle>
-                        <CardDescription>
-                          New repair requests requiring your response
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <ShopJobOffers shopId={shopData.id} />
-                  </CardContent>
-                </Card>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="bg-primary/10 p-2 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Active Job Offers</h2>
+                    <p className="text-muted-foreground">
+                      New repair requests requiring your response
+                    </p>
+                  </div>
+                </div>
+                <ShopJobOffers shopId={shopData.id} />
               </div>
             </>
           )}
 
           {!shopData ? (
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Complete Your Shop Profile</CardTitle>
-                  <CardDescription>
-                    Set up your shop information to start receiving job offers
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Complete the setup below to activate your shop profile and start managing jobs.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Complete Your Shop Profile</h2>
+                <p className="text-muted-foreground">
+                  Set up your shop information to start receiving job offers
+                </p>
+              </div>
               
               <div className="space-y-6">
                 {renderActiveSection()}
@@ -252,14 +239,12 @@ const ShopDashboard = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Shop Management</CardTitle>
-                  <CardDescription>
-                    Manage your shop calendar, settings, and business details
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Shop Management</h2>
+                <p className="text-muted-foreground">
+                  Manage your shop calendar, settings, and business details
+                </p>
+              </div>
 
               <div className="space-y-6">
                 {renderActiveSection()}
