@@ -17,6 +17,9 @@ export type Database = {
       appointments: {
         Row: {
           additional_notes: string | null
+          ai_assessment_details: Json | null
+          ai_confidence_score: number | null
+          ai_recommended_repair: string | null
           appointment_date: string
           appointment_time: string
           confirmation_email_sent: boolean | null
@@ -26,6 +29,7 @@ export type Database = {
           customer_phone: string | null
           damage_photos: string[] | null
           damage_type: string | null
+          driver_view_obstruction: boolean | null
           id: string
           is_insurance_claim: boolean | null
           notes: string | null
@@ -40,6 +44,9 @@ export type Database = {
         }
         Insert: {
           additional_notes?: string | null
+          ai_assessment_details?: Json | null
+          ai_confidence_score?: number | null
+          ai_recommended_repair?: string | null
           appointment_date: string
           appointment_time: string
           confirmation_email_sent?: boolean | null
@@ -49,6 +56,7 @@ export type Database = {
           customer_phone?: string | null
           damage_photos?: string[] | null
           damage_type?: string | null
+          driver_view_obstruction?: boolean | null
           id?: string
           is_insurance_claim?: boolean | null
           notes?: string | null
@@ -63,6 +71,9 @@ export type Database = {
         }
         Update: {
           additional_notes?: string | null
+          ai_assessment_details?: Json | null
+          ai_confidence_score?: number | null
+          ai_recommended_repair?: string | null
           appointment_date?: string
           appointment_time?: string
           confirmation_email_sent?: boolean | null
@@ -72,6 +83,7 @@ export type Database = {
           customer_phone?: string | null
           damage_photos?: string[] | null
           damage_type?: string | null
+          driver_view_obstruction?: boolean | null
           id?: string
           is_insurance_claim?: boolean | null
           notes?: string | null
