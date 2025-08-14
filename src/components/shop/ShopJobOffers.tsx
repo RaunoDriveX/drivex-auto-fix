@@ -75,7 +75,7 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
         .order('offered_at', { ascending: false });
 
       if (error) throw error;
-      setJobOffers((data as JobOffer[]) || []);
+      setJobOffers((data as JobOffer[])?.filter(offer => offer.appointments !== null) || []);
     } catch (error: any) {
       console.error('Error fetching job offers:', error);
       toast({
@@ -186,7 +186,14 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
         </Card>
       ) : (
         <div className="grid gap-6">
-          {jobOffers.map((offer) => (
+          {jobOffers.map((offer) => {
+            // Safety check to ensure appointments data exists
+            if (!offer.appointments) {
+              console.warn('Job offer missing appointments data:', offer.id);
+              return null;
+            }
+            
+            return (
             <Card key={offer.id} className="border-l-4 border-l-primary overflow-hidden">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -403,7 +410,8 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                 </div>
               </CardContent>
             </Card>
-          ))}
+            );
+          }).filter(Boolean)}
         </div>
       )}
     </div>
