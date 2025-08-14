@@ -195,11 +195,34 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
             
             return (
             <Card key={offer.id} className="border-l-4 border-l-primary overflow-hidden">
-              <CardHeader>
+              <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <CardTitle className="text-xl">{offer.appointments.service_type}</CardTitle>
+                    {/* Job Type as Title */}
+                    <CardTitle className="text-2xl mb-3">{offer.appointments.service_type}</CardTitle>
+                    
+                    {/* Vehicle Make and Model */}
+                    {offer.appointments.vehicle_info && (
+                      <div className="flex items-center gap-2 mb-3">
+                        <Car className="h-5 w-5 text-gray-600" />
+                        <span className="text-lg font-semibold text-gray-700">
+                          {offer.appointments.vehicle_info.make} {offer.appointments.vehicle_info.model}
+                          {offer.appointments.vehicle_info.year && ` (${offer.appointments.vehicle_info.year})`}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Customer Details */}
+                    <div className="space-y-1">
+                      <p className="text-base text-muted-foreground">Customer: {offer.appointments.customer_name}</p>
+                      <p className="text-sm text-muted-foreground">{offer.appointments.customer_email}</p>
+                      {offer.appointments.customer_phone && (
+                        <p className="text-sm text-muted-foreground">{offer.appointments.customer_phone}</p>
+                      )}
+                    </div>
+
+                    {/* Badges */}
+                    <div className="flex gap-2 mt-3">
                       {offer.appointments.is_insurance_claim && (
                         <Badge variant="secondary" className="flex items-center gap-1">
                           <CreditCard className="h-3 w-3" />
@@ -213,9 +236,6 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                         </Badge>
                       )}
                     </div>
-                    <CardDescription className="text-base">
-                      Customer: {offer.appointments.customer_name}
-                    </CardDescription>
                   </div>
                   <Badge variant={getStatusColor(offer.expires_at)} className="text-sm">
                     {formatTimeRemaining(offer.expires_at)}
@@ -308,19 +328,6 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                           <div>
                             <p className="font-medium">{offer.appointments.customer_phone}</p>
                             <p className="text-sm text-muted-foreground">Phone Number</p>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {offer.appointments.vehicle_info && (
-                        <div className="flex items-center gap-3">
-                          <Car className="h-5 w-5 text-gray-600" />
-                          <div>
-                            <p className="font-medium">
-                              {offer.appointments.vehicle_info.make} {offer.appointments.vehicle_info.model}
-                              {offer.appointments.vehicle_info.year && ` (${offer.appointments.vehicle_info.year})`}
-                            </p>
-                            <p className="text-sm text-muted-foreground">Vehicle</p>
                           </div>
                         </div>
                       )}
