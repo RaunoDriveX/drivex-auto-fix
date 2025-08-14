@@ -4,10 +4,10 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench } from "lucide-react";
+import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import type { User } from "@supabase/supabase-js";
 
 // Import components for each tab
@@ -17,11 +17,13 @@ import ShopPricingSettings from "@/components/shop/ShopPricingSettings";
 import ShopServiceSettings from "@/components/shop/ShopServiceSettings";
 import ShopJobOffers from "@/components/shop/ShopJobOffers";
 import ShopCalendarView from "@/components/shop/ShopCalendarView";
+import { ShopSidebar } from "@/components/ShopSidebar";
 
 const ShopDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [shopData, setShopData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState("location");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -98,6 +100,10 @@ const ShopDashboard = () => {
 
       console.log('ShopDashboard: Shop data fetched:', !!shop);
       setShopData(shop);
+      // Switch to calendar view when shop is set up
+      if (shop && activeSection === "location") {
+        setActiveSection("calendar");
+      }
     } catch (error: any) {
       console.error('ShopDashboard: Error fetching shop data:', error);
       toast({
@@ -108,6 +114,23 @@ const ShopDashboard = () => {
     } finally {
       console.log('ShopDashboard: Setting loading to false');
       setLoading(false);
+    }
+  };
+
+  const renderActiveSection = () => {
+    switch (activeSection) {
+      case "calendar":
+        return shopData ? <ShopCalendarView shopId={shopData.id} /> : null;
+      case "location":
+        return <ShopLocationSettings shopData={shopData} onUpdate={() => fetchShopData(user?.email!)} />;
+      case "availability":
+        return <ShopAvailabilitySettings shopId={shopData?.id || user?.email || 'temp'} />;
+      case "pricing":
+        return <ShopPricingSettings shopId={shopData?.id || user?.email || 'temp'} />;
+      case "services":
+        return <ShopServiceSettings shopData={shopData} onUpdate={() => fetchShopData(user?.email!)} />;
+      default:
+        return null;
     }
   };
 
@@ -134,18 +157,19 @@ const ShopDashboard = () => {
   }
 
   return (
-    <>
+    <SidebarProvider>
       <Helmet>
         <title>Shop Dashboard - DriveX</title>
         <meta name="description" content="Manage your repair shop settings, availability, pricing, and job offers." />
       </Helmet>
       
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex w-full">
         {/* Header */}
-        <header className="bg-card border-b">
+        <header className="bg-card border-b fixed top-0 left-0 right-0 z-10">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
+                <SidebarTrigger className="mr-2" />
                 <div className="bg-primary/10 p-2 rounded-lg">
                   <Wrench className="h-6 w-6 text-primary" />
                 </div>
@@ -171,8 +195,15 @@ const ShopDashboard = () => {
           </div>
         </header>
 
+        {/* Sidebar */}
+        <ShopSidebar 
+          activeSection={activeSection} 
+          onSectionChange={setActiveSection}
+          shopData={shopData}
+        />
+
         {/* Main Content */}
-        <main className="container mx-auto px-4 py-8">
+        <main className="flex-1 pt-24 p-8 overflow-auto">
           {shopData && (
             <>
               {/* ACTIVE JOB OFFERS SECTION - Always visible at top */}
@@ -215,45 +246,11 @@ const ShopDashboard = () => {
                 </CardContent>
               </Card>
               
-              <Tabs defaultValue="location" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="location" className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Location
-                  </TabsTrigger>
-                  <TabsTrigger value="availability" className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Availability
-                  </TabsTrigger>
-                  <TabsTrigger value="pricing" className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    Pricing
-                  </TabsTrigger>
-                  <TabsTrigger value="services" className="flex items-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    Services
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="location">
-                  <ShopLocationSettings shopData={null} onUpdate={() => fetchShopData(user?.email!)} />
-                </TabsContent>
-
-                <TabsContent value="availability">
-                  <ShopAvailabilitySettings shopId={user?.email || 'temp'} />
-                </TabsContent>
-
-                <TabsContent value="pricing">
-                  <ShopPricingSettings shopId={user?.email || 'temp'} />
-                </TabsContent>
-
-                <TabsContent value="services">
-                  <ShopServiceSettings shopData={null} onUpdate={() => fetchShopData(user?.email!)} />
-                </TabsContent>
-              </Tabs>
+              <div className="space-y-6">
+                {renderActiveSection()}
+              </div>
             </div>
           ) : (
-            /* SHOP MANAGEMENT SECTION - Below job offers */
             <div className="space-y-6">
               <Card>
                 <CardHeader>
@@ -264,55 +261,14 @@ const ShopDashboard = () => {
                 </CardHeader>
               </Card>
 
-              <Tabs defaultValue="calendar" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="calendar" className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Calendar
-                  </TabsTrigger>
-                  <TabsTrigger value="location" className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Location
-                  </TabsTrigger>
-                  <TabsTrigger value="availability" className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Availability
-                  </TabsTrigger>
-                  <TabsTrigger value="pricing" className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    Pricing
-                  </TabsTrigger>
-                  <TabsTrigger value="services" className="flex items-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    Services
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="calendar">
-                  <ShopCalendarView shopId={shopData.id} />
-                </TabsContent>
-
-                <TabsContent value="location">
-                  <ShopLocationSettings shopData={shopData} onUpdate={fetchShopData} />
-                </TabsContent>
-
-                <TabsContent value="availability">
-                  <ShopAvailabilitySettings shopId={shopData.id} />
-                </TabsContent>
-
-                <TabsContent value="pricing">
-                  <ShopPricingSettings shopId={shopData.id} />
-                </TabsContent>
-
-                <TabsContent value="services">
-                  <ShopServiceSettings shopData={shopData} onUpdate={fetchShopData} />
-                </TabsContent>
-              </Tabs>
+              <div className="space-y-6">
+                {renderActiveSection()}
+              </div>
             </div>
           )}
         </main>
       </div>
-    </>
+    </SidebarProvider>
   );
 };
 
