@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench, Plus, Users } from "lucide-react";
+import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench, Plus, Users, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
 
@@ -19,6 +19,7 @@ import ShopJobOffers from "@/components/shop/ShopJobOffers";
 import ShopCalendarView from "@/components/shop/ShopCalendarView";
 import ShopUpsellSettings from "@/components/shop/ShopUpsellSettings";
 import ShopTechnicians from "@/components/shop/ShopTechnicians";
+import CallCenterOverview from "@/components/call-center/CallCenterOverview";
 
 const ShopDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -182,7 +183,7 @@ const ShopDashboard = () => {
               <div className="w-64 bg-card border rounded-lg p-4">
                 <nav className="space-y-2">
                   <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
-                    <TabsList className="grid w-full grid-rows-8 h-auto bg-transparent p-0 gap-1">
+                    <TabsList className="grid w-full grid-rows-9 h-auto bg-transparent p-0 gap-1">
                       <TabsTrigger 
                         value="offers" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -239,6 +240,13 @@ const ShopDashboard = () => {
                         <Users className="h-4 w-4" />
                         Technicians
                       </TabsTrigger>
+                      <TabsTrigger 
+                        value="call-center" 
+                        className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                      >
+                        <Phone className="h-4 w-4" />
+                        Call Center
+                      </TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </nav>
@@ -292,6 +300,10 @@ const ShopDashboard = () => {
 
                 {activeTab === 'technicians' && (
                   <ShopTechnicians shopId={shopData.id} />
+                )}
+
+                {activeTab === 'call-center' && (
+                  <CallCenterOverview />
                 )}
               </div>
             </div>

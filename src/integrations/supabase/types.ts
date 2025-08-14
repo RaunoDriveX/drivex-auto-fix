@@ -104,6 +104,158 @@ export type Database = {
         }
         Relationships: []
       }
+      call_center_activities: {
+        Row: {
+          activity_type: string
+          ai_agent_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          lead_id: string
+          metadata: Json | null
+          scheduled_for: string | null
+          status: string | null
+          summary: string | null
+          transcript: string | null
+        }
+        Insert: {
+          activity_type: string
+          ai_agent_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          lead_id: string
+          metadata?: Json | null
+          scheduled_for?: string | null
+          status?: string | null
+          summary?: string | null
+          transcript?: string | null
+        }
+        Update: {
+          activity_type?: string
+          ai_agent_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          lead_id?: string
+          metadata?: Json | null
+          scheduled_for?: string | null
+          status?: string | null
+          summary?: string | null
+          transcript?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_center_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "call_center_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_center_leads: {
+        Row: {
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          damage_description: string | null
+          id: string
+          initial_message: string | null
+          lead_source: string | null
+          location_info: Json | null
+          must_contact_by: string | null
+          priority_level: number | null
+          shop_id: string | null
+          status: string | null
+          updated_at: string
+          vehicle_info: Json | null
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          damage_description?: string | null
+          id?: string
+          initial_message?: string | null
+          lead_source?: string | null
+          location_info?: Json | null
+          must_contact_by?: string | null
+          priority_level?: number | null
+          shop_id?: string | null
+          status?: string | null
+          updated_at?: string
+          vehicle_info?: Json | null
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          damage_description?: string | null
+          id?: string
+          initial_message?: string | null
+          lead_source?: string | null
+          location_info?: Json | null
+          must_contact_by?: string | null
+          priority_level?: number | null
+          shop_id?: string | null
+          status?: string | null
+          updated_at?: string
+          vehicle_info?: Json | null
+        }
+        Relationships: []
+      }
+      call_center_stats: {
+        Row: {
+          average_response_time_minutes: number | null
+          calls_made: number | null
+          calls_successful: number | null
+          created_at: string
+          date: string
+          id: string
+          inspections_scheduled: number | null
+          leads_contacted: number | null
+          leads_converted: number | null
+          leads_received: number | null
+          revenue_generated: number | null
+          shop_id: string
+          updated_at: string
+        }
+        Insert: {
+          average_response_time_minutes?: number | null
+          calls_made?: number | null
+          calls_successful?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          inspections_scheduled?: number | null
+          leads_contacted?: number | null
+          leads_converted?: number | null
+          leads_received?: number | null
+          revenue_generated?: number | null
+          shop_id: string
+          updated_at?: string
+        }
+        Update: {
+          average_response_time_minutes?: number | null
+          calls_made?: number | null
+          calls_successful?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          inspections_scheduled?: number | null
+          leads_contacted?: number | null
+          leads_converted?: number | null
+          leads_received?: number | null
+          revenue_generated?: number | null
+          shop_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       insurance_details: {
         Row: {
           booking_reference: string
