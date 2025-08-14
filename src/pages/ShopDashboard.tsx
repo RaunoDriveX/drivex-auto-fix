@@ -181,7 +181,7 @@ const ShopDashboard = () => {
                   <CardHeader>
                     <div className="flex items-center gap-3">
                       <div className="bg-primary/10 p-2 rounded-lg">
-                        <Wrench className="h-5 w-5 text-primary" />
+                        <DollarSign className="h-5 w-5 text-primary" />
                       </div>
                       <div>
                         <CardTitle className="text-xl">Active Job Offers</CardTitle>

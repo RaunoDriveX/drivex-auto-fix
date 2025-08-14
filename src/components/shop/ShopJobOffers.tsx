@@ -166,14 +166,6 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Job Offers</CardTitle>
-          <CardDescription>
-            Review and respond to job offers. You have limited time to accept or decline each offer.
-          </CardDescription>
-        </CardHeader>
-      </Card>
 
       {jobOffers.length === 0 ? (
         <Card>
@@ -203,12 +195,25 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                     
                     {/* Vehicle Make and Model */}
                     {offer.appointments.vehicle_info && (
-                      <div className="flex items-center gap-2 mb-3">
-                        <Car className="h-5 w-5 text-gray-600" />
-                        <span className="text-lg font-semibold text-gray-700">
-                          {offer.appointments.vehicle_info.make} {offer.appointments.vehicle_info.model}
-                          {offer.appointments.vehicle_info.year && ` (${offer.appointments.vehicle_info.year})`}
-                        </span>
+                      <div className="space-y-2 mb-3">
+                        <div className="flex items-center gap-2">
+                          <Car className="h-5 w-5 text-gray-600" />
+                          <span className="text-lg font-semibold text-gray-700">
+                            {offer.appointments.vehicle_info.make} {offer.appointments.vehicle_info.model}
+                            {offer.appointments.vehicle_info.year && ` (${offer.appointments.vehicle_info.year})`}
+                          </span>
+                        </div>
+                        {(offer.appointments.vehicle_info.license_plate || offer.appointments.vehicle_info.vin) && (
+                          <div className="text-sm text-muted-foreground ml-7">
+                            {offer.appointments.vehicle_info.license_plate && (
+                              <span>License: {offer.appointments.vehicle_info.license_plate}</span>
+                            )}
+                            {offer.appointments.vehicle_info.license_plate && offer.appointments.vehicle_info.vin && " • "}
+                            {offer.appointments.vehicle_info.vin && (
+                              <span>VIN: {offer.appointments.vehicle_info.vin}</span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                     
@@ -255,10 +260,10 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                       {offer.appointments.damage_photos.map((photoUrl, index) => (
                         <div key={index} className="relative aspect-square bg-muted rounded-lg overflow-hidden">
                           <img
-                            src={photoUrl}
+                            src={photoUrl.startsWith('/') ? `${window.location.origin}${photoUrl}` : photoUrl}
                             alt={`Damage photo ${index + 1}`}
                             className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => window.open(photoUrl, '_blank')}
+                            onClick={() => window.open(photoUrl.startsWith('/') ? `${window.location.origin}${photoUrl}` : photoUrl, '_blank')}
                           />
                         </div>
                       ))}
