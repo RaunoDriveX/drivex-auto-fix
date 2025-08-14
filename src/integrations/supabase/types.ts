@@ -474,6 +474,116 @@ export type Database = {
         }
         Relationships: []
       }
+      parts_fitment_requirements: {
+        Row: {
+          calibration_sensitive: boolean | null
+          created_at: string
+          damage_type: string
+          id: string
+          part_specifications: Json | null
+          reason: string | null
+          requires_oem: boolean | null
+          updated_at: string
+          vehicle_make: string
+          vehicle_model: string | null
+          year_from: number
+          year_to: number
+        }
+        Insert: {
+          calibration_sensitive?: boolean | null
+          created_at?: string
+          damage_type: string
+          id?: string
+          part_specifications?: Json | null
+          reason?: string | null
+          requires_oem?: boolean | null
+          updated_at?: string
+          vehicle_make: string
+          vehicle_model?: string | null
+          year_from: number
+          year_to: number
+        }
+        Update: {
+          calibration_sensitive?: boolean | null
+          created_at?: string
+          damage_type?: string
+          id?: string
+          part_specifications?: Json | null
+          reason?: string | null
+          requires_oem?: boolean | null
+          updated_at?: string
+          vehicle_make?: string
+          vehicle_model?: string | null
+          year_from?: number
+          year_to?: number
+        }
+        Relationships: []
+      }
+      parts_sourcing_requests: {
+        Row: {
+          created_at: string
+          estimated_cost: number | null
+          estimated_delivery_days: number | null
+          id: string
+          job_offer_id: string | null
+          notes: string | null
+          oem_required: boolean | null
+          part_type: string
+          requested_delivery_date: string | null
+          shop_id: string
+          status: string | null
+          supplier_quote: Json | null
+          updated_at: string
+          vehicle_make: string
+          vehicle_model: string | null
+          vehicle_year: number
+        }
+        Insert: {
+          created_at?: string
+          estimated_cost?: number | null
+          estimated_delivery_days?: number | null
+          id?: string
+          job_offer_id?: string | null
+          notes?: string | null
+          oem_required?: boolean | null
+          part_type: string
+          requested_delivery_date?: string | null
+          shop_id: string
+          status?: string | null
+          supplier_quote?: Json | null
+          updated_at?: string
+          vehicle_make: string
+          vehicle_model?: string | null
+          vehicle_year: number
+        }
+        Update: {
+          created_at?: string
+          estimated_cost?: number | null
+          estimated_delivery_days?: number | null
+          id?: string
+          job_offer_id?: string | null
+          notes?: string | null
+          oem_required?: boolean | null
+          part_type?: string
+          requested_delivery_date?: string | null
+          shop_id?: string
+          status?: string | null
+          supplier_quote?: Json | null
+          updated_at?: string
+          vehicle_make?: string
+          vehicle_model?: string | null
+          vehicle_year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parts_sourcing_requests_job_offer_id_fkey"
+            columns: ["job_offer_id"]
+            isOneToOne: false
+            referencedRelation: "job_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_pricing: {
         Row: {
           base_price: number
@@ -1100,6 +1210,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_oem_requirements: {
+        Args: {
+          _damage_type: string
+          _vehicle_make: string
+          _vehicle_model: string
+          _vehicle_year: number
+        }
+        Returns: Json
+      }
       detect_adas_calibration_needs: {
         Args: {
           damage_location?: string

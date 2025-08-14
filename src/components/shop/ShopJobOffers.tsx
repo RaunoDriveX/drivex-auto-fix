@@ -10,6 +10,7 @@ import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, Aler
 import { useToast } from "@/hooks/use-toast";
 import JobOfferUpsells from "./JobOfferUpsells";
 import { AdasCalibrationAlert } from "./AdasCalibrationAlert";
+import PartsFitmentAlert from "./PartsFitmentAlert";
 
 interface JobOffer {
   id: string;
@@ -446,13 +447,28 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                    </div>
                  )}
 
-                 {/* ADAS Calibration Alert */}
-                 <AdasCalibrationAlert
-                   requiresCalibration={offer.requires_adas_calibration || false}
-                   calibrationReason={offer.adas_calibration_notes || undefined}
-                   shopHasCapability={shop?.adas_calibration_capability || false}
-                   onDecline={() => handleJobResponse(offer.id, 'decline')}
-                 />
+                  {/* Parts Fitment Alert */}
+                  {offer.appointments.vehicle_info && (
+                    <PartsFitmentAlert
+                      vehicleInfo={{
+                        make: offer.appointments.vehicle_info.make,
+                        model: offer.appointments.vehicle_info.model,
+                        year: offer.appointments.vehicle_info.year
+                      }}
+                      damageType={offer.appointments.damage_type}
+                      jobOfferId={offer.id}
+                      shopId={offer.shop_id}
+                      onPartsSourced={fetchJobOffers}
+                    />
+                  )}
+
+                  {/* ADAS Calibration Alert */}
+                  <AdasCalibrationAlert
+                    requiresCalibration={offer.requires_adas_calibration || false}
+                    calibrationReason={offer.adas_calibration_notes || undefined}
+                    shopHasCapability={shop?.adas_calibration_capability || false}
+                    onDecline={() => handleJobResponse(offer.id, 'decline')}
+                  />
 
                  {/* Upsell Services Section */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
