@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench } from "lucide-react";
+import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
 
@@ -173,6 +173,32 @@ const ShopDashboard = () => {
 
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
+          {shopData && (
+            <>
+              {/* URGENT JOB OFFERS SECTION - Always visible at top */}
+              <div className="mb-8">
+                <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary/10 p-3 rounded-lg">
+                        <AlertCircle className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl text-primary">🚨 Urgent Job Offers</CardTitle>
+                        <CardDescription className="text-lg">
+                          New repair requests requiring immediate attention
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ShopJobOffers shopId={shopData.id} />
+                  </CardContent>
+                </Card>
+              </div>
+            </>
+          )}
+
           {!shopData ? (
             <div className="space-y-6">
               <Card>
@@ -227,58 +253,62 @@ const ShopDashboard = () => {
               </Tabs>
             </div>
           ) : (
-            <Tabs defaultValue="calendar" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-6">
-                <TabsTrigger value="calendar" className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Calendar
-                </TabsTrigger>
-                <TabsTrigger value="jobs" className="flex items-center gap-2">
-                  <Wrench className="h-4 w-4" />
-                  Job Offers
-                </TabsTrigger>
-                <TabsTrigger value="location" className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Location
-                </TabsTrigger>
-                <TabsTrigger value="availability" className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Availability
-                </TabsTrigger>
-                <TabsTrigger value="pricing" className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Pricing
-                </TabsTrigger>
-                <TabsTrigger value="services" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Services
-                </TabsTrigger>
-              </TabsList>
+            /* SHOP MANAGEMENT SECTION - Below job offers */
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Shop Management</CardTitle>
+                  <CardDescription>
+                    Manage your shop calendar, settings, and business details
+                  </CardDescription>
+                </CardHeader>
+              </Card>
 
-              <TabsContent value="calendar">
-                <ShopCalendarView shopId={shopData.id} />
-              </TabsContent>
+              <Tabs defaultValue="calendar" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="calendar" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Calendar
+                  </TabsTrigger>
+                  <TabsTrigger value="location" className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Location
+                  </TabsTrigger>
+                  <TabsTrigger value="availability" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Availability
+                  </TabsTrigger>
+                  <TabsTrigger value="pricing" className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Pricing
+                  </TabsTrigger>
+                  <TabsTrigger value="services" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Services
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="jobs">
-                <ShopJobOffers shopId={shopData.id} />
-              </TabsContent>
+                <TabsContent value="calendar">
+                  <ShopCalendarView shopId={shopData.id} />
+                </TabsContent>
 
-              <TabsContent value="location">
-                <ShopLocationSettings shopData={shopData} onUpdate={fetchShopData} />
-              </TabsContent>
+                <TabsContent value="location">
+                  <ShopLocationSettings shopData={shopData} onUpdate={fetchShopData} />
+                </TabsContent>
 
-              <TabsContent value="availability">
-                <ShopAvailabilitySettings shopId={shopData.id} />
-              </TabsContent>
+                <TabsContent value="availability">
+                  <ShopAvailabilitySettings shopId={shopData.id} />
+                </TabsContent>
 
-              <TabsContent value="pricing">
-                <ShopPricingSettings shopId={shopData.id} />
-              </TabsContent>
+                <TabsContent value="pricing">
+                  <ShopPricingSettings shopId={shopData.id} />
+                </TabsContent>
 
-              <TabsContent value="services">
-                <ShopServiceSettings shopData={shopData} onUpdate={fetchShopData} />
-              </TabsContent>
-            </Tabs>
+                <TabsContent value="services">
+                  <ShopServiceSettings shopData={shopData} onUpdate={fetchShopData} />
+                </TabsContent>
+              </Tabs>
+            </div>
           )}
         </main>
       </div>
