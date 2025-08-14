@@ -35,6 +35,7 @@ function analyzeFromToken(token: string) {
 }
 
 const AIReport = () => {
+  console.log('🔥🔥🔥 AI REPORT PAGE LOADING!', window.location.href);
   const { token } = useParams<{ token: string }>();
   const result = useMemo(() => ({
     decision: "repair" as const,
