@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Star, Quote } from "lucide-react";
+import { Quote } from "lucide-react";
+import { StarRating } from "@/components/ui/star-rating";
 
 const Testimonials = () => {
   const testimonials = [
@@ -51,10 +52,8 @@ const Testimonials = () => {
               
               <CardContent className="p-6">
                 {/* Stars */}
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
+                <div className="mb-4">
+                  <StarRating rating={testimonial.rating} />
                 </div>
                 
                 {/* Testimonial text */}

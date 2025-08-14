@@ -2,7 +2,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck, Leaf, Banknote, ShieldCheck, Star } from "lucide-react";
+import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck, Leaf, Banknote, ShieldCheck } from "lucide-react";
+import { StarRating } from "@/components/ui/star-rating";
 import DIYResinKit from "@/components/DIYResinKit";
 
 export type CompareOptionsProps = {
@@ -126,13 +127,8 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
                       <div className="flex items-center gap-1"><Store className="h-3.5 w-3.5" /> Stationary workshop</div>
                     )}
                   </div>
-                  <div className="mt-2 flex items-center gap-1">
-                    {[1,2,3,4,5].map((i) => (
-                      <span key={i} className={i <= Math.round(s.rating) ? 'text-foreground' : 'text-muted-foreground'}>
-                        <Star className="h-3.5 w-3.5" {...(i <= Math.round(s.rating) ? { fill: 'currentColor' } : {})} />
-                      </span>
-                    ))}
-                    <span className="ml-2 text-xs text-muted-foreground">{s.rating.toFixed(1)} ({s.reviews})</span>
+                  <div className="mt-2">
+                    <StarRating rating={s.rating} size="sm" showValue reviews={s.reviews} />
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3">
                     <div className="text-sm"><span className="text-muted-foreground mr-1">Total</span><span className="font-semibold text-foreground">{euro(total(s))}</span></div>
