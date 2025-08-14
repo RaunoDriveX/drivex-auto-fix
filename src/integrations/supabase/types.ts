@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           appointment_date: string
           appointment_time: string
+          confirmation_email_sent: boolean | null
           created_at: string
           customer_email: string
           customer_name: string
@@ -26,6 +27,7 @@ export type Database = {
           id: string
           is_insurance_claim: boolean | null
           notes: string | null
+          reminder_email_sent: boolean | null
           service_type: string
           shop_id: string
           shop_name: string
@@ -37,6 +39,7 @@ export type Database = {
         Insert: {
           appointment_date: string
           appointment_time: string
+          confirmation_email_sent?: boolean | null
           created_at?: string
           customer_email: string
           customer_name: string
@@ -45,6 +48,7 @@ export type Database = {
           id?: string
           is_insurance_claim?: boolean | null
           notes?: string | null
+          reminder_email_sent?: boolean | null
           service_type?: string
           shop_id: string
           shop_name: string
@@ -56,6 +60,7 @@ export type Database = {
         Update: {
           appointment_date?: string
           appointment_time?: string
+          confirmation_email_sent?: boolean | null
           created_at?: string
           customer_email?: string
           customer_name?: string
@@ -64,6 +69,7 @@ export type Database = {
           id?: string
           is_insurance_claim?: boolean | null
           notes?: string | null
+          reminder_email_sent?: boolean | null
           service_type?: string
           shop_id?: string
           shop_name?: string
