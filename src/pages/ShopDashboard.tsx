@@ -143,20 +143,58 @@ const ShopDashboard = () => {
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
           {!shopData ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Complete Your Shop Profile</CardTitle>
-                <CardDescription>
-                  Set up your shop information to start receiving job offers
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Please contact support to activate your shop profile, or complete the setup in the Location tab.
-                </p>
-                <Button>Contact Support</Button>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Complete Your Shop Profile</CardTitle>
+                  <CardDescription>
+                    Set up your shop information to start receiving job offers
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">
+                    Complete the setup below to activate your shop profile and start managing jobs.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Tabs defaultValue="location" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="location" className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Location
+                  </TabsTrigger>
+                  <TabsTrigger value="availability" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Availability
+                  </TabsTrigger>
+                  <TabsTrigger value="pricing" className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Pricing
+                  </TabsTrigger>
+                  <TabsTrigger value="services" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Services
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="location">
+                  <ShopLocationSettings shopData={null} onUpdate={() => fetchShopData(user?.email!)} />
+                </TabsContent>
+
+                <TabsContent value="availability">
+                  <ShopAvailabilitySettings shopId={user?.email || 'temp'} />
+                </TabsContent>
+
+                <TabsContent value="pricing">
+                  <ShopPricingSettings shopId={user?.email || 'temp'} />
+                </TabsContent>
+
+                <TabsContent value="services">
+                  <ShopServiceSettings shopData={null} onUpdate={() => fetchShopData(user?.email!)} />
+                </TabsContent>
+              </Tabs>
+            </div>
           ) : (
             <Tabs defaultValue="jobs" className="space-y-6">
               <TabsList className="grid w-full grid-cols-5">

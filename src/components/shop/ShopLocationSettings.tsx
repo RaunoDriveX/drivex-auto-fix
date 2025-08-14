@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,62 +14,105 @@ interface ShopLocationSettingsProps {
 const ShopLocationSettings = ({ shopData, onUpdate }: ShopLocationSettingsProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: shopData?.name || "",
-    address: shopData?.address || "",
-    city: shopData?.city || "",
-    postal_code: shopData?.postal_code || "",
-    phone: shopData?.phone || "",
-    email: shopData?.email || "",
-    website: shopData?.website || "",
-    description: shopData?.description || "",
-    latitude: shopData?.latitude || "",
-    longitude: shopData?.longitude || ""
+    id: '',
+    name: '',
+    address: '',
+    city: '',
+    postal_code: '',
+    phone: '',
+    email: '',
+    website: '',
+    description: '',
+    latitude: '',
+    longitude: ''
   });
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (shopData) {
+      setFormData({
+        id: shopData.id || '',
+        name: shopData.name || '',
+        address: shopData.address || '',
+        city: shopData.city || '',
+        postal_code: shopData.postal_code || '',
+        phone: shopData.phone || '',
+        email: shopData.email || '',
+        website: shopData.website || '',
+        description: shopData.description || '',
+        latitude: shopData.latitude?.toString() || '',
+        longitude: shopData.longitude?.toString() || ''
+      });
+    } else {
+      // Get user email from auth for new shops
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user?.email) {
+          setFormData(prev => ({
+            ...prev,
+            email: user.email!,
+            id: user.email! // Use email as ID for new shops
+          }));
+        }
+      });
+    }
+  }, [shopData]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.name || !formData.address || !formData.city || !formData.postal_code) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields (name, address, city, postal code).",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
       const updateData = {
-        ...formData,
+        id: formData.id,
+        name: formData.name,
+        address: formData.address,
+        city: formData.city,
+        postal_code: formData.postal_code,
+        phone: formData.phone || null,
+        email: formData.email,
+        website: formData.website || null,
+        description: formData.description || null,
         latitude: formData.latitude ? parseFloat(formData.latitude) : null,
         longitude: formData.longitude ? parseFloat(formData.longitude) : null,
-        updated_at: new Date().toISOString()
       };
 
-      if (shopData?.id) {
+      let result;
+      if (shopData) {
         // Update existing shop
-        const { error } = await supabase
+        result = await supabase
           .from('shops')
           .update(updateData)
           .eq('id', shopData.id);
-
-        if (error) throw error;
       } else {
         // Create new shop
-        const { error } = await supabase
+        result = await supabase
           .from('shops')
-          .insert([{
-            id: `shop_${Date.now()}`,
-            ...updateData
-          }]);
-
-        if (error) throw error;
+          .insert([updateData]);
       }
 
+      if (result.error) throw result.error;
+
       toast({
-        title: "Location updated",
-        description: "Your shop location has been updated successfully."
+        title: "Success",
+        description: shopData ? "Shop information updated successfully!" : "Shop profile created successfully!"
       });
 
       onUpdate(formData.email);
     } catch (error: any) {
-      console.error('Error updating location:', error);
+      console.error('Error saving shop data:', error);
       toast({
         title: "Error",
-        description: "Failed to update location settings",
+        description: error.message || "Failed to save shop information",
         variant: "destructive"
       });
     } finally {
@@ -86,7 +129,7 @@ const ShopLocationSettings = ({ shopData, onUpdate }: ShopLocationSettingsProps)
       <CardHeader>
         <CardTitle>Shop Location & Contact Information</CardTitle>
         <CardDescription>
-          Update your shop's location and contact details. Changes take effect immediately for new job offers.
+          {shopData ? "Update your shop's location and contact details" : "Set up your shop's location and contact details to get started"}. Changes take effect immediately for new job offers.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -205,7 +248,7 @@ const ShopLocationSettings = ({ shopData, onUpdate }: ShopLocationSettingsProps)
           </div>
 
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Updating..." : "Update Location Settings"}
+            {loading ? "Saving..." : shopData ? "Update Location Settings" : "Create Shop Profile"}
           </Button>
         </form>
       </CardContent>
