@@ -106,10 +106,36 @@ const handler = async (req: Request): Promise<Response> => {
       console.log('Filtering to only ADAS calibration-capable shops for this job');
     }
 
+    // Filter by skill requirements - only include shops with qualified technicians
+    console.log('Applying skill-based filtering...');
+    
     const { data: eligibleShops, error: shopsError } = await shopsQuery;
 
     if (shopsError) {
       throw new Error(`Error fetching shops: ${shopsError.message}`);
+    }
+
+    // Additional filtering for qualified technicians
+    const qualifiedShops = [];
+    for (const shop of eligibleShops || []) {
+      const { data: isQualified, error: qualificationError } = await supabase
+        .rpc('shop_has_qualified_technicians', {
+          _shop_id: shop.id,
+          _service_type: serviceType,
+          _damage_type: damageType,
+          _vehicle_type: vehicleInfo?.make || null
+        });
+
+      if (qualificationError) {
+        console.error(`Error checking qualifications for shop ${shop.id}:`, qualificationError);
+        continue; // Skip this shop if we can't verify qualifications
+      }
+
+      if (isQualified) {
+        qualifiedShops.push(shop);
+      } else {
+        console.log(`Shop ${shop.name} lacks qualified technicians for this job`);
+      }
     }
 
     if (!eligibleShops || eligibleShops.length === 0) {
@@ -129,7 +155,24 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    console.log(`Found ${eligibleShops.length} eligible shops${requiresAdasCalibration ? ' with ADAS calibration capability' : ''}`);
+    console.log(`Found ${qualifiedShops.length} qualified shops${requiresAdasCalibration ? ' with ADAS calibration capability' : ''}${qualifiedShops.length !== (eligibleShops?.length || 0) ? ` (filtered from ${eligibleShops?.length || 0} total)` : ''}`);
+
+    if (!qualifiedShops || qualifiedShops.length === 0) {
+      const message = requiresAdasCalibration 
+        ? 'No ADAS calibration-capable shops with qualified technicians found'
+        : 'No shops with qualified technicians found for this job';
+      
+      console.log(message);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message,
+        requiresAdasCalibration,
+        jobOffers: []
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Calculate pricing based on service type and parts availability
     let basePrice = serviceType === 'repair' ? 89 : 350;
@@ -155,8 +198,8 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Score and rank shops for job allocation
-    const scoredShops = eligibleShops.map(shop => {
+    // Score and rank qualified shops for job allocation
+    const scoredShops = qualifiedShops.map(shop => {
       let score = 0;
       
       // Performance tier bonus
@@ -200,6 +243,9 @@ const handler = async (req: Request): Promise<Response> => {
         score += 25; // Significant bonus for matching capability
         console.log(`ADAS bonus applied to ${shop.name}: +25 points`);
       }
+
+      // Skill-based qualification bonus - already filtered so all shops get this
+      score += 15; // Bonus for having qualified technicians
       
       // Distance factor (if location available)
       if (customerLocation && shop.latitude && shop.longitude) {

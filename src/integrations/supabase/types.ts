@@ -244,6 +244,45 @@ export type Database = {
           },
         ]
       }
+      job_skill_requirements: {
+        Row: {
+          created_at: string
+          damage_type: string | null
+          description: string | null
+          id: string
+          minimum_experience_years: number | null
+          required_certifications:
+            | Database["public"]["Enums"]["certification_type"][]
+            | null
+          service_type: string
+          vehicle_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          damage_type?: string | null
+          description?: string | null
+          id?: string
+          minimum_experience_years?: number | null
+          required_certifications?:
+            | Database["public"]["Enums"]["certification_type"][]
+            | null
+          service_type: string
+          vehicle_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          damage_type?: string | null
+          description?: string | null
+          id?: string
+          minimum_experience_years?: number | null
+          required_certifications?:
+            | Database["public"]["Enums"]["certification_type"][]
+            | null
+          service_type?: string
+          vehicle_type?: string | null
+        }
+        Relationships: []
+      }
       monthly_leaderboard: {
         Row: {
           bonus_earned: number | null
@@ -543,6 +582,86 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_technician_certifications: {
+        Row: {
+          certificate_number: string | null
+          certification_type: Database["public"]["Enums"]["certification_type"]
+          certified_date: string
+          certifying_body: string | null
+          created_at: string
+          expires_date: string | null
+          id: string
+          technician_id: string
+        }
+        Insert: {
+          certificate_number?: string | null
+          certification_type: Database["public"]["Enums"]["certification_type"]
+          certified_date?: string
+          certifying_body?: string | null
+          created_at?: string
+          expires_date?: string | null
+          id?: string
+          technician_id: string
+        }
+        Update: {
+          certificate_number?: string | null
+          certification_type?: Database["public"]["Enums"]["certification_type"]
+          certified_date?: string
+          certifying_body?: string | null
+          created_at?: string
+          expires_date?: string | null
+          id?: string
+          technician_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_technician_certifications_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "shop_technicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_technicians: {
+        Row: {
+          created_at: string
+          email: string | null
+          hire_date: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          phone: string | null
+          shop_id: string
+          updated_at: string
+          years_experience: number | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          hire_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          phone?: string | null
+          shop_id: string
+          updated_at?: string
+          years_experience?: number | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          hire_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          phone?: string | null
+          shop_id?: string
+          updated_at?: string
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
       shop_upsell_offerings: {
         Row: {
           created_at: string
@@ -713,6 +832,33 @@ export type Database = {
         }
         Relationships: []
       }
+      technician_certifications: {
+        Row: {
+          certification_type: Database["public"]["Enums"]["certification_type"]
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          required_for_jobs: string[] | null
+        }
+        Insert: {
+          certification_type: Database["public"]["Enums"]["certification_type"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          required_for_jobs?: string[] | null
+        }
+        Update: {
+          certification_type?: Database["public"]["Enums"]["certification_type"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          required_for_jobs?: string[] | null
+        }
+        Relationships: []
+      }
       upsell_services: {
         Row: {
           category: string
@@ -812,6 +958,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      shop_has_qualified_technicians: {
+        Args: {
+          _damage_type?: string
+          _service_type: string
+          _shop_id: string
+          _vehicle_type?: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       achievement_type:
@@ -823,6 +978,18 @@ export type Database = {
         | "innovation_leader"
         | "consistency_king"
         | "early_adopter"
+      certification_type:
+        | "adas_calibration"
+        | "windshield_replacement"
+        | "mobile_service"
+        | "luxury_vehicle"
+        | "heavy_duty_vehicle"
+        | "laminated_glass"
+        | "tempered_glass"
+        | "heated_windshield"
+        | "heads_up_display"
+        | "rain_sensor"
+        | "tinted_glass"
       job_status:
         | "pending"
         | "offered"
@@ -969,6 +1136,19 @@ export const Constants = {
         "innovation_leader",
         "consistency_king",
         "early_adopter",
+      ],
+      certification_type: [
+        "adas_calibration",
+        "windshield_replacement",
+        "mobile_service",
+        "luxury_vehicle",
+        "heavy_duty_vehicle",
+        "laminated_glass",
+        "tempered_glass",
+        "heated_windshield",
+        "heads_up_display",
+        "rain_sensor",
+        "tinted_glass",
       ],
       job_status: [
         "pending",
