@@ -168,12 +168,17 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
     <div className="space-y-6">
 
       {jobOffers.length === 0 ? (
-        <div className="py-12 text-center text-muted-foreground">
-          <p>No active job offers at the moment.</p>
-          <p className="text-sm mt-2">New offers will appear here when available.</p>
-        </div>
+        <Card>
+          <CardContent className="py-6">
+            <div className="text-center text-muted-foreground">
+              <p>No active job offers at the moment.</p>
+              <p className="text-sm mt-2">New offers will appear here when available.</p>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="space-y-8">{jobOffers.map((offer) => {
+        <div className="grid gap-6">
+          {jobOffers.map((offer) => {
             // Safety check to ensure appointments data exists
             if (!offer.appointments) {
               console.warn('Job offer missing appointments data:', offer.id);
@@ -181,12 +186,12 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
             }
             
             return (
-            <div key={offer.id} className="bg-background p-6 rounded-lg border-l-4 border-l-primary">
-              <div className="pb-4">
+            <Card key={offer.id} className="border-l-4 border-l-primary overflow-hidden">
+              <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     {/* Job Type as Title */}
-                    <h3 className="text-2xl font-bold mb-3">{offer.appointments.service_type}</h3>
+                    <CardTitle className="text-2xl mb-3">{offer.appointments.service_type}</CardTitle>
                     
                     {/* Vehicle Make and Model */}
                     {offer.appointments.vehicle_info && (
@@ -231,9 +236,9 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                     {formatTimeRemaining(offer.expires_at)}
                   </Badge>
                 </div>
-              </div>
+              </CardHeader>
               
-              <div className="space-y-6">
+              <CardContent className="space-y-6">
                 {/* Damage Photos */}
                 {offer.appointments.damage_photos && offer.appointments.damage_photos.length > 0 && (
                   <div className="space-y-3">
@@ -420,8 +425,8 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
             );
           }).filter(Boolean)}
         </div>
