@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench } from "lucide-react";
+import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
 
@@ -17,6 +17,7 @@ import ShopPricingSettings from "@/components/shop/ShopPricingSettings";
 import ShopServiceSettings from "@/components/shop/ShopServiceSettings";
 import ShopJobOffers from "@/components/shop/ShopJobOffers";
 import ShopCalendarView from "@/components/shop/ShopCalendarView";
+import ShopUpsellSettings from "@/components/shop/ShopUpsellSettings";
 
 const ShopDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -179,7 +180,7 @@ const ShopDashboard = () => {
               <div className="w-64 bg-card border rounded-lg p-4">
                 <nav className="space-y-2">
                   <Tabs defaultValue="offers" orientation="vertical" className="w-full">
-                    <TabsList className="grid w-full grid-rows-6 h-auto bg-transparent p-0 gap-1">
+                    <TabsList className="grid w-full grid-rows-7 h-auto bg-transparent p-0 gap-1">
                       <TabsTrigger 
                         value="offers" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -221,6 +222,13 @@ const ShopDashboard = () => {
                       >
                         <Settings className="h-4 w-4" />
                         Services
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="upsells" 
+                        className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Upsell Services
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>
@@ -265,6 +273,10 @@ const ShopDashboard = () => {
 
                   <TabsContent value="services" className="mt-0">
                     <ShopServiceSettings shopData={shopData} onUpdate={fetchShopData} />
+                  </TabsContent>
+
+                  <TabsContent value="upsells" className="mt-0">
+                    <ShopUpsellSettings shopId={shopData.id} />
                   </TabsContent>
                 </Tabs>
               </div>

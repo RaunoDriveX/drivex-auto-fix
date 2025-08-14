@@ -131,6 +131,51 @@ export type Database = {
         }
         Relationships: []
       }
+      job_offer_upsells: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_accepted: boolean | null
+          job_offer_id: string
+          offered_price: number
+          upsell_service_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_accepted?: boolean | null
+          job_offer_id: string
+          offered_price: number
+          upsell_service_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_accepted?: boolean | null
+          job_offer_id?: string
+          offered_price?: number
+          upsell_service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_offer_upsells_job_offer_id_fkey"
+            columns: ["job_offer_id"]
+            isOneToOne: false
+            referencedRelation: "job_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_offer_upsells_upsell_service_id_fkey"
+            columns: ["upsell_service_id"]
+            isOneToOne: false
+            referencedRelation: "upsell_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_offers: {
         Row: {
           appointment_id: string | null
@@ -486,6 +531,47 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_upsell_offerings: {
+        Row: {
+          created_at: string
+          custom_description: string | null
+          custom_price: number | null
+          id: string
+          is_active: boolean | null
+          shop_id: string
+          updated_at: string
+          upsell_service_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_description?: string | null
+          custom_price?: number | null
+          id?: string
+          is_active?: boolean | null
+          shop_id: string
+          updated_at?: string
+          upsell_service_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_description?: string | null
+          custom_price?: number | null
+          id?: string
+          is_active?: boolean | null
+          shop_id?: string
+          updated_at?: string
+          upsell_service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_upsell_offerings_upsell_service_id_fkey"
+            columns: ["upsell_service_id"]
+            isOneToOne: false
+            referencedRelation: "upsell_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shops: {
         Row: {
           acceptance_rate: number | null
@@ -609,6 +695,42 @@ export type Database = {
           total_reviews?: number | null
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      upsell_services: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          name: string
+          requires_parts: boolean | null
+          typical_price_max: number | null
+          typical_price_min: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          name: string
+          requires_parts?: boolean | null
+          typical_price_max?: number | null
+          typical_price_min?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          name?: string
+          requires_parts?: boolean | null
+          typical_price_max?: number | null
+          typical_price_min?: number | null
         }
         Relationships: []
       }

@@ -6,12 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target } from "lucide-react";
+import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import JobOfferUpsells from "./JobOfferUpsells";
 
 interface JobOffer {
   id: string;
   appointment_id: string;
+  shop_id: string;
   offered_price: number;
   status: string;
   expires_at: string;
@@ -434,6 +436,19 @@ const ShopJobOffers = ({ shopId }: ShopJobOffersProps) => {
                     )}
                   </div>
                 )}
+
+                {/* Upsell Services Section */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Additional Services
+                  </h4>
+                  <JobOfferUpsells 
+                    jobOfferId={offer.id} 
+                    shopId={offer.shop_id}
+                    onUpsellsChange={fetchJobOffers}
+                  />
+                </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4 border-t">
