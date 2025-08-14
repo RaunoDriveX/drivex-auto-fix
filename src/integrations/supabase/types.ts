@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          appointment_date: string
+          appointment_time: string
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          damage_type: string | null
+          id: string
+          is_insurance_claim: boolean | null
+          notes: string | null
+          service_type: string
+          shop_id: string
+          shop_name: string
+          status: string
+          total_cost: number | null
+          updated_at: string
+          vehicle_info: Json | null
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time: string
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          damage_type?: string | null
+          id?: string
+          is_insurance_claim?: boolean | null
+          notes?: string | null
+          service_type?: string
+          shop_id: string
+          shop_name: string
+          status?: string
+          total_cost?: number | null
+          updated_at?: string
+          vehicle_info?: Json | null
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          damage_type?: string | null
+          id?: string
+          is_insurance_claim?: boolean | null
+          notes?: string | null
+          service_type?: string
+          shop_id?: string
+          shop_name?: string
+          status?: string
+          total_cost?: number | null
+          updated_at?: string
+          vehicle_info?: Json | null
+        }
+        Relationships: []
+      }
       insurance_details: {
         Row: {
           booking_reference: string
@@ -44,6 +104,215 @@ export type Database = {
           insurance_company_name?: string
           insurer_name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      service_pricing: {
+        Row: {
+          base_price: number
+          created_at: string
+          damage_type: string
+          description: string | null
+          estimated_duration_minutes: number | null
+          id: string
+          service_type: string
+          shop_id: string
+          updated_at: string
+        }
+        Insert: {
+          base_price: number
+          created_at?: string
+          damage_type: string
+          description?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          service_type: string
+          shop_id: string
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          damage_type?: string
+          description?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          service_type?: string
+          shop_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_pricing_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_availability: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          date: string
+          id: string
+          is_available: boolean
+          shop_id: string
+          time_slot: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          is_available?: boolean
+          shop_id: string
+          time_slot: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          is_available?: boolean
+          shop_id?: string
+          time_slot?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_availability_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_availability_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_reviews: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          id: string
+          rating: number
+          review_text: string | null
+          service_type: string | null
+          shop_id: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          id?: string
+          rating: number
+          review_text?: string | null
+          service_type?: string | null
+          shop_id: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          id?: string
+          rating?: number
+          review_text?: string | null
+          service_type?: string | null
+          shop_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_reviews_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_reviews_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shops: {
+        Row: {
+          address: string
+          business_hours: Json | null
+          city: string
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          insurance_approved: boolean | null
+          is_certified: boolean | null
+          is_mobile_service: boolean | null
+          latitude: number | null
+          longitude: number | null
+          name: string
+          phone: string | null
+          postal_code: string
+          rating: number | null
+          total_reviews: number | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address: string
+          business_hours?: Json | null
+          city: string
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id: string
+          insurance_approved?: boolean | null
+          is_certified?: boolean | null
+          is_mobile_service?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          phone?: string | null
+          postal_code: string
+          rating?: number | null
+          total_reviews?: number | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string
+          business_hours?: Json | null
+          city?: string
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          insurance_approved?: boolean | null
+          is_certified?: boolean | null
+          is_mobile_service?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          phone?: string | null
+          postal_code?: string
+          rating?: number | null
+          total_reviews?: number | null
+          updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
