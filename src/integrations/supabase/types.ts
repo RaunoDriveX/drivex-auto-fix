@@ -169,6 +169,45 @@ export type Database = {
           },
         ]
       }
+      monthly_leaderboard: {
+        Row: {
+          bonus_earned: number | null
+          created_at: string
+          customer_rating_avg: number | null
+          id: string
+          jobs_completed: number | null
+          leaderboard_rank: number | null
+          month_year: string
+          points_earned: number | null
+          response_time_avg: number | null
+          shop_id: string
+        }
+        Insert: {
+          bonus_earned?: number | null
+          created_at?: string
+          customer_rating_avg?: number | null
+          id?: string
+          jobs_completed?: number | null
+          leaderboard_rank?: number | null
+          month_year: string
+          points_earned?: number | null
+          response_time_avg?: number | null
+          shop_id: string
+        }
+        Update: {
+          bonus_earned?: number | null
+          created_at?: string
+          customer_rating_avg?: number | null
+          id?: string
+          jobs_completed?: number | null
+          leaderboard_rank?: number | null
+          month_year?: string
+          points_earned?: number | null
+          response_time_avg?: number | null
+          shop_id?: string
+        }
+        Relationships: []
+      }
       service_pricing: {
         Row: {
           base_price: number
@@ -212,6 +251,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shop_achievements: {
+        Row: {
+          achievement_type: Database["public"]["Enums"]["achievement_type"]
+          created_at: string
+          data: Json | null
+          description: string
+          earned_at: string
+          id: string
+          points_value: number
+          shop_id: string
+          title: string
+        }
+        Insert: {
+          achievement_type: Database["public"]["Enums"]["achievement_type"]
+          created_at?: string
+          data?: Json | null
+          description: string
+          earned_at?: string
+          id?: string
+          points_value?: number
+          shop_id: string
+          title: string
+        }
+        Update: {
+          achievement_type?: Database["public"]["Enums"]["achievement_type"]
+          created_at?: string
+          data?: Json | null
+          description?: string
+          earned_at?: string
+          id?: string
+          points_value?: number
+          shop_id?: string
+          title?: string
+        }
+        Relationships: []
       }
       shop_availability: {
         Row: {
@@ -348,6 +423,51 @@ export type Database = {
           },
         ]
       }
+      shop_rewards: {
+        Row: {
+          best_streak_days: number | null
+          created_at: string
+          id: string
+          level_tier: string | null
+          lifetime_earnings: number | null
+          monthly_bonus: number | null
+          next_level_points: number | null
+          referral_bonus: number | null
+          shop_id: string
+          streak_days: number | null
+          total_points: number | null
+          updated_at: string
+        }
+        Insert: {
+          best_streak_days?: number | null
+          created_at?: string
+          id?: string
+          level_tier?: string | null
+          lifetime_earnings?: number | null
+          monthly_bonus?: number | null
+          next_level_points?: number | null
+          referral_bonus?: number | null
+          shop_id: string
+          streak_days?: number | null
+          total_points?: number | null
+          updated_at?: string
+        }
+        Update: {
+          best_streak_days?: number | null
+          created_at?: string
+          id?: string
+          level_tier?: string | null
+          lifetime_earnings?: number | null
+          monthly_bonus?: number | null
+          next_level_points?: number | null
+          referral_bonus?: number | null
+          shop_id?: string
+          streak_days?: number | null
+          total_points?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       shops: {
         Row: {
           acceptance_rate: number | null
@@ -356,6 +476,7 @@ export type Database = {
           business_hours: Json | null
           city: string
           created_at: string
+          current_streak: number | null
           description: string | null
           email: string | null
           id: string
@@ -367,7 +488,9 @@ export type Database = {
           jobs_offered_count: number | null
           last_job_offered_at: string | null
           latitude: number | null
+          level_tier: string | null
           longitude: number | null
+          monthly_bonus_rate: number | null
           name: string
           performance_tier: string | null
           phone: string | null
@@ -380,6 +503,8 @@ export type Database = {
             | Database["public"]["Enums"]["service_capability"]
             | null
           spare_parts_stock: Json | null
+          special_badges: string[] | null
+          total_points: number | null
           total_reviews: number | null
           updated_at: string
           website: string | null
@@ -391,6 +516,7 @@ export type Database = {
           business_hours?: Json | null
           city: string
           created_at?: string
+          current_streak?: number | null
           description?: string | null
           email?: string | null
           id: string
@@ -402,7 +528,9 @@ export type Database = {
           jobs_offered_count?: number | null
           last_job_offered_at?: string | null
           latitude?: number | null
+          level_tier?: string | null
           longitude?: number | null
+          monthly_bonus_rate?: number | null
           name: string
           performance_tier?: string | null
           phone?: string | null
@@ -415,6 +543,8 @@ export type Database = {
             | Database["public"]["Enums"]["service_capability"]
             | null
           spare_parts_stock?: Json | null
+          special_badges?: string[] | null
+          total_points?: number | null
           total_reviews?: number | null
           updated_at?: string
           website?: string | null
@@ -426,6 +556,7 @@ export type Database = {
           business_hours?: Json | null
           city?: string
           created_at?: string
+          current_streak?: number | null
           description?: string | null
           email?: string | null
           id?: string
@@ -437,7 +568,9 @@ export type Database = {
           jobs_offered_count?: number | null
           last_job_offered_at?: string | null
           latitude?: number | null
+          level_tier?: string | null
           longitude?: number | null
+          monthly_bonus_rate?: number | null
           name?: string
           performance_tier?: string | null
           phone?: string | null
@@ -450,6 +583,8 @@ export type Database = {
             | Database["public"]["Enums"]["service_capability"]
             | null
           spare_parts_stock?: Json | null
+          special_badges?: string[] | null
+          total_points?: number | null
           total_reviews?: number | null
           updated_at?: string
           website?: string | null
@@ -512,6 +647,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      achievement_type:
+        | "speed_demon"
+        | "quality_master"
+        | "reliable_partner"
+        | "volume_champion"
+        | "customer_favorite"
+        | "innovation_leader"
+        | "consistency_king"
+        | "early_adopter"
       job_status:
         | "pending"
         | "offered"
@@ -649,6 +793,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      achievement_type: [
+        "speed_demon",
+        "quality_master",
+        "reliable_partner",
+        "volume_champion",
+        "customer_favorite",
+        "innovation_leader",
+        "consistency_king",
+        "early_adopter",
+      ],
       job_status: [
         "pending",
         "offered",
