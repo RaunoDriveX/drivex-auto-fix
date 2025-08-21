@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, Phone, Mail } from "lucide-react";
+import { Menu, X, Phone, Mail, Search } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CallCenterToolbarWidget from "@/components/call-center/CallCenterToolbarWidget";
@@ -18,7 +18,6 @@ const Header = () => {
 
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "Track Job", href: "/track" },
     { name: "How it Works", href: "#workflow" },
     { name: "About Us", href: "#about" },
     { name: "Contact", href: "#contact" },
@@ -34,6 +33,16 @@ const Header = () => {
           <div className="flex items-center">
             <Link to="/" className="text-2xl font-bold text-primary">
               DriveX
+            </Link>
+          </div>
+
+          {/* Track Job CTA - Prominent Position */}
+          <div className="hidden md:flex items-center">
+            <Link to="/track">
+              <Button variant="outline" className="flex items-center gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                <Search className="h-4 w-4" />
+                Track Your Job
+              </Button>
             </Link>
           </div>
 
@@ -96,6 +105,16 @@ const Header = () => {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden border-t border-border py-4">
+            {/* Mobile Track Job CTA */}
+            <div className="mb-4 pb-4 border-b border-border">
+              <Link to="/track" onClick={() => setIsMenuOpen(false)}>
+                <Button className="w-full flex items-center justify-center gap-2">
+                  <Search className="h-4 w-4" />
+                  Track Your Job
+                </Button>
+              </Link>
+            </div>
+            
             <nav className="flex flex-col space-y-4">
               {navLinks.map((link) => {
                 if (link.href.startsWith('/')) {
