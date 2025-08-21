@@ -24,6 +24,7 @@ interface JobAllocationRequest {
     latitude: number;
     longitude: number;
   };
+  insurerName?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -37,7 +38,8 @@ const handler = async (req: Request): Promise<Response> => {
       serviceType,
       damageType,
       vehicleInfo,
-      customerLocation
+      customerLocation,
+      insurerName
     }: JobAllocationRequest = await req.json();
 
     console.log(`Starting job allocation for appointment ${appointmentId}, service: ${serviceType}`);
@@ -78,6 +80,34 @@ const handler = async (req: Request): Promise<Response> => {
             adas_calibration_reason: adasCalibrationReason
           })
           .eq('id', appointmentId);
+      }
+    }
+
+    // Get preferred shops for insurer if specified
+    let preferredShopIds: string[] = [];
+    if (insurerName) {
+      // First get the insurer profile
+      const { data: insurerProfile } = await supabase
+        .from('insurer_profiles')
+        .select('id')
+        .eq('insurer_name', insurerName)
+        .single();
+      
+      if (insurerProfile) {
+        // Then get preferred shops for this insurer
+        const { data: preferredShops } = await supabase
+          .from('insurer_preferred_shops')
+          .select('shop_id')
+          .eq('insurer_id', insurerProfile.id)
+          .eq('is_active', true)
+          .order('priority_level', { ascending: true });
+        
+        if (preferredShops) {
+          preferredShopIds = preferredShops.map(shop => shop.shop_id);
+          console.log(`Found ${preferredShopIds.length} preferred shops for insurer: ${insurerName}`);
+        }
+      } else {
+        console.log(`No insurer profile found for: ${insurerName}`);
       }
     }
 
@@ -198,9 +228,24 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
+    // Separate preferred and non-preferred shops
+    let preferredShops = [];
+    let nonPreferredShops = [];
+    
+    if (preferredShopIds.length > 0) {
+      preferredShops = qualifiedShops.filter(shop => preferredShopIds.includes(shop.id));
+      nonPreferredShops = qualifiedShops.filter(shop => !preferredShopIds.includes(shop.id));
+      console.log(`Separated shops: ${preferredShops.length} preferred, ${nonPreferredShops.length} non-preferred`);
+    } else {
+      nonPreferredShops = qualifiedShops;
+    }
+
     // Score and rank qualified shops for job allocation
-    const scoredShops = qualifiedShops.map(shop => {
+    const scoreShop = (shop: any, isPreferred: boolean) => {
       let score = 0;
+      
+      // Massive bonus for preferred shops (ensures they are always selected first)
+      if (isPreferred) score += 1000;
       
       // Performance tier bonus
       if (shop.performance_tier === 'premium') score += 20;
@@ -263,16 +308,28 @@ const handler = async (req: Request): Promise<Response> => {
       
       return {
         ...shop,
-        allocationScore: Math.round(score * 100) / 100
+        allocationScore: Math.round(score * 100) / 100,
+        isPreferred
       };
-    });
+    };
+
+    // Score preferred and non-preferred shops
+    const scoredPreferredShops = preferredShops.map(shop => scoreShop(shop, true));
+    const scoredNonPreferredShops = nonPreferredShops.map(shop => scoreShop(shop, false));
+    
+    // Combine and sort all shops (preferred will always rank higher due to bonus)
+    const allScoredShops = [...scoredPreferredShops, ...scoredNonPreferredShops];
 
     // Sort by score (highest first) and take top candidates
-    const rankedShops = scoredShops
+    const rankedShops = allScoredShops
       .sort((a, b) => b.allocationScore - a.allocationScore)
-      .slice(0, Math.min(5, scoredShops.length)); // Top 5 shops max
+      .slice(0, Math.min(5, allScoredShops.length)); // Top 5 shops max
 
-    console.log(`Ranked ${rankedShops.length} shops for job allocation`);
+    // Check if we have preferred shops in the selection
+    const hasPreferredShops = rankedShops.some(shop => shop.isPreferred);
+    const isOutOfNetwork = preferredShopIds.length > 0 && !hasPreferredShops;
+
+    console.log(`Ranked ${rankedShops.length} shops for job allocation${hasPreferredShops ? ' (including preferred shops)' : ''}${isOutOfNetwork ? ' - OUT OF NETWORK' : ''}`);
 
     // Create job offers for top-ranked shops
     const jobOffers = [];
@@ -298,7 +355,9 @@ const handler = async (req: Request): Promise<Response> => {
           expires_at: offerExpiryTime.toISOString(),
           status: 'offered',
           requires_adas_calibration: requiresAdasCalibration,
-          adas_calibration_notes: adasCalibrationReason
+          adas_calibration_notes: adasCalibrationReason,
+          is_preferred_shop: shop.isPreferred || false,
+          is_out_of_network: !shop.isPreferred && preferredShopIds.length > 0
         })
         .select()
         .single();
@@ -355,7 +414,9 @@ const handler = async (req: Request): Promise<Response> => {
         offeredPrice: shopPrice,
         allocationScore: shop.allocationScore,
         estimatedCompletion: completionTime,
-        expiresAt: offerExpiryTime.toISOString()
+        expiresAt: offerExpiryTime.toISOString(),
+        isPreferred: shop.isPreferred || false,
+        isOutOfNetwork: !shop.isPreferred && preferredShopIds.length > 0
       });
 
       console.log(`Job offer sent to ${shop.name} for €${shopPrice}`);

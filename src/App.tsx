@@ -11,6 +11,7 @@ import AIReport from "./pages/AIReport";
 import ClaimSubmission from "./pages/ClaimSubmission";
 import ShopAuth from "./pages/ShopAuth";
 import ShopDashboard from "./pages/ShopDashboard";
+import InsurerDashboard from "./pages/InsurerDashboard";
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -34,6 +35,7 @@ const App = () => {
             <Route path="/claim/:appointmentId" element={<ClaimSubmission />} />
             <Route path="/shop-auth" element={<ShopAuth />} />
             <Route path="/shop-dashboard" element={<ShopDashboard />} />
+            <Route path="/insurer-dashboard" element={<InsurerDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

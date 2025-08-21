@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { BadgeCheck, Clock, MapPin, Truck, Store, Wrench, Factory } from "lucide-react";
+import { PreferredShopBadge } from "@/components/ui/preferred-shop-badge";
 
 export type ShopOffersProps = {
   kind: "repair" | "replacement";
@@ -33,7 +34,10 @@ export default function ShopOffers({ kind }: ShopOffersProps) {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="flex items-center gap-2"><Wrench className="h-5 w-5" /> RapidGlass Mobile</span>
-                <Badge variant="secondary">Mobile</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">Mobile</Badge>
+                  <PreferredShopBadge isPreferred={true} />
+                </div>
               </CardTitle>
               <CardDescription>Comes to you. Great for chips and small cracks.</CardDescription>
             </CardHeader>
@@ -52,7 +56,10 @@ export default function ShopOffers({ kind }: ShopOffersProps) {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="flex items-center gap-2"><Store className="h-5 w-5" /> CityGlass Center</span>
-                <Badge variant="secondary">Stationary</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">Stationary</Badge>
+                  <PreferredShopBadge isOutOfNetwork={true} />
+                </div>
               </CardTitle>
               <CardDescription>Drive-in service with waiting area and Wi‑Fi.</CardDescription>
             </CardHeader>

@@ -32,7 +32,10 @@ export type Database = {
           damage_type: string | null
           driver_view_obstruction: boolean | null
           id: string
+          insurer_name: string | null
           is_insurance_claim: boolean | null
+          is_out_of_network: boolean | null
+          is_preferred_shop: boolean | null
           notes: string | null
           reminder_email_sent: boolean | null
           requires_adas_calibration: boolean | null
@@ -61,7 +64,10 @@ export type Database = {
           damage_type?: string | null
           driver_view_obstruction?: boolean | null
           id?: string
+          insurer_name?: string | null
           is_insurance_claim?: boolean | null
+          is_out_of_network?: boolean | null
+          is_preferred_shop?: boolean | null
           notes?: string | null
           reminder_email_sent?: boolean | null
           requires_adas_calibration?: boolean | null
@@ -90,7 +96,10 @@ export type Database = {
           damage_type?: string | null
           driver_view_obstruction?: boolean | null
           id?: string
+          insurer_name?: string | null
           is_insurance_claim?: boolean | null
+          is_out_of_network?: boolean | null
+          is_preferred_shop?: boolean | null
           notes?: string | null
           reminder_email_sent?: boolean | null
           requires_adas_calibration?: boolean | null
@@ -387,6 +396,78 @@ export type Database = {
         }
         Relationships: []
       }
+      insurer_preferred_shops: {
+        Row: {
+          created_at: string
+          id: string
+          insurer_id: string
+          is_active: boolean | null
+          priority_level: number | null
+          shop_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          insurer_id: string
+          is_active?: boolean | null
+          priority_level?: number | null
+          shop_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          insurer_id?: string
+          is_active?: boolean | null
+          priority_level?: number | null
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurer_preferred_shops_insurer_id_fkey"
+            columns: ["insurer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurer_preferred_shops_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insurer_profiles: {
+        Row: {
+          contact_person: string | null
+          created_at: string
+          email: string | null
+          id: string
+          insurer_name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          insurer_name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          insurer_name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       job_offer_upsells: {
         Row: {
           created_at: string
@@ -441,6 +522,8 @@ export type Database = {
           estimated_completion_time: unknown | null
           expires_at: string
           id: string
+          is_out_of_network: boolean | null
+          is_preferred_shop: boolean | null
           notes: string | null
           offered_at: string
           offered_price: number
@@ -458,6 +541,8 @@ export type Database = {
           estimated_completion_time?: unknown | null
           expires_at: string
           id?: string
+          is_out_of_network?: boolean | null
+          is_preferred_shop?: boolean | null
           notes?: string | null
           offered_at?: string
           offered_price: number
@@ -475,6 +560,8 @@ export type Database = {
           estimated_completion_time?: unknown | null
           expires_at?: string
           id?: string
+          is_out_of_network?: boolean | null
+          is_preferred_shop?: boolean | null
           notes?: string | null
           offered_at?: string
           offered_price?: number
