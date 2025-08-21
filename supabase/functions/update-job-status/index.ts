@@ -133,6 +133,30 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Successfully updated job status to ${newStatus} for appointment ${appointmentId}`);
 
+    // Send customer notification
+    try {
+      const { error: notificationError } = await supabase.functions.invoke('send-job-notification', {
+        body: {
+          appointmentId,
+          type: 'status_change',
+          newStatus,
+          settings: {
+            email: true,
+            sms: true,
+            whatsapp: false
+          }
+        }
+      });
+      
+      if (notificationError) {
+        console.error('Failed to send customer notification:', notificationError);
+      } else {
+        console.log('Customer notification sent successfully');
+      }
+    } catch (notificationError) {
+      console.error('Error sending customer notification:', notificationError);
+    }
+
     return new Response(JSON.stringify({
       success: true,
       appointmentId,
