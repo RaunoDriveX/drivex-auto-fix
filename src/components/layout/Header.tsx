@@ -18,6 +18,7 @@ const Header = () => {
 
   const navLinks = [
     { name: "Home", href: "/" },
+    { name: "Track Job", href: "/track" },
     { name: "How it Works", href: "#workflow" },
     { name: "About Us", href: "#about" },
     { name: "Contact", href: "#contact" },

@@ -10,6 +10,7 @@ import InspectionResults from "./pages/InspectionResults";
 import AIReport from "./pages/AIReport";
 import ClaimSubmission from "./pages/ClaimSubmission";
 import JobTracking from "./pages/JobTracking";
+import TrackJobLookup from "./pages/TrackJobLookup";
 import ShopAuth from "./pages/ShopAuth";
 import ShopDashboard from "./pages/ShopDashboard";
 import InsurerAuth from "./pages/InsurerAuth";
@@ -35,6 +36,7 @@ const App = () => {
             <Route path="/results/:token" element={<InspectionResults />} />
             <Route path="/report/:token" element={<AIReport />} />
             <Route path="/claim/:appointmentId" element={<ClaimSubmission />} />
+            <Route path="/track" element={<TrackJobLookup />} />
             <Route path="/track/:appointmentId" element={<JobTracking />} />
             <Route path="/shop-auth" element={<ShopAuth />} />
             <Route path="/shop-dashboard" element={<ShopDashboard />} />
