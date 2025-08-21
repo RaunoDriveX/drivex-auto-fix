@@ -31,11 +31,15 @@ export type Database = {
           damage_photos: string[] | null
           damage_type: string | null
           driver_view_obstruction: boolean | null
+          estimated_completion: string | null
           id: string
           insurer_name: string | null
           is_insurance_claim: boolean | null
           is_out_of_network: boolean | null
           is_preferred_shop: boolean | null
+          job_completed_at: string | null
+          job_started_at: string | null
+          job_status: Database["public"]["Enums"]["job_status_type"] | null
           notes: string | null
           reminder_email_sent: boolean | null
           requires_adas_calibration: boolean | null
@@ -63,11 +67,15 @@ export type Database = {
           damage_photos?: string[] | null
           damage_type?: string | null
           driver_view_obstruction?: boolean | null
+          estimated_completion?: string | null
           id?: string
           insurer_name?: string | null
           is_insurance_claim?: boolean | null
           is_out_of_network?: boolean | null
           is_preferred_shop?: boolean | null
+          job_completed_at?: string | null
+          job_started_at?: string | null
+          job_status?: Database["public"]["Enums"]["job_status_type"] | null
           notes?: string | null
           reminder_email_sent?: boolean | null
           requires_adas_calibration?: boolean | null
@@ -95,11 +103,15 @@ export type Database = {
           damage_photos?: string[] | null
           damage_type?: string | null
           driver_view_obstruction?: boolean | null
+          estimated_completion?: string | null
           id?: string
           insurer_name?: string | null
           is_insurance_claim?: boolean | null
           is_out_of_network?: boolean | null
           is_preferred_shop?: boolean | null
+          job_completed_at?: string | null
+          job_started_at?: string | null
+          job_status?: Database["public"]["Enums"]["job_status_type"] | null
           notes?: string | null
           reminder_email_sent?: boolean | null
           requires_adas_calibration?: boolean | null
@@ -468,6 +480,59 @@ export type Database = {
         }
         Relationships: []
       }
+      insurer_webhook_configs: {
+        Row: {
+          created_at: string
+          events_subscribed: string[] | null
+          id: string
+          insurer_id: string
+          is_active: boolean | null
+          last_failure_at: string | null
+          last_success_at: string | null
+          retry_attempts: number | null
+          timeout_seconds: number | null
+          updated_at: string
+          webhook_secret: string | null
+          webhook_url: string
+        }
+        Insert: {
+          created_at?: string
+          events_subscribed?: string[] | null
+          id?: string
+          insurer_id: string
+          is_active?: boolean | null
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          retry_attempts?: number | null
+          timeout_seconds?: number | null
+          updated_at?: string
+          webhook_secret?: string | null
+          webhook_url: string
+        }
+        Update: {
+          created_at?: string
+          events_subscribed?: string[] | null
+          id?: string
+          insurer_id?: string
+          is_active?: boolean | null
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          retry_attempts?: number | null
+          timeout_seconds?: number | null
+          updated_at?: string
+          webhook_secret?: string | null
+          webhook_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurer_webhook_configs_insurer_id_fkey"
+            columns: ["insurer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_offer_upsells: {
         Row: {
           created_at: string
@@ -619,6 +684,76 @@ export type Database = {
           vehicle_type?: string | null
         }
         Relationships: []
+      }
+      job_status_audit: {
+        Row: {
+          appointment_id: string
+          changed_by_shop_id: string | null
+          claim_id: string | null
+          created_at: string
+          id: string
+          job_offer_id: string | null
+          metadata: Json | null
+          new_status: Database["public"]["Enums"]["job_status_type"]
+          notes: string | null
+          old_status: Database["public"]["Enums"]["job_status_type"] | null
+          status_changed_at: string
+          webhook_response: Json | null
+          webhook_sent_at: string | null
+        }
+        Insert: {
+          appointment_id: string
+          changed_by_shop_id?: string | null
+          claim_id?: string | null
+          created_at?: string
+          id?: string
+          job_offer_id?: string | null
+          metadata?: Json | null
+          new_status: Database["public"]["Enums"]["job_status_type"]
+          notes?: string | null
+          old_status?: Database["public"]["Enums"]["job_status_type"] | null
+          status_changed_at?: string
+          webhook_response?: Json | null
+          webhook_sent_at?: string | null
+        }
+        Update: {
+          appointment_id?: string
+          changed_by_shop_id?: string | null
+          claim_id?: string | null
+          created_at?: string
+          id?: string
+          job_offer_id?: string | null
+          metadata?: Json | null
+          new_status?: Database["public"]["Enums"]["job_status_type"]
+          notes?: string | null
+          old_status?: Database["public"]["Enums"]["job_status_type"] | null
+          status_changed_at?: string
+          webhook_response?: Json | null
+          webhook_sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_status_audit_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_status_audit_changed_by_shop_id_fkey"
+            columns: ["changed_by_shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_status_audit_job_offer_id_fkey"
+            columns: ["job_offer_id"]
+            isOneToOne: false
+            referencedRelation: "job_offers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       monthly_leaderboard: {
         Row: {
@@ -1453,6 +1588,7 @@ export type Database = {
         | "declined"
         | "expired"
         | "completed"
+      job_status_type: "scheduled" | "in_progress" | "completed" | "cancelled"
       notification_type: "job_offer" | "job_update" | "payment"
       repair_type: "chip_repair" | "crack_repair" | "both_repairs"
       service_capability: "repair_only" | "replacement_only" | "both"
@@ -1614,6 +1750,7 @@ export const Constants = {
         "expired",
         "completed",
       ],
+      job_status_type: ["scheduled", "in_progress", "completed", "cancelled"],
       notification_type: ["job_offer", "job_update", "payment"],
       repair_type: ["chip_repair", "crack_repair", "both_repairs"],
       service_capability: ["repair_only", "replacement_only", "both"],
