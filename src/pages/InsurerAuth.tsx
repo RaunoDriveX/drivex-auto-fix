@@ -19,11 +19,25 @@ export default function InsurerAuth() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already authenticated
+    // Check if user is already authenticated with valid profile
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/insurer-dashboard');
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email) {
+          // Verify the user has insurer profile before redirecting
+          const { data: profile } = await supabase
+            .from('insurer_profiles')
+            .select('*')
+            .eq('email', session.user.email)
+            .single();
+          
+          if (profile) {
+            navigate('/insurer-dashboard');
+          }
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        // Don't redirect if there's an error
       }
     };
     checkAuth();

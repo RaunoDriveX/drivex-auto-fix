@@ -27,104 +27,92 @@ export function useInsurerAuth() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let isMounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        if (!isMounted) return;
+
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user?.id) {
-          // Fetch user role and insurer profile
+          // Defer profile fetching to avoid blocking auth state changes
           setTimeout(async () => {
-            const [{ data: insurerUser }, { data: insurerId }] = await Promise.all([
-              supabase
-                .from('insurer_users')
-                .select('*')
-                .eq('user_id', session.user.id)
-                .eq('is_active', true)
-                .single(),
-              supabase.rpc('get_user_insurer_id', { _user_id: session.user.id })
-            ]);
-
-            if (insurerUser && insurerId) {
-              setUserRole(insurerUser);
-              
-              // Fetch insurer profile
-              const { data: insurerProfile } = await supabase
-                .from('insurer_profiles')
-                .select('*')
-                .eq('id', insurerId)
-                .single();
-              
-              setProfile(insurerProfile);
-            } else {
-              // Fallback to legacy profile check
+            if (!isMounted) return;
+            
+            try {
+              // First try to get insurer profile by email (legacy method)
               const { data: legacyProfile } = await supabase
                 .from('insurer_profiles')
                 .select('*')
                 .eq('email', session.user.email)
                 .single();
               
-              setProfile(legacyProfile);
+              if (legacyProfile) {
+                setProfile(legacyProfile);
+                setLoading(false);
+                return;
+              }
+
+              // If no legacy profile, try new method
+              const [{ data: insurerUser }, { data: insurerId }] = await Promise.all([
+                supabase
+                  .from('insurer_users')
+                  .select('*')
+                  .eq('user_id', session.user.id)
+                  .eq('is_active', true)
+                  .single(),
+                supabase.rpc('get_user_insurer_id', { _user_id: session.user.id })
+              ]);
+
+              if (insurerUser && insurerId) {
+                setUserRole(insurerUser);
+                
+                // Fetch insurer profile
+                const { data: insurerProfile } = await supabase
+                  .from('insurer_profiles')
+                  .select('*')
+                  .eq('id', insurerId)
+                  .single();
+                
+                setProfile(insurerProfile);
+              }
+            } catch (error) {
+              console.error('Error fetching insurer profile:', error);
+              setProfile(null);
+              setUserRole(null);
+            } finally {
+              if (isMounted) {
+                setLoading(false);
+              }
             }
           }, 0);
         } else {
           setProfile(null);
           setUserRole(null);
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     );
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user?.id) {
-        // Fetch user role and insurer profile
-        Promise.all([
-          supabase
-            .from('insurer_users')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .eq('is_active', true)
-            .single(),
-          supabase.rpc('get_user_insurer_id', { _user_id: session.user.id })
-        ]).then(([{ data: insurerUser }, { data: insurerId }]) => {
-          if (insurerUser && insurerId) {
-            setUserRole(insurerUser);
-            
-            // Fetch insurer profile
-            supabase
-              .from('insurer_profiles')
-              .select('*')
-              .eq('id', insurerId)
-              .single()
-              .then(({ data: insurerProfile }) => {
-                setProfile(insurerProfile);
-                setLoading(false);
-              });
-          } else {
-            // Fallback to legacy profile check
-            supabase
-              .from('insurer_profiles')
-              .select('*')
-              .eq('email', session.user.email)
-              .single()
-              .then(({ data: legacyProfile }) => {
-                setProfile(legacyProfile);
-                setLoading(false);
-              });
-          }
-        });
-      } else {
+      if (!session?.user?.id) {
         setLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
