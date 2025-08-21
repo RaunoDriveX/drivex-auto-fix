@@ -69,6 +69,11 @@ const Header = () => {
               <Phone className="h-4 w-4" />
               <span>+372 58528824</span>
             </div>
+            <Link to="/insurer-auth">
+              <Button variant="outline" size="sm">
+                Insurer Login
+              </Button>
+            </Link>
             <Button size="sm">
               Get Started
             </Button>
@@ -120,9 +125,16 @@ const Header = () => {
                   <Phone className="h-4 w-4" />
                   <span>+372 58528824</span>
                 </div>
-                <Button size="sm" className="w-full">
-                  Get Started
-                </Button>
+                <div className="space-y-2">
+                  <Link to="/insurer-auth">
+                    <Button variant="outline" size="sm" className="w-full">
+                      Insurer Login
+                    </Button>
+                  </Link>
+                  <Button size="sm" className="w-full">
+                    Get Started
+                  </Button>
+                </div>
               </div>
             </nav>
           </div>
