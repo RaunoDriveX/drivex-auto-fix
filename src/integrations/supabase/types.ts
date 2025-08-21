@@ -256,6 +256,104 @@ export type Database = {
         }
         Relationships: []
       }
+      insurance_claims: {
+        Row: {
+          ai_assessment_details: Json | null
+          ai_confidence_score: number | null
+          api_response: Json | null
+          appointment_id: string | null
+          claim_number: string
+          claim_status: string | null
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          damage_location: string
+          damage_photos: string[] | null
+          damage_severity: string
+          damage_type: string
+          email_sent_at: string | null
+          estimated_cost_max: number | null
+          estimated_cost_min: number | null
+          id: string
+          insurer_decision_date: string | null
+          insurer_name: string
+          insurer_response: Json | null
+          policy_number: string
+          recommended_action: string
+          submission_method: string
+          submission_status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_assessment_details?: Json | null
+          ai_confidence_score?: number | null
+          api_response?: Json | null
+          appointment_id?: string | null
+          claim_number: string
+          claim_status?: string | null
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          damage_location: string
+          damage_photos?: string[] | null
+          damage_severity: string
+          damage_type: string
+          email_sent_at?: string | null
+          estimated_cost_max?: number | null
+          estimated_cost_min?: number | null
+          id?: string
+          insurer_decision_date?: string | null
+          insurer_name: string
+          insurer_response?: Json | null
+          policy_number: string
+          recommended_action: string
+          submission_method?: string
+          submission_status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_assessment_details?: Json | null
+          ai_confidence_score?: number | null
+          api_response?: Json | null
+          appointment_id?: string | null
+          claim_number?: string
+          claim_status?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          damage_location?: string
+          damage_photos?: string[] | null
+          damage_severity?: string
+          damage_type?: string
+          email_sent_at?: string | null
+          estimated_cost_max?: number | null
+          estimated_cost_min?: number | null
+          id?: string
+          insurer_decision_date?: string | null
+          insurer_name?: string
+          insurer_response?: Json | null
+          policy_number?: string
+          recommended_action?: string
+          submission_method?: string
+          submission_status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_claims_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurance_details: {
         Row: {
           booking_reference: string

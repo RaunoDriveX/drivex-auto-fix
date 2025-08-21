@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Inspection from "./pages/Inspection";
 import InspectionResults from "./pages/InspectionResults";
 import AIReport from "./pages/AIReport";
+import ClaimSubmission from "./pages/ClaimSubmission";
 import ShopAuth from "./pages/ShopAuth";
 import ShopDashboard from "./pages/ShopDashboard";
 import NotFound from "./pages/NotFound";
@@ -30,6 +31,7 @@ const App = () => {
             <Route path="/inspection/:token" element={<Inspection />} />
             <Route path="/results/:token" element={<InspectionResults />} />
             <Route path="/report/:token" element={<AIReport />} />
+            <Route path="/claim/:appointmentId" element={<ClaimSubmission />} />
             <Route path="/shop-auth" element={<ShopAuth />} />
             <Route path="/shop-dashboard" element={<ShopDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
