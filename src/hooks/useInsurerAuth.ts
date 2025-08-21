@@ -11,10 +11,18 @@ interface InsurerProfile {
   phone: string | null;
 }
 
+interface InsurerUser {
+  id: string;
+  role: 'admin' | 'claims_user';
+  is_active: boolean;
+  full_name: string;
+}
+
 export function useInsurerAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<InsurerProfile | null>(null);
+  const [userRole, setUserRole] = useState<InsurerUser | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -25,19 +33,44 @@ export function useInsurerAuth() {
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user?.email) {
-          // Fetch insurer profile
+        if (session?.user?.id) {
+          // Fetch user role and insurer profile
           setTimeout(async () => {
-            const { data: insurerProfile } = await supabase
-              .from('insurer_profiles')
-              .select('*')
-              .eq('email', session.user.email)
-              .single();
-            
-            setProfile(insurerProfile);
+            const [{ data: insurerUser }, { data: insurerId }] = await Promise.all([
+              supabase
+                .from('insurer_users')
+                .select('*')
+                .eq('user_id', session.user.id)
+                .eq('is_active', true)
+                .single(),
+              supabase.rpc('get_user_insurer_id', { _user_id: session.user.id })
+            ]);
+
+            if (insurerUser && insurerId) {
+              setUserRole(insurerUser);
+              
+              // Fetch insurer profile
+              const { data: insurerProfile } = await supabase
+                .from('insurer_profiles')
+                .select('*')
+                .eq('id', insurerId)
+                .single();
+              
+              setProfile(insurerProfile);
+            } else {
+              // Fallback to legacy profile check
+              const { data: legacyProfile } = await supabase
+                .from('insurer_profiles')
+                .select('*')
+                .eq('email', session.user.email)
+                .single();
+              
+              setProfile(legacyProfile);
+            }
           }, 0);
         } else {
           setProfile(null);
+          setUserRole(null);
         }
         
         setLoading(false);
@@ -49,17 +82,43 @@ export function useInsurerAuth() {
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user?.email) {
-        // Fetch insurer profile
-        supabase
-          .from('insurer_profiles')
-          .select('*')
-          .eq('email', session.user.email)
-          .single()
-          .then(({ data: insurerProfile }) => {
-            setProfile(insurerProfile);
-            setLoading(false);
-          });
+      if (session?.user?.id) {
+        // Fetch user role and insurer profile
+        Promise.all([
+          supabase
+            .from('insurer_users')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .eq('is_active', true)
+            .single(),
+          supabase.rpc('get_user_insurer_id', { _user_id: session.user.id })
+        ]).then(([{ data: insurerUser }, { data: insurerId }]) => {
+          if (insurerUser && insurerId) {
+            setUserRole(insurerUser);
+            
+            // Fetch insurer profile
+            supabase
+              .from('insurer_profiles')
+              .select('*')
+              .eq('id', insurerId)
+              .single()
+              .then(({ data: insurerProfile }) => {
+                setProfile(insurerProfile);
+                setLoading(false);
+              });
+          } else {
+            // Fallback to legacy profile check
+            supabase
+              .from('insurer_profiles')
+              .select('*')
+              .eq('email', session.user.email)
+              .single()
+              .then(({ data: legacyProfile }) => {
+                setProfile(legacyProfile);
+                setLoading(false);
+              });
+          }
+        });
       } else {
         setLoading(false);
       }
@@ -74,6 +133,7 @@ export function useInsurerAuth() {
       setUser(null);
       setSession(null);
       setProfile(null);
+      setUserRole(null);
       navigate('/');
     } catch (error) {
       console.error('Error signing out:', error);
@@ -88,13 +148,19 @@ export function useInsurerAuth() {
     return true;
   };
 
+  const isAdmin = () => {
+    return userRole?.role === 'admin';
+  };
+
   return {
     user,
     session,
     profile,
+    userRole,
     loading,
     signOut,
     requireAuth,
+    isAdmin,
     isAuthenticated: !!user && !!profile
   };
 }

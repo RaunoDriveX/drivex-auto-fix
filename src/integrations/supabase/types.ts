@@ -498,6 +498,53 @@ export type Database = {
         }
         Relationships: []
       }
+      insurer_users: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          full_name: string
+          id: string
+          insurer_id: string
+          is_active: boolean
+          role: Database["public"]["Enums"]["insurer_user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          full_name: string
+          id?: string
+          insurer_id: string
+          is_active?: boolean
+          role?: Database["public"]["Enums"]["insurer_user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          insurer_id?: string
+          is_active?: boolean
+          role?: Database["public"]["Enums"]["insurer_user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurer_users_insurer_id_fkey"
+            columns: ["insurer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurer_webhook_configs: {
         Row: {
           created_at: string
@@ -1642,6 +1689,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_user_insurer_id: {
+        Args: { _user_id: string }
+        Returns: string
+      }
+      is_insurer_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       shop_has_qualified_technicians: {
         Args: {
           _damage_type?: string
@@ -1674,6 +1729,7 @@ export type Database = {
         | "heads_up_display"
         | "rain_sensor"
         | "tinted_glass"
+      insurer_user_role: "admin" | "claims_user"
       job_status:
         | "pending"
         | "offered"
@@ -1835,6 +1891,7 @@ export const Constants = {
         "rain_sensor",
         "tinted_glass",
       ],
+      insurer_user_role: ["admin", "claims_user"],
       job_status: [
         "pending",
         "offered",
