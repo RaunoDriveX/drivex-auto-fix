@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { JobStatusTracker } from '@/components/realtime/JobStatusTracker';
+import { CompletionDocumentsViewer } from '@/components/insurer/CompletionDocumentsViewer';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import {
@@ -360,8 +361,9 @@ export const InsurerJobsBoard: React.FC = () => {
                 </Button>
                 
                 {selectedJob === job.id && (
-                  <div className="mt-4">
+                  <div className="mt-4 space-y-4">
                     <JobStatusTracker appointmentId={job.id} />
+                    <CompletionDocumentsViewer appointmentId={job.id} />
                   </div>
                 )}
               </CardContent>

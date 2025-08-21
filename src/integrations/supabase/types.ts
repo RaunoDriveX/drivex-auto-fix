@@ -23,6 +23,9 @@ export type Database = {
           ai_recommended_repair: string | null
           appointment_date: string
           appointment_time: string
+          completion_documents_verified: boolean | null
+          completion_proof_path: string | null
+          completion_proof_uploaded_at: string | null
           confirmation_email_sent: boolean | null
           created_at: string
           customer_email: string
@@ -34,6 +37,9 @@ export type Database = {
           estimated_completion: string | null
           id: string
           insurer_name: string | null
+          invoice_file_path: string | null
+          invoice_sent_to_insurer_at: string | null
+          invoice_uploaded_at: string | null
           is_insurance_claim: boolean | null
           is_out_of_network: boolean | null
           is_preferred_shop: boolean | null
@@ -59,6 +65,9 @@ export type Database = {
           ai_recommended_repair?: string | null
           appointment_date: string
           appointment_time: string
+          completion_documents_verified?: boolean | null
+          completion_proof_path?: string | null
+          completion_proof_uploaded_at?: string | null
           confirmation_email_sent?: boolean | null
           created_at?: string
           customer_email: string
@@ -70,6 +79,9 @@ export type Database = {
           estimated_completion?: string | null
           id?: string
           insurer_name?: string | null
+          invoice_file_path?: string | null
+          invoice_sent_to_insurer_at?: string | null
+          invoice_uploaded_at?: string | null
           is_insurance_claim?: boolean | null
           is_out_of_network?: boolean | null
           is_preferred_shop?: boolean | null
@@ -95,6 +107,9 @@ export type Database = {
           ai_recommended_repair?: string | null
           appointment_date?: string
           appointment_time?: string
+          completion_documents_verified?: boolean | null
+          completion_proof_path?: string | null
+          completion_proof_uploaded_at?: string | null
           confirmation_email_sent?: boolean | null
           created_at?: string
           customer_email?: string
@@ -106,6 +121,9 @@ export type Database = {
           estimated_completion?: string | null
           id?: string
           insurer_name?: string | null
+          invoice_file_path?: string | null
+          invoice_sent_to_insurer_at?: string | null
+          invoice_uploaded_at?: string | null
           is_insurance_claim?: boolean | null
           is_out_of_network?: boolean | null
           is_preferred_shop?: boolean | null
@@ -529,6 +547,81 @@ export type Database = {
             columns: ["insurer_id"]
             isOneToOne: false
             referencedRelation: "insurer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_completion_documents: {
+        Row: {
+          appointment_id: string
+          completion_proof_file_name: string
+          completion_proof_file_size: number | null
+          completion_proof_path: string
+          created_at: string
+          id: string
+          insurer_delivery_method: string | null
+          insurer_delivery_response: Json | null
+          insurer_delivery_status: string | null
+          invoice_file_name: string
+          invoice_file_path: string
+          invoice_file_size: number | null
+          notes: string | null
+          sent_to_insurer_at: string | null
+          shop_id: string
+          updated_at: string
+          uploaded_at: string
+        }
+        Insert: {
+          appointment_id: string
+          completion_proof_file_name: string
+          completion_proof_file_size?: number | null
+          completion_proof_path: string
+          created_at?: string
+          id?: string
+          insurer_delivery_method?: string | null
+          insurer_delivery_response?: Json | null
+          insurer_delivery_status?: string | null
+          invoice_file_name: string
+          invoice_file_path: string
+          invoice_file_size?: number | null
+          notes?: string | null
+          sent_to_insurer_at?: string | null
+          shop_id: string
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          completion_proof_file_name?: string
+          completion_proof_file_size?: number | null
+          completion_proof_path?: string
+          created_at?: string
+          id?: string
+          insurer_delivery_method?: string | null
+          insurer_delivery_response?: Json | null
+          insurer_delivery_status?: string | null
+          invoice_file_name?: string
+          invoice_file_path?: string
+          invoice_file_size?: number | null
+          notes?: string | null
+          sent_to_insurer_at?: string | null
+          shop_id?: string
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_completion_documents_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_completion_documents_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
             referencedColumns: ["id"]
           },
         ]

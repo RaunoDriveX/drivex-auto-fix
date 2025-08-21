@@ -9,11 +9,14 @@ import {
   CheckCircle, 
   XCircle, 
   Clock,
-  AlertTriangle 
+  AlertTriangle,
+  FileText,
+  Upload
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
+import { CompletionDocumentsUpload } from './CompletionDocumentsUpload';
 import {
   Dialog,
   DialogContent,
@@ -62,10 +65,18 @@ export const JobStatusControls: React.FC<JobStatusControlsProps> = ({
   const [updating, setUpdating] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [selectedAction, setSelectedAction] = useState<any>(null);
+  const [showCompletionUpload, setShowCompletionUpload] = useState(false);
+  const [documentsUploaded, setDocumentsUploaded] = useState(false);
 
   const availableActions = statusActions[currentStatus] || [];
 
   const handleStatusUpdate = async (newStatus: string, actionNotes?: string) => {
+    // If trying to complete a job, ensure documents are uploaded
+    if (newStatus === 'completed' && !documentsUploaded) {
+      setShowCompletionUpload(true);
+      return;
+    }
+
     setUpdating(newStatus);
     
     try {
@@ -101,6 +112,14 @@ export const JobStatusControls: React.FC<JobStatusControlsProps> = ({
     } finally {
       setUpdating(null);
     }
+  };
+
+  const handleDocumentsUploaded = (data: { invoiceUrl: string; proofUrl: string }) => {
+    setDocumentsUploaded(true);
+    setShowCompletionUpload(false);
+    
+    // Now complete the job
+    handleStatusUpdate('completed', 'Job completed with documents uploaded');
   };
 
   const handleCancelJob = () => {
@@ -145,55 +164,88 @@ export const JobStatusControls: React.FC<JobStatusControlsProps> = ({
           {availableActions.map((action) => {
             const ActionIcon = action.icon;
             const isUpdating = updating === action.status;
+            const isCompleting = action.status === 'completed';
             
             return (
-              <Dialog key={action.status}>
-                <DialogTrigger asChild>
-                  <Button
-                    className={cn("w-full justify-start gap-2", action.color)}
-                    disabled={updating !== null}
-                    onClick={() => setSelectedAction(action)}
-                  >
-                    <ActionIcon className="h-4 w-4" />
-                    {isUpdating ? 'Updating...' : action.label}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <ActionIcon className="h-5 w-5" />
-                      {action.label}
-                    </DialogTitle>
-                    <DialogDescription>
-                      {action.description}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="status-notes">Notes (optional)</Label>
-                      <Textarea
-                        id="status-notes"
-                        placeholder="Add any notes about this status change..."
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div className="flex gap-2">
+              <div key={action.status}>
+                {isCompleting ? (
+                  <Dialog open={showCompletionUpload} onOpenChange={setShowCompletionUpload}>
+                    <DialogTrigger asChild>
                       <Button
-                        onClick={() => handleStatusUpdate(action.status)}
+                        className={cn("w-full justify-start gap-2", action.color)}
                         disabled={updating !== null}
-                        className="flex-1"
                       >
-                        {updating === action.status ? 'Updating...' : `Confirm ${action.label}`}
+                        <ActionIcon className="h-4 w-4" />
+                        {isUpdating ? 'Updating...' : action.label}
                       </Button>
-                      <DialogTrigger asChild>
-                        <Button variant="outline">Cancel</Button>
-                      </DialogTrigger>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          Upload Completion Documents
+                        </DialogTitle>
+                        <DialogDescription>
+                          Before marking the job as complete, please upload the invoice and completion proof photo.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <CompletionDocumentsUpload
+                        appointmentId={appointmentId}
+                        shopId={shopId}
+                        onDocumentsUploaded={handleDocumentsUploaded}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <Dialog key={action.status}>
+                    <DialogTrigger asChild>
+                      <Button
+                        className={cn("w-full justify-start gap-2", action.color)}
+                        disabled={updating !== null}
+                        onClick={() => setSelectedAction(action)}
+                      >
+                        <ActionIcon className="h-4 w-4" />
+                        {isUpdating ? 'Updating...' : action.label}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <ActionIcon className="h-5 w-5" />
+                          {action.label}
+                        </DialogTitle>
+                        <DialogDescription>
+                          {action.description}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="status-notes">Notes (optional)</Label>
+                          <Textarea
+                            id="status-notes"
+                            placeholder="Add any notes about this status change..."
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleStatusUpdate(action.status)}
+                            disabled={updating !== null}
+                            className="flex-1"
+                          >
+                            {updating === action.status ? 'Updating...' : `Confirm ${action.label}`}
+                          </Button>
+                          <DialogTrigger asChild>
+                            <Button variant="outline">Cancel</Button>
+                          </DialogTrigger>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
             );
           })}
         </div>
