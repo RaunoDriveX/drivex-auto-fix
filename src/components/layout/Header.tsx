@@ -28,14 +28,14 @@ const Header = () => {
   return (
     <header className="bg-white/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-24">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center py-2 hover:opacity-80 transition-opacity duration-200">
               <img 
                 src="/lovable-uploads/a5efa9c3-de1b-4fe4-bd71-b629b802989d.png" 
                 alt="Autocristal - Auto Glass Repair & Replacement" 
-                className="h-20 w-auto max-w-[200px] object-contain" 
+                className="h-28 w-auto max-w-[280px] object-contain" 
               />
             </Link>
           </div>
