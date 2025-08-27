@@ -33,7 +33,7 @@ const Header = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center py-2 hover:opacity-80 transition-opacity duration-200">
               <img 
-                src="/lovable-uploads/a5efa9c3-de1b-4fe4-bd71-b629b802989d.png" 
+                src="/lovable-uploads/df12f014-4490-43bd-b853-4dd0b472d367.png" 
                 alt="Autocristal - Auto Glass Repair & Replacement" 
                 className="h-28 w-auto max-w-[280px] object-contain" 
               />
