@@ -32,7 +32,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <img src="/lovable-uploads/a5efa9c3-de1b-4fe4-bd71-b629b802989d.png" alt="Autocristal" className="h-10 w-auto" />
+              <img src="/lovable-uploads/a5efa9c3-de1b-4fe4-bd71-b629b802989d.png" alt="Autocristal" className="h-16 w-auto" />
             </Link>
           </div>
 
