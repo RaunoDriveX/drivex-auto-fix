@@ -50,11 +50,12 @@ const Hero = () => {
       <div className="relative z-10 container mx-auto py-24 lg:py-32">
         <div className="max-w-2xl">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
-            The easiest, fastest, and most trusted way to fix your windshield
+            Fix your vehicle glass!
           </h1>
           <p className="mt-6 text-lg lg:text-xl text-white/90">
-            Cracked windshield? Don't wait until it gets worse — or until you fail inspection and get fined.
-            Get transparent pricing, book online in minutes, and ensure safety with ADAS recalibration included.
+            Report your glass damage in minutes. Our AI triages repair vs. replacement and
+            matches you with the best shop based on price, availability, and quality. Uninsured?
+            Order a DIY resin kit.
           </p>
           
           <form onSubmit={handleStart} className="mt-8 grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
