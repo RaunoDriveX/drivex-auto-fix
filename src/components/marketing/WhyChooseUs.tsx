@@ -51,7 +51,7 @@ const WhyChooseUs = () => {
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8 leading-tight">
             Fair pricing. Quality repairs.<br/>
-            <span className="text-brand">Powered by AI.</span>
+            <span className="text-primary">Powered by AI.</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             300,000 assessments completed with <span className="font-semibold text-foreground">95% accuracy</span> over 6 years. 
@@ -68,7 +68,7 @@ const WhyChooseUs = () => {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-4">{practice.title}</h3>
               <p className="text-muted-foreground mb-4 leading-relaxed">{practice.description}</p>
-              <div className="inline-flex items-center gap-2 text-sm text-brand font-medium px-4 py-2 bg-brand/10 rounded-full">
+              <div className="inline-flex items-center gap-2 text-sm text-primary font-medium px-4 py-2 bg-primary/5 rounded-full">
                 <CheckCircle className="h-4 w-4" />
                 {practice.benefit}
               </div>
@@ -114,8 +114,8 @@ const WhyChooseUs = () => {
                 </div>
               </div>
 
-              <div className="mt-8 p-6 bg-brand/10 rounded-lg border border-brand/20">
-                <div className="flex items-center gap-2 text-brand font-semibold mb-2">
+              <div className="mt-8 p-6 bg-primary/5 rounded-lg border border-primary/10">
+                <div className="flex items-center gap-2 text-primary font-semibold mb-2">
                   <TrendingUp className="h-5 w-5" />
                   Proven Track Record
                 </div>
@@ -135,7 +135,7 @@ const WhyChooseUs = () => {
               />
               <div className="absolute -bottom-4 -right-4 bg-white dark:bg-gray-900 p-4 rounded-lg shadow-lg border">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-brand">4</div>
+                  <div className="text-2xl font-bold text-primary">4</div>
                   <div className="text-sm text-muted-foreground">Continents</div>
                 </div>
               </div>
