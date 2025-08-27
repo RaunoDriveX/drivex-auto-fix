@@ -41,7 +41,7 @@ const WhyChooseUs = () => {
   ];
 
   return (
-    <section className="bg-gradient-to-b from-background to-muted/30 py-20">
+    <section id="about" className="bg-gradient-to-b from-background to-muted/30 py-20">
       <div className="container mx-auto">
         
         {/* Main header */}

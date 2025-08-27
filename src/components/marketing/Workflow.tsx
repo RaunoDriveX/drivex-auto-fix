@@ -42,7 +42,7 @@ const steps = [
 
 const Workflow = () => {
   return (
-    <section aria-labelledby="workflow-heading" className="bg-gradient-to-br from-background to-muted/20 py-16">
+    <section id="workflow" aria-labelledby="workflow-heading" className="bg-gradient-to-br from-background to-muted/20 py-16">
       <div className="container mx-auto">
         <div className="text-center mb-12">
           <h2 id="workflow-heading" className="text-3xl md:text-4xl font-bold text-foreground mb-4">
