@@ -31,8 +31,8 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-primary">
-              DriveX
+            <Link to="/" className="flex items-center">
+              <img src="/lovable-uploads/a5efa9c3-de1b-4fe4-bd71-b629b802989d.png" alt="Autocristal" className="h-10 w-auto" />
             </Link>
           </div>
 
