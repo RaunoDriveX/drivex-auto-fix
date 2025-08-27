@@ -84,7 +84,7 @@ const Hero = () => {
                 className="bg-white/95 border-white/20" 
               />
             </div>
-            <Button size="lg" type="submit" className="bg-primary hover:bg-primary/90">
+            <Button size="lg" type="submit" className="bg-brand hover:bg-brand/90 text-brand-foreground">
               Begin damage assessment
             </Button>
           </form>

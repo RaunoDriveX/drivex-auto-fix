@@ -75,7 +75,7 @@ const Testimonials = () => {
                 
                 {/* Benefit badge */}
                 <div className="mt-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-brand/10 text-brand">
                     {testimonial.benefit}
                   </span>
                 </div>
@@ -92,13 +92,13 @@ const Testimonials = () => {
           <div className="flex flex-wrap gap-4 justify-center">
             <Link 
               to="/report/eo3w_x1IBgPaUDj8gsUVkI2qL8rG0gSx" 
-              className="px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
+              className="px-8 py-4 bg-brand text-brand-foreground font-semibold rounded-lg hover:bg-brand/90 transition-colors"
             >
               Start Your Assessment
             </Link>
             <a 
-              href="mailto:fleet@autocristal.com" 
-              className="px-8 py-4 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/5 transition-colors"
+              href="mailto:fleet@autocristal.mx" 
+              className="px-8 py-4 border border-brand text-brand font-semibold rounded-lg hover:bg-brand/5 transition-colors"
             >
               Contact Fleet Sales
             </a>
