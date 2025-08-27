@@ -3,24 +3,36 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Users, Building2, Zap, Shield, DollarSign, Clock, Smartphone, TrendingUp } from "lucide-react";
 
 const WhyChooseUs = () => {
-  const practices = [
-    {
-      icon: Zap,
-      title: "AI-Powered Assessment",
-      description: "Patent-pending technology analyzes damage instantly with 95% accuracy.",
-      benefit: "Get the right solution every time"
-    },
+  const carOwnerBenefits = [
     {
       icon: DollarSign,
-      title: "Transparent Marketplace",
-      description: "Compare real prices from vetted shops. Fair deals for everyone.",
-      benefit: "Best value with full price visibility"
+      title: "Transparent Pricing",
+      description: "Compare OEM glass vs. lower-cost options, always with calibration included.",
+      benefit: "Fair pricing, no surprises"
+    },
+    {
+      icon: Shield,
+      title: "No Insurance Required",
+      description: "Most drivers pay out-of-pocket, and we make it simple and fair.",
+      benefit: "Built for Mexico's reality"
     },
     {
       icon: Smartphone,
-      title: "Mobile-First Platform",
-      description: "Complete assessment to booking in minutes on your phone.",
-      benefit: "Maximum convenience and speed"
+      title: "Total Convenience",
+      description: "Book online in minutes, with mobile or in-shop service options.",
+      benefit: "Your schedule, your location"
+    },
+    {
+      icon: CheckCircle,
+      title: "Safety Guaranteed",
+      description: "Repair + ADAS recalibration in one visit, with certificate provided.",
+      benefit: "Complete peace of mind"
+    },
+    {
+      icon: Badge,
+      title: "Trusted Network",
+      description: "Every shop in our network is vetted and backed by the Autocristal brand.",
+      benefit: "Quality you can count on"
     }
   ];
 
@@ -47,100 +59,102 @@ const WhyChooseUs = () => {
         {/* Main header */}
         <div className="text-center mb-20">
           <Badge variant="secondary" className="mb-6 px-6 py-3 text-sm font-medium">
-            Patent Pending Technology
+            🚘 For Car Owners
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8 leading-tight">
-            Fair pricing. Quality repairs.<br/>
-            <span className="text-primary">Powered by AI.</span>
+            Fix your windshield today<br/>
+            <span className="text-primary">and avoid fines.</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            300,000 assessments completed with <span className="font-semibold text-foreground">95% accuracy</span> over 6 years. 
-            Autocristal creates transparency in the auto glass repair market.
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <span className="font-semibold text-foreground">70% of drivers in Mexico don't have insurance</span> — our platform is built for them. 
+            With stricter inspections & fines, timely windshield repair is now a necessity.
           </p>
         </div>
 
-        {/* Our practices */}
-        <div className="grid md:grid-cols-3 gap-8 mb-24">
-          {practices.map((practice, index) => (
-            <div key={practice.title} className="text-center group animate-fade-in" style={{ animationDelay: `${index * 150}ms` }}>
+        {/* Car owner benefits */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+          {carOwnerBenefits.map((benefit, index) => (
+            <div key={benefit.title} className="text-center group animate-fade-in" style={{ animationDelay: `${index * 150}ms` }}>
               <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <practice.icon className="h-10 w-10 text-primary" />
+                <benefit.icon className="h-10 w-10 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">{practice.title}</h3>
-              <p className="text-muted-foreground mb-4 leading-relaxed">{practice.description}</p>
+              <h3 className="text-xl font-semibold text-foreground mb-4">{benefit.title}</h3>
+              <p className="text-muted-foreground mb-4 leading-relaxed">{benefit.description}</p>
               <div className="inline-flex items-center gap-2 text-sm text-primary font-medium px-4 py-2 bg-primary/5 rounded-full">
                 <CheckCircle className="h-4 w-4" />
-                {practice.benefit}
+                {benefit.benefit}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Team section */}
+        {/* Shop benefits - brief mention */}
         <div className="mb-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <Badge variant="secondary" className="mb-4 px-4 py-2">
-                Our Team
-              </Badge>
-              <h3 className="text-3xl font-bold text-foreground mb-6">
-                Trusted by drivers worldwide
-              </h3>
-              <p className="text-lg text-muted-foreground mb-6">
-                Our international team is already revolutionizing auto glass repair across multiple continents. 
-                From our headquarters to our partner networks, we're building the future of automotive maintenance.
-              </p>
-              
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <span className="font-medium">Europe</span>
-                  <span className="text-muted-foreground">- Germany, Netherlands, and expanding</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <span className="font-medium">North America</span>
-                  <span className="text-muted-foreground">- United States operations</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="font-medium">Latin America</span>
-                  <span className="text-muted-foreground">- Brazil market launch</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                  <span className="font-medium">Africa</span>
-                  <span className="text-muted-foreground">- Emerging market partnerships</span>
-                </div>
-              </div>
-
-              <div className="mt-8 p-6 bg-primary/5 rounded-lg border border-primary/10">
-                <div className="flex items-center gap-2 text-primary font-semibold mb-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Proven Track Record
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Over 300,000 assessments completed in 6 years of operation, 
-                  with 97% customer satisfaction rate.
-                </p>
-              </div>
+          <div className="text-center mb-12">
+            <Badge variant="secondary" className="mb-4 px-4 py-2">
+              🔧 For Repair Shops
+            </Badge>
+            <h3 className="text-3xl font-bold text-foreground mb-6">
+              Win more jobs — risk free
+            </h3>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Losing customers to big chains and dealerships? Join Autocristal and get ready-to-go customers sent straight to your shop.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="text-center p-6 bg-muted/50 rounded-lg">
+              <Users className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h4 className="font-semibold mb-2">Ready Customers</h4>
+              <p className="text-sm text-muted-foreground">Confirmed jobs sent directly to you</p>
             </div>
-
-            <div className="relative">
-              <img
-                src="/lovable-uploads/5cafe942-1574-4628-a9df-559fb4bd6d49.png"
-                alt="Autocristal international team members standing together with classic cars, representing our global presence"
-                className="w-full h-auto rounded-xl shadow-2xl"
-                loading="lazy"
-              />
-              <div className="absolute -bottom-4 -right-4 bg-white dark:bg-gray-900 p-4 rounded-lg shadow-lg border">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">4</div>
-                  <div className="text-sm text-muted-foreground">Continents</div>
-                </div>
-              </div>
+            <div className="text-center p-6 bg-muted/50 rounded-lg">
+              <DollarSign className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h4 className="font-semibold mb-2">No Subscriptions</h4>
+              <p className="text-sm text-muted-foreground">Only pay when you get real work</p>
+            </div>
+            <div className="text-center p-6 bg-muted/50 rounded-lg">
+              <Smartphone className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h4 className="font-semibold mb-2">Digital Presence</h4>
+              <p className="text-sm text-muted-foreground">Online booking and reviews included</p>
+            </div>
+            <div className="text-center p-6 bg-muted/50 rounded-lg">
+              <Shield className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h4 className="font-semibold mb-2">Quality Seal</h4>
+              <p className="text-sm text-muted-foreground">Stand tall against chains</p>
             </div>
           </div>
+        </div>
+
+        {/* Why Autocristal section */}
+        <div className="text-center mb-20">
+          <Badge variant="secondary" className="mb-6 px-6 py-3 text-sm font-medium">
+            🌟 Why Autocristal?
+          </Badge>
+          <h3 className="text-3xl font-bold text-foreground mb-8">
+            The trusted network connecting car owners and repair shops across Latin America
+          </h3>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg">
+              <div className="text-2xl font-bold text-primary mb-2">70%</div>
+              <p className="text-sm text-muted-foreground">of drivers in Mexico don't have insurance — our platform is built for them</p>
+            </div>
+            <div className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg">
+              <CheckCircle className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h4 className="font-semibold mb-2">Certification & Warranty</h4>
+              <p className="text-sm text-muted-foreground">Every job comes with proof of quality</p>
+            </div>
+            <div className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg">
+              <TrendingUp className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h4 className="font-semibold mb-2">Growing Network</h4>
+              <p className="text-sm text-muted-foreground">More shops = more trust = more customers for everyone</p>
+            </div>
+          </div>
+          
+          <p className="text-lg text-muted-foreground mt-8 max-w-2xl mx-auto">
+            💡 <strong>Autocristal:</strong> not just a directory, but the trusted network connecting car owners and repair shops across Latin America.
+          </p>
         </div>
 
       </div>
