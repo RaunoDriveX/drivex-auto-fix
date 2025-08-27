@@ -127,9 +127,20 @@ const ShopAuth = () => {
           </Alert>
         )}
         
-        <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
         </Button>
+
+        {/* Demo Credentials */}
+        {!isSignUp && (
+          <div className="mt-4 p-3 bg-muted/50 rounded-lg border">
+            <h4 className="text-sm font-medium text-foreground mb-2">Demo Credentials</h4>
+            <div className="space-y-1 text-xs text-muted-foreground">
+              <p><strong>Email:</strong> demo.shop@autofix.com</p>
+              <p><strong>Password:</strong> password123</p>
+            </div>
+          </div>
+        )}
       </form>
     );
   };

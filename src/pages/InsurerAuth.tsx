@@ -171,7 +171,16 @@ export default function InsurerAuth() {
                 </Button>
               </form>
 
-              <div className="mt-6 text-center text-sm text-muted-foreground">
+              {/* Demo Credentials */}
+              <div className="mt-6 p-3 bg-muted/50 rounded-lg border">
+                <h4 className="text-sm font-medium text-foreground mb-2">Demo Credentials</h4>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <p><strong>Email:</strong> demo.insurer@allstate.com</p>
+                  <p><strong>Password:</strong> password123</p>
+                </div>
+              </div>
+
+              <div className="mt-4 text-center text-sm text-muted-foreground">
                 <p>Need access? Contact your DriveX administrator.</p>
               </div>
             </CardContent>
