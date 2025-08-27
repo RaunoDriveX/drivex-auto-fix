@@ -46,7 +46,7 @@ const Workflow = () => {
       <div className="container mx-auto">
         <div className="text-center mb-12">
           <h2 id="workflow-heading" className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            How DriveX works
+            How Autocristal works
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             From damage report to repair completion in 6 simple steps. Fast, transparent, and designed for your convenience.

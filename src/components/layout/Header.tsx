@@ -21,7 +21,7 @@ const Header = () => {
     { name: "How it Works", href: "#workflow" },
     { name: "About Us", href: "#about" },
     { name: "Contact", href: "#contact" },
-    { name: "Fleet Solutions", href: "mailto:fleet@drivex.com" },
+    { name: "Fleet Solutions", href: "mailto:fleet@autocristal.com" },
     { name: "Shop Portal", href: "/shop-auth" }
   ];
 

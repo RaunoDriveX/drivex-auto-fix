@@ -31,7 +31,7 @@ const Hero = () => {
       <div className="absolute inset-0">
         <img
           src="/lovable-uploads/55656e15-f7f7-4cf3-9e95-1f90feeb7a19.png"
-          alt="DriveX professional using mobile app for auto glass inspection"
+          alt="Autocristal professional using mobile app for auto glass inspection"
           className="w-full h-full object-cover"
           loading="eager"
           decoding="async"

@@ -13,7 +13,7 @@ const Index = () => {
   const orgJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "DriveX",
+    name: "Autocristal",
     url: canonical,
     sameAs: [] as string[],
   };
@@ -21,13 +21,13 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>DriveX Auto Glass Repair & Replacement</title>
+        <title>Autocristal Auto Glass Repair & Replacement</title>
         <meta
           name="description"
           content="Report glass damage. AI triage and smart matching to top repair shops. Or order DIY resin. Fast, fair, quality."
         />
         <link rel="canonical" href={canonical} />
-        <meta property="og:title" content="DriveX Auto Glass Repair & Replacement" />
+        <meta property="og:title" content="Autocristal Auto Glass Repair & Replacement" />
         <meta property="og:description" content="Report glass damage. AI triage and smart matching to top repair shops. Or DIY resin." />
         <meta property="og:type" content="website" />
         <script type="application/ld+json">{JSON.stringify(orgJsonLd)}</script>
