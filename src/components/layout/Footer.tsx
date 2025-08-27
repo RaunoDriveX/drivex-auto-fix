@@ -18,15 +18,15 @@ const Footer = () => {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>+372 58528824</span>
+                <span>+52 55 1234 5678</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>hello@autocristal.com</span>
+                <span>contacto@autocristal.mx</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>Global Operations</span>
+                <span>Ciudad de México, México</span>
               </div>
             </div>
           </div>
@@ -53,7 +53,7 @@ const Footer = () => {
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Careers</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">News & Press</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Partner Network</a></li>
-              <li><a href="mailto:fleet@autocristal.com" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</a></li>
+              <li><a href="mailto:contacto@autocristal.mx" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</a></li>
             </ul>
           </div>
 
