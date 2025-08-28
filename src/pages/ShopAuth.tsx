@@ -17,52 +17,23 @@ const ShopAuth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if user is already logged in
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        navigate("/shop-dashboard");
-      }
-    };
-    checkAuth();
-  }, [navigate]);
-
   const handleAuth = async (email: string, password: string, isSignUp: boolean) => {
     setIsLoading(true);
     setError(null);
     
-    try {
+    // Simulate loading for demo purposes
+    setTimeout(() => {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/shop-dashboard`
-          }
-        });
-        
-        if (error) throw error;
-        
         toast({
           title: "Account created",
-          description: "Please check your email to verify your account."
+          description: "Demo account created successfully."
         });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-        
-        if (error) throw error;
-        
+        // Skip auth and go directly to dashboard for demo
         navigate("/shop-dashboard");
       }
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
       setIsLoading(false);
-    }
+    }, 500);
   };
 
   const AuthForm = ({ isSignUp }: { isSignUp: boolean }) => {

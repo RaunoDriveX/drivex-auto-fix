@@ -18,72 +18,21 @@ export default function InsurerAuth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Check if user is already authenticated with valid profile
-    const checkAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user?.email) {
-          // Verify the user has insurer profile before redirecting
-          const { data: profile } = await supabase
-            .from('insurer_profiles')
-            .select('*')
-            .eq('email', session.user.email)
-            .single();
-          
-          if (profile) {
-            navigate('/insurer-dashboard');
-          }
-        }
-      } catch (error) {
-        console.error('Auth check error:', error);
-        // Don't redirect if there's an error
-      }
-    };
-    checkAuth();
-  }, [navigate]);
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        setError(signInError.message);
-        return;
-      }
-
-      // Verify the user has insurer profile
-      const { data: profile } = await supabase
-        .from('insurer_profiles')
-        .select('*')
-        .eq('email', email)
-        .single();
-
-      if (!profile) {
-        await supabase.auth.signOut();
-        setError('Access denied. This email is not registered as an insurer.');
-        return;
-      }
-
+    // Simulate loading and skip auth for demo purposes
+    setTimeout(() => {
       toast({
         title: 'Welcome back!',
         description: 'Successfully signed in to your insurer account.',
       });
-
+      
       navigate('/insurer-dashboard');
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-      console.error('Sign in error:', err);
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   return (
