@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -13,15 +14,13 @@ import { useToast } from "@/components/ui/use-toast";
 
 const ShopAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleAuth = async (email: string, password: string, isSignUp: boolean) => {
     setIsLoading(true);
-    setError(null);
     
-    // Simulate loading for demo purposes
+    // Skip all validation and go directly to dashboard for demo
     setTimeout(() => {
       if (isSignUp) {
         toast({
@@ -29,9 +28,12 @@ const ShopAuth = () => {
           description: "Demo account created successfully."
         });
       } else {
-        // Skip auth and go directly to dashboard for demo
-        navigate("/shop-dashboard");
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in to your shop account."
+        });
       }
+      navigate("/shop-dashboard");
       setIsLoading(false);
     }, 500);
   };
@@ -43,12 +45,7 @@ const ShopAuth = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      
-      if (isSignUp && password !== confirmPassword) {
-        setError("Passwords do not match");
-        return;
-      }
-      
+      // No validation needed for demo - just proceed
       handleAuth(email, password, isSignUp);
     };
 
@@ -61,7 +58,6 @@ const ShopAuth = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
             placeholder="your-shop@email.com"
           />
         </div>
@@ -73,7 +69,6 @@ const ShopAuth = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
             minLength={6}
           />
         </div>
@@ -86,19 +81,12 @@ const ShopAuth = () => {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              required
               minLength={6}
             />
           </div>
         )}
         
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        
-                <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
         </Button>
 
@@ -109,6 +97,7 @@ const ShopAuth = () => {
             <div className="space-y-1 text-xs text-muted-foreground">
               <p><strong>Email:</strong> demo.shop@autofix.com</p>
               <p><strong>Password:</strong> password123</p>
+              <p className="text-green-600 font-medium">Any credentials will work for demo</p>
             </div>
           </div>
         )}
