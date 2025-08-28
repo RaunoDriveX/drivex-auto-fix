@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -15,14 +14,16 @@ export default function InsurerAuth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
-    // Skip all validation and go directly to dashboard for demo
+    // Simulate loading and skip auth for demo purposes
     setTimeout(() => {
       toast({
         title: 'Welcome back!',
@@ -71,6 +72,12 @@ export default function InsurerAuth() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSignIn} className="space-y-4">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
                   <Input
@@ -79,6 +86,7 @@ export default function InsurerAuth() {
                     placeholder="insurer@company.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    required
                     disabled={loading}
                   />
                 </div>
@@ -91,6 +99,7 @@ export default function InsurerAuth() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    required
                     disabled={loading}
                   />
                 </div>
@@ -117,7 +126,6 @@ export default function InsurerAuth() {
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <p><strong>Email:</strong> demo.insurer@allstate.com</p>
                   <p><strong>Password:</strong> password123</p>
-                  <p className="text-green-600 font-medium">Any credentials will work for demo</p>
                 </div>
               </div>
 
