@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -20,6 +21,18 @@ interface ConfirmationEmailRequest {
   totalCost?: number;
 }
 
+// Input validation schema
+const ConfirmationEmailSchema = z.object({
+  appointmentId: z.string().uuid(),
+  customerName: z.string().min(1).max(200),
+  customerEmail: z.string().email().max(255),
+  shopName: z.string().min(1).max(200),
+  appointmentDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  appointmentTime: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+  serviceType: z.string().max(100),
+  totalCost: z.number().positive().max(999999).optional(),
+});
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -27,6 +40,19 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate input
+    const rawInput = await req.json();
+    const validatedInput = ConfirmationEmailSchema.parse(rawInput);
+    
     const {
       appointmentId,
       customerName,
@@ -36,7 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
       appointmentTime,
       serviceType,
       totalCost,
-    }: ConfirmationEmailRequest = await req.json();
+    }: ConfirmationEmailRequest = validatedInput;
 
     console.log("Sending confirmation email for appointment:", appointmentId);
 

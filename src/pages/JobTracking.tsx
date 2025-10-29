@@ -85,7 +85,7 @@ export default function JobTracking() {
             email
           )
         `)
-        .eq('id', appointmentId)
+        .eq('tracking_token', appointmentId)
         .single();
 
       if (error) throw error;
