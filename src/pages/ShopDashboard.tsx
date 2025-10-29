@@ -21,31 +21,65 @@ import ShopUpsellSettings from "@/components/shop/ShopUpsellSettings";
 import ShopTechnicians from "@/components/shop/ShopTechnicians";
 import CallCenterOverview from "@/components/call-center/CallCenterOverview";
 
+interface ShopData {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string;
+  city: string;
+  [key: string]: unknown;
+}
+
 const ShopDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [shopData, setShopData] = useState<any>(null);
+  const [shopData, setShopData] = useState<ShopData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("offers");
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Skip auth for demo - set mock user and shop data
-    const mockUser = { email: 'demo.shop@autofix.com' } as User;
-    const mockShopData = {
-      id: 'demo-shop',
-      name: 'AutoFix Demo Shop',
-      email: 'demo.shop@autofix.com',
-      location: 'Demo Location'
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+          navigate('/shop-auth');
+          return;
+        }
+
+        setUser(session.user);
+
+        if (session.user.email) {
+          await fetchShopData(session.user.email);
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        navigate('/shop-auth');
+      }
     };
-    
-    setUser(mockUser);
-    setShopData(mockShopData);
-    setLoading(false);
-  }, []);
+
+    checkAuth();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate('/shop-auth');
+      } else if (session?.user && !user) {
+        setUser(session.user);
+        if (session.user.email) {
+          await fetchShopData(session.user.email);
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const fetchShopData = async (email: string) => {
-    console.log('ShopDashboard: Fetching shop data for:', email);
     try {
       const { data: shop, error } = await supabase
         .from('shops')
@@ -54,28 +88,44 @@ const ShopDashboard = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('ShopDashboard: Database error:', error);
         throw error;
       }
 
-      console.log('ShopDashboard: Shop data fetched:', !!shop);
+      if (!shop) {
+        toast({
+          title: "Error",
+          description: "No shop profile found. Please contact support.",
+          variant: "destructive"
+        });
+        navigate('/shop-auth');
+        return;
+      }
+
       setShopData(shop);
     } catch (error: any) {
-      console.error('ShopDashboard: Error fetching shop data:', error);
+      console.error('Error fetching shop data:', error);
       toast({
         title: "Error",
         description: "Failed to load shop data",
         variant: "destructive"
       });
     } finally {
-      console.log('ShopDashboard: Setting loading to false');
       setLoading(false);
     }
   };
 
   const handleSignOut = async () => {
-    // For demo, just navigate back to auth
-    navigate("/shop-auth");
+    try {
+      await supabase.auth.signOut();
+      navigate("/shop-auth");
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {

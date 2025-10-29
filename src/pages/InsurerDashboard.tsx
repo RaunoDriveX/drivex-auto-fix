@@ -8,24 +8,26 @@ import { useInsurerAuth } from '@/hooks/useInsurerAuth';
 import { LogOut, Building2 } from 'lucide-react';
 
 export default function InsurerDashboard() {
-  // Skip auth for demo - use mock data
-  const mockProfile = {
-    insurer_name: 'Demo Insurance Company',
-    contact_person: 'Demo User',
-    email: 'demo@insurance.com'
-  };
-  
-  const mockUserRole = {
-    full_name: 'Demo User',
-    role: 'admin'
-  };
-  
-  const signOut = () => {
-    // For demo, just navigate back to auth
-    window.location.href = '/insurer-auth';
-  };
-  
-  const isAdmin = () => true;
+  const { profile, userRole, loading, signOut, requireAuth, isAdmin } = useInsurerAuth();
+
+  useEffect(() => {
+    requireAuth();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -37,9 +39,9 @@ export default function InsurerDashboard() {
                 <div className="flex items-center gap-2">
                   <Building2 className="h-6 w-6 text-primary" />
                   <div>
-                    <h1 className="text-lg font-semibold">{mockProfile.insurer_name}</h1>
+                    <h1 className="text-lg font-semibold">{profile.insurer_name}</h1>
                     <p className="text-sm text-muted-foreground">
-                      {mockUserRole ? `${mockUserRole.full_name} • ${mockUserRole.role === 'admin' ? 'Admin' : 'Claims User'}` : mockProfile.contact_person}
+                      {userRole ? `${userRole.full_name} • ${userRole.role === 'admin' ? 'Admin' : 'Claims User'}` : profile.contact_person}
                     </p>
                   </div>
                 </div>

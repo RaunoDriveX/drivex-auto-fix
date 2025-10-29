@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import CallCenterCTA from "@/components/CallCenterCTA";
 
 const Hero = () => {
-  console.log("Hero component rendering...");
   const navigate = useNavigate();
   const [licensePlate, setLicensePlate] = useState("");
   const [phone, setPhone] = useState("");
@@ -36,11 +35,7 @@ const Hero = () => {
           loading="eager"
           decoding="async"
           onError={(e) => {
-            console.log('Hero image failed to load, hiding...');
             e.currentTarget.style.display = 'none';
-          }}
-          onLoad={() => {
-            console.log('Hero image loaded successfully');
           }}
         />
         <div className="absolute inset-0 bg-black/50"></div>

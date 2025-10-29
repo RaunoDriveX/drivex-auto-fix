@@ -57,7 +57,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       const formData = new FormData(e.currentTarget);
       const customerName = formData.get('name') as string;
@@ -65,9 +65,49 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
       const customerPhone = formData.get('phone') as string;
       const isInsurance = formData.get('insuranceClaim') === 'yes';
       const insurerName = formData.get('insurerName') as string;
-      
+
+      // Validate required fields
+      if (!customerName || customerName.trim().length < 2) {
+        toast.error("Please enter a valid name (at least 2 characters)");
+        setLoading(false);
+        return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!customerEmail || !emailRegex.test(customerEmail)) {
+        toast.error("Please enter a valid email address");
+        setLoading(false);
+        return;
+      }
+
+      // Validate phone format (basic validation for numbers)
+      const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
+      if (!customerPhone || !phoneRegex.test(customerPhone)) {
+        toast.error("Please enter a valid phone number (at least 10 digits)");
+        setLoading(false);
+        return;
+      }
+
       if (!selectedDate || !selectedTimeSlot) {
         toast.error("Please select a date and time slot");
+        setLoading(false);
+        return;
+      }
+
+      // Validate date is not in the past
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        toast.error("Please select a future date");
+        setLoading(false);
+        return;
+      }
+
+      // Validate insurer name if insurance claim
+      if (isInsurance && (!insurerName || insurerName.trim().length < 2)) {
+        toast.error("Please enter your insurance company name");
+        setLoading(false);
         return;
       }
 
@@ -150,8 +190,6 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
 
         if (allocationError) {
           console.error('Error in job allocation:', allocationError);
-        } else {
-          console.log('Job successfully allocated to eligible shops');
         }
       } catch (allocationError) {
         console.error('Error with job allocation:', allocationError);

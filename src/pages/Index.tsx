@@ -8,7 +8,6 @@ import WhyChooseUs, { CustomerSegments } from "@/components/marketing/WhyChooseU
 import Testimonials from "@/components/marketing/Testimonials";
 
 const Index = () => {
-  console.log("Index component rendering...");
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
   const orgJsonLd = {
     "@context": "https://schema.org",

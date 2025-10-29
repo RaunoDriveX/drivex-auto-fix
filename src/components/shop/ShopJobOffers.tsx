@@ -12,6 +12,33 @@ import JobOfferUpsells from "./JobOfferUpsells";
 import { AdasCalibrationAlert } from "./AdasCalibrationAlert";
 import PartsFitmentAlert from "./PartsFitmentAlert";
 
+interface VehicleInfo {
+  make?: string;
+  model?: string;
+  year?: string;
+  licensePlate?: string;
+  [key: string]: unknown;
+}
+
+interface AIAssessmentDetails {
+  damageType?: string;
+  severity?: string;
+  location?: string;
+  repairComplexity?: string;
+  estimatedCost?: number;
+  [key: string]: unknown;
+}
+
+interface Shop {
+  id: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string;
+  city?: string;
+  [key: string]: unknown;
+}
+
 interface JobOffer {
   id: string;
   appointment_id: string;
@@ -31,13 +58,13 @@ interface JobOffer {
     damage_type: string;
     appointment_date: string;
     appointment_time: string;
-    vehicle_info: any;
+    vehicle_info: VehicleInfo | null;
     notes: string;
     is_insurance_claim: boolean;
     damage_photos: string[];
     additional_notes: string;
     ai_confidence_score: number;
-    ai_assessment_details: any;
+    ai_assessment_details: AIAssessmentDetails | null;
     ai_recommended_repair: string;
     driver_view_obstruction: boolean;
   };
@@ -45,7 +72,7 @@ interface JobOffer {
 
 interface ShopJobOffersProps {
   shopId: string;
-  shop?: any;
+  shop?: Shop;
 }
 
 const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
@@ -313,8 +340,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                        {offer.appointments.damage_photos.map((photoUrl, index) => {
                          const fullImageUrl = photoUrl.startsWith('/') ? `${window.location.origin}${photoUrl}` : photoUrl;
-                         console.log('Loading image:', fullImageUrl);
-                         
+
                          return (
                             <div key={index} className="relative aspect-square bg-muted rounded-lg overflow-hidden group">
                               <img
@@ -323,11 +349,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                                 className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                 onClick={() => window.open(fullImageUrl, '_blank')}
                                 onError={(e) => {
-                                  console.error('Failed to load image:', fullImageUrl);
+                                  console.error('Failed to load damage photo:', fullImageUrl);
                                   e.currentTarget.style.display = 'none';
-                                }}
-                                onLoad={() => {
-                                  console.log('Image loaded successfully:', fullImageUrl);
                                 }}
                               />
                               {/* AI Detection Indicator */}
