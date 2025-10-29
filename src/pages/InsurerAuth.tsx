@@ -23,16 +23,30 @@ export default function InsurerAuth() {
     setLoading(true);
     setError('');
 
-    // Simulate loading and skip auth for demo purposes
-    setTimeout(() => {
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
       toast({
         title: 'Welcome back!',
         description: 'Successfully signed in to your insurer account.',
       });
       
       navigate('/insurer-dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Invalid credentials');
+      toast({
+        title: 'Error',
+        description: err.message || 'Invalid credentials',
+        variant: 'destructive'
+      });
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (

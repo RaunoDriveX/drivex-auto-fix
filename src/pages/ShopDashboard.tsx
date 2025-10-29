@@ -30,19 +30,32 @@ const ShopDashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Skip auth for demo - set mock user and shop data
-    const mockUser = { email: 'demo.shop@autofix.com' } as User;
-    const mockShopData = {
-      id: 'demo-shop',
-      name: 'AutoFix Demo Shop',
-      email: 'demo.shop@autofix.com',
-      location: 'Demo Location'
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate("/shop-auth");
+        return;
+      }
+
+      setUser(session.user);
+      await fetchShopData(session.user.email!);
     };
-    
-    setUser(mockUser);
-    setShopData(mockShopData);
-    setLoading(false);
-  }, []);
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setUser(session.user);
+        fetchShopData(session.user.email!);
+      } else {
+        navigate("/shop-auth");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const fetchShopData = async (email: string) => {
     console.log('ShopDashboard: Fetching shop data for:', email);
@@ -74,7 +87,7 @@ const ShopDashboard = () => {
   };
 
   const handleSignOut = async () => {
-    // For demo, just navigate back to auth
+    await supabase.auth.signOut();
     navigate("/shop-auth");
   };
 

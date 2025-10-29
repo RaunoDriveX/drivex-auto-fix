@@ -21,19 +21,44 @@ const ShopAuth = () => {
     setIsLoading(true);
     setError(null);
     
-    // Simulate loading for demo purposes
-    setTimeout(() => {
+    try {
       if (isSignUp) {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
         toast({
           title: "Account created",
-          description: "Demo account created successfully."
+          description: "Please check your email to verify your account."
         });
       } else {
-        // Skip auth and go directly to dashboard for demo
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Signed in successfully"
+        });
+        
         navigate("/shop-dashboard");
       }
+    } catch (error: any) {
+      setError(error.message || "Authentication failed");
+      toast({
+        title: "Error",
+        description: error.message || "Authentication failed",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
   const AuthForm = ({ isSignUp }: { isSignUp: boolean }) => {
