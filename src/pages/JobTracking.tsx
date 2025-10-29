@@ -21,23 +21,6 @@ import {
 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 
-interface VehicleInfo {
-  make?: string;
-  model?: string;
-  year?: string;
-  licensePlate?: string;
-  [key: string]: unknown;
-}
-
-interface ShopDetails {
-  name: string;
-  phone?: string;
-  address: string;
-  city: string;
-  postal_code: string;
-  email?: string;
-}
-
 interface JobDetails {
   id: string;
   customer_name: string;
@@ -54,9 +37,23 @@ interface JobDetails {
   job_completed_at?: string;
   estimated_completion?: string;
   total_cost?: number;
-  vehicle_info?: VehicleInfo | null;
+  vehicle_info?: any;
   additional_notes?: string;
-  shops?: ShopDetails;
+  shops?: {
+    name: string;
+    phone?: string;
+    address: string;
+    city: string;
+    postal_code: string;
+    email?: string;
+  } | {
+    name: string;
+    phone?: string;
+    address: string;
+    city: string;
+    postal_code: string;
+    email?: string;
+  }[];
 }
 
 export default function JobTracking() {

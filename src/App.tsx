@@ -21,6 +21,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 const queryClient = new QueryClient();
 
 const App = () => {
+  console.log("App component rendering...");
   return (
     <ErrorBoundary>
       <HelmetProvider>

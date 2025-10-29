@@ -23,39 +23,16 @@ export default function InsurerAuth() {
     setLoading(true);
     setError('');
 
-    try {
-      // Sign in with Supabase
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) throw signInError;
-
-      // Verify insurer profile exists
-      const { data: profile, error: profileError } = await supabase
-        .from('insurer_profiles')
-        .select('id')
-        .eq('email', email)
-        .single();
-
-      if (profileError || !profile) {
-        await supabase.auth.signOut();
-        throw new Error("No insurer profile found for this email. Please contact support.");
-      }
-
+    // Simulate loading and skip auth for demo purposes
+    setTimeout(() => {
       toast({
         title: 'Welcome back!',
         description: 'Successfully signed in to your insurer account.',
       });
-
+      
       navigate('/insurer-dashboard');
-    } catch (err: any) {
-      console.error('Authentication error:', err);
-      setError(err.message || 'Invalid credentials. Please try again.');
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   return (
@@ -127,9 +104,9 @@ export default function InsurerAuth() {
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full"
+                <Button 
+                  type="submit" 
+                  className="w-full" 
                   disabled={loading}
                 >
                   {loading ? (
@@ -142,6 +119,15 @@ export default function InsurerAuth() {
                   )}
                 </Button>
               </form>
+
+              {/* Demo Credentials */}
+              <div className="mt-6 p-3 bg-muted/50 rounded-lg border">
+                <h4 className="text-sm font-medium text-foreground mb-2">Demo Credentials</h4>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <p><strong>Email:</strong> demo.insurer@allstate.com</p>
+                  <p><strong>Password:</strong> password123</p>
+                </div>
+              </div>
 
               <div className="mt-4 text-center text-sm text-muted-foreground">
                 <p>Need access? Contact your DriveX administrator.</p>

@@ -20,55 +20,20 @@ const ShopAuth = () => {
   const handleAuth = async (email: string, password: string, isSignUp: boolean) => {
     setIsLoading(true);
     setError(null);
-
-    try {
+    
+    // Simulate loading for demo purposes
+    setTimeout(() => {
       if (isSignUp) {
-        // Sign up new shop user
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-
-        if (signUpError) throw signUpError;
-
         toast({
           title: "Account created",
-          description: "Please check your email to verify your account.",
+          description: "Demo account created successfully."
         });
       } else {
-        // Sign in existing shop user
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (signInError) throw signInError;
-
-        // Verify shop exists in database
-        const { data: shop, error: shopError } = await supabase
-          .from('shops')
-          .select('id')
-          .eq('email', email)
-          .single();
-
-        if (shopError || !shop) {
-          await supabase.auth.signOut();
-          throw new Error("No shop profile found for this email. Please contact support.");
-        }
-
-        toast({
-          title: "Welcome back!",
-          description: "Successfully signed in.",
-        });
-
+        // Skip auth and go directly to dashboard for demo
         navigate("/shop-dashboard");
       }
-    } catch (error: any) {
-      console.error('Authentication error:', error);
-      setError(error.message || "Authentication failed. Please try again.");
-    } finally {
       setIsLoading(false);
-    }
+    }, 500);
   };
 
   const AuthForm = ({ isSignUp }: { isSignUp: boolean }) => {
@@ -136,6 +101,17 @@ const ShopAuth = () => {
                 <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
         </Button>
+
+        {/* Demo Credentials */}
+        {!isSignUp && (
+          <div className="mt-4 p-3 bg-muted/50 rounded-lg border">
+            <h4 className="text-sm font-medium text-foreground mb-2">Demo Credentials</h4>
+            <div className="space-y-1 text-xs text-muted-foreground">
+              <p><strong>Email:</strong> demo.shop@autofix.com</p>
+              <p><strong>Password:</strong> password123</p>
+            </div>
+          </div>
+        )}
       </form>
     );
   };
