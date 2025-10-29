@@ -1,31 +1,81 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { InsurerDashboard as InsurerDashboardComponent } from '@/components/insurer/InsurerDashboard';
 import { InsurerJobsBoard } from '@/components/insurer/InsurerJobsBoard';
 import { UserManagement } from '@/components/insurer/UserManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useInsurerAuth } from '@/hooks/useInsurerAuth';
 import { LogOut, Building2 } from 'lucide-react';
 
 export default function InsurerDashboard() {
-  // Skip auth for demo - use mock data
+  const [isDemoMode, setIsDemoMode] = useState(false);
+
+  // Check if in demo mode
+  useEffect(() => {
+    const demoMode = sessionStorage.getItem('demoMode') === 'true';
+    setIsDemoMode(demoMode);
+  }, []);
+
+  // Use real auth hook
+  const { profile, userRole, loading, signOut: authSignOut, requireAuth, isAdmin } = useInsurerAuth();
+
+  useEffect(() => {
+    // Only require auth if not in demo mode
+    if (!isDemoMode) {
+      requireAuth();
+    }
+  }, [isDemoMode]);
+
+  // Create mock data for demo mode
   const mockProfile = {
     insurer_name: 'Demo Insurance Company',
     contact_person: 'Demo User',
-    email: 'demo@insurance.com'
+    email: sessionStorage.getItem('demoEmail') || 'demo@insurance.com'
   };
-  
+
   const mockUserRole = {
     full_name: 'Demo User',
-    role: 'admin'
+    role: 'admin' as const
   };
-  
-  const signOut = () => {
-    // For demo, just navigate back to auth
-    window.location.href = '/insurer-auth';
+
+  // Use mock or real data depending on mode
+  const displayProfile = isDemoMode ? mockProfile : profile;
+  const displayUserRole = isDemoMode ? mockUserRole : userRole;
+
+  const handleSignOut = () => {
+    if (isDemoMode) {
+      // Demo mode - clear session storage and navigate
+      sessionStorage.removeItem('demoMode');
+      sessionStorage.removeItem('demoEmail');
+      window.location.href = '/insurer-auth';
+    } else {
+      // Real auth - use the auth hook's signOut
+      authSignOut();
+    }
   };
-  
-  const isAdmin = () => true;
+
+  const checkIsAdmin = () => {
+    if (isDemoMode) return true;
+    return isAdmin();
+  };
+
+  // Show loading only for real auth mode
+  if (!isDemoMode && loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Skip null check for demo mode
+  if (!isDemoMode && !displayProfile) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -37,21 +87,26 @@ export default function InsurerDashboard() {
                 <div className="flex items-center gap-2">
                   <Building2 className="h-6 w-6 text-primary" />
                   <div>
-                    <h1 className="text-lg font-semibold">{mockProfile.insurer_name}</h1>
+                    <h1 className="text-lg font-semibold">{displayProfile?.insurer_name}</h1>
                     <p className="text-sm text-muted-foreground">
-                      {mockUserRole ? `${mockUserRole.full_name} • ${mockUserRole.role === 'admin' ? 'Admin' : 'Claims User'}` : mockProfile.contact_person}
+                      {displayUserRole ? `${displayUserRole.full_name} • ${displayUserRole.role === 'admin' ? 'Admin' : 'Claims User'}` : displayProfile?.contact_person}
                     </p>
                   </div>
                 </div>
+                {isDemoMode && (
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">
+                    🧪 Demo Mode
+                  </Badge>
+                )}
                 <TabsList className="grid grid-cols-3">
                   <TabsTrigger value="jobs">Live Jobs</TabsTrigger>
                   <TabsTrigger value="network">Shop Network</TabsTrigger>
-                  {isAdmin() && <TabsTrigger value="users">User Management</TabsTrigger>}
+                  {checkIsAdmin() && <TabsTrigger value="users">User Management</TabsTrigger>}
                 </TabsList>
               </div>
-              <Button 
-                variant="outline" 
-                onClick={signOut}
+              <Button
+                variant="outline"
+                onClick={handleSignOut}
                 className="flex items-center gap-2"
               >
                 <LogOut className="h-4 w-4" />
@@ -69,7 +124,7 @@ export default function InsurerDashboard() {
           <InsurerDashboardComponent />
         </TabsContent>
         
-        {isAdmin() && (
+        {checkIsAdmin() && (
           <TabsContent value="users" className="mt-0">
             <div className="container mx-auto px-4 py-6">
               <UserManagement />
