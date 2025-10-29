@@ -26,6 +26,9 @@ const ShopAuth = () => {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/shop-dashboard`
+          }
         });
 
         if (error) throw error;
@@ -127,13 +130,13 @@ const ShopAuth = () => {
           {isLoading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
         </Button>
 
-        {/* Demo Credentials */}
+        {/* Testing tip */}
         {!isSignUp && (
           <div className="mt-4 p-3 bg-muted/50 rounded-lg border">
-            <h4 className="text-sm font-medium text-foreground mb-2">Demo Credentials</h4>
+            <h4 className="text-sm font-medium text-foreground mb-2">Testing tip</h4>
             <div className="space-y-1 text-xs text-muted-foreground">
-              <p><strong>Email:</strong> demo.shop@autofix.com</p>
-              <p><strong>Password:</strong> password123</p>
+              <p>Use the Sign Up tab to create a test account, then sign in here.</p>
+              <p className="mt-1">For faster testing, you can disable email confirmation in Supabase Auth settings.</p>
             </div>
           </div>
         )}

@@ -30,28 +30,25 @@ const ShopDashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+    // Set up listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setUser(session.user);
+        // Defer fetch to avoid deadlocks inside the callback
+        setTimeout(() => fetchShopData(session.user.email!), 0);
+      } else {
+        navigate("/shop-auth");
+      }
+    });
+
+    // Then check existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate("/shop-auth");
         return;
       }
-
       setUser(session.user);
-      await fetchShopData(session.user.email!);
-    };
-
-    checkAuth();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        setUser(session.user);
-        fetchShopData(session.user.email!);
-      } else {
-        navigate("/shop-auth");
-      }
+      fetchShopData(session.user.email!);
     });
 
     return () => subscription.unsubscribe();
