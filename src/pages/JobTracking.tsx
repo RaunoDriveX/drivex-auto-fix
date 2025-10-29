@@ -24,10 +24,6 @@ import { toast } from "@/components/ui/use-toast";
 interface JobDetails {
   id: string;
   customer_name: string;
-  customer_email: string;
-  customer_phone?: string;
-  shop_id: string;
-  shop_name: string;
   service_type: string;
   damage_type?: string;
   appointment_date: string;
@@ -39,6 +35,7 @@ interface JobDetails {
   total_cost?: number;
   vehicle_info?: any;
   additional_notes?: string;
+  shop_name: string;
   shops?: {
     name: string;
     phone?: string;
@@ -46,14 +43,7 @@ interface JobDetails {
     city: string;
     postal_code: string;
     email?: string;
-  } | {
-    name: string;
-    phone?: string;
-    address: string;
-    city: string;
-    postal_code: string;
-    email?: string;
-  }[];
+  };
 }
 
 export default function JobTracking() {
@@ -64,7 +54,6 @@ export default function JobTracking() {
   useEffect(() => {
     if (appointmentId) {
       fetchJobDetails();
-      setupRealtimeSubscription();
     }
   }, [appointmentId]);
 
@@ -72,30 +61,18 @@ export default function JobTracking() {
     if (!appointmentId) return;
 
     try {
-      const { data, error } = await supabase
-        .from('appointments')
-        .select(`
-          *,
-          shops (
-            name,
-            phone,
-            address,
-            city,
-            postal_code,
-            email
-          )
-        `)
-        .eq('tracking_token', appointmentId)
-        .single();
+      // Use secure edge function instead of direct RLS query
+      const { data, error } = await supabase.functions.invoke('get-job-tracking', {
+        body: { tracking_token: appointmentId }
+      });
 
       if (error) throw error;
       
-      // Handle the shops array from Supabase join
-      const processedData = {
-        ...data,
-        shops: Array.isArray(data.shops) ? data.shops[0] : data.shops
-      };
-      setJobDetails(processedData);
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      setJobDetails(data.appointment);
     } catch (error) {
       console.error('Error fetching job details:', error);
       toast({
@@ -106,35 +83,6 @@ export default function JobTracking() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const setupRealtimeSubscription = () => {
-    const channel = supabase
-      .channel('job-status-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'appointments',
-          filter: `id=eq.${appointmentId}`
-        },
-        (payload) => {
-          console.log('Job status update received:', payload);
-          setJobDetails(prev => prev ? { ...prev, ...payload.new } : payload.new as JobDetails);
-          
-          // Show notification for status changes
-          toast({
-            title: "Job Status Updated",
-            description: `Your repair job is now ${payload.new.job_status.replace('_', ' ')}`,
-          });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   };
 
   const getStatusProgress = (status: string) => {
@@ -155,10 +103,6 @@ export default function JobTracking() {
       case 'cancelled': return 'bg-red-500';
       default: return 'bg-gray-500';
     }
-  };
-
-  const getShop = () => {
-    return Array.isArray(jobDetails?.shops) ? jobDetails.shops[0] : jobDetails?.shops;
   };
 
   const formatAddress = (shop: any) => {
@@ -198,6 +142,8 @@ export default function JobTracking() {
       </div>
     );
   }
+
+  const shop = jobDetails.shops;
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -265,57 +211,59 @@ export default function JobTracking() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="font-semibold">{getShop()?.name || jobDetails.shop_name}</h3>
+                <h3 className="font-semibold">{shop?.name || jobDetails.shop_name}</h3>
                 <p className="text-sm text-muted-foreground">
                   Authorized repair facility
                 </p>
               </div>
               
-              {getShop()?.phone && (
+              {shop?.phone && (
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
                   <a 
-                    href={`tel:${getShop()?.phone}`}
+                    href={`tel:${shop.phone}`}
                     className="text-primary hover:underline"
                   >
-                    {getShop()?.phone}
+                    {shop.phone}
                   </a>
                 </div>
               )}
               
-              {getShop()?.email && (
+              {shop?.email && (
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   <a 
-                    href={`mailto:${getShop()?.email}`}
+                    href={`mailto:${shop.email}`}
                     className="text-primary hover:underline"
                   >
-                    {getShop()?.email}
+                    {shop.email}
                   </a>
                 </div>
               )}
               
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 mt-1" />
-                <div className="flex-1">
-                  <p className="text-sm">{formatAddress(getShop())}</p>
-                  <Button 
-                    variant="link" 
-                    size="sm" 
-                    className="p-0 h-auto"
-                    asChild
-                  >
-                    <a 
-                      href={getGoogleMapsLink(getShop())} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1"
+              {shop && (
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 mt-1" />
+                  <div className="flex-1">
+                    <p className="text-sm">{formatAddress(shop)}</p>
+                    <Button 
+                      variant="link" 
+                      size="sm" 
+                      className="p-0 h-auto"
+                      asChild
                     >
-                      Open in Google Maps <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </Button>
+                      <a 
+                        href={getGoogleMapsLink(shop)} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1"
+                      >
+                        Open in Google Maps <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 

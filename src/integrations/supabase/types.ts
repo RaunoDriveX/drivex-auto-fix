@@ -561,6 +561,7 @@ export type Database = {
           timeout_seconds: number | null
           updated_at: string
           webhook_secret: string | null
+          webhook_secret_hash: string | null
           webhook_url: string
         }
         Insert: {
@@ -575,6 +576,7 @@ export type Database = {
           timeout_seconds?: number | null
           updated_at?: string
           webhook_secret?: string | null
+          webhook_secret_hash?: string | null
           webhook_url: string
         }
         Update: {
@@ -589,6 +591,7 @@ export type Database = {
           timeout_seconds?: number | null
           updated_at?: string
           webhook_secret?: string | null
+          webhook_secret_hash?: string | null
           webhook_url?: string
         }
         Relationships: [
@@ -1694,6 +1697,10 @@ export type Database = {
       }
       get_user_insurer_id: { Args: { _user_id: string }; Returns: string }
       is_insurer_admin: { Args: { _user_id: string }; Returns: boolean }
+      set_webhook_secret: {
+        Args: { _config_id: string; _secret: string }
+        Returns: undefined
+      }
       shop_has_qualified_technicians: {
         Args: {
           _damage_type?: string
@@ -1701,6 +1708,10 @@ export type Database = {
           _shop_id: string
           _vehicle_type?: string
         }
+        Returns: boolean
+      }
+      verify_webhook_signature: {
+        Args: { _config_id: string; _payload: string; _signature: string }
         Returns: boolean
       }
     }
