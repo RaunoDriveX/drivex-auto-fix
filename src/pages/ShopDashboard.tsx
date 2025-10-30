@@ -21,41 +21,94 @@ import ShopUpsellSettings from "@/components/shop/ShopUpsellSettings";
 import ShopTechnicians from "@/components/shop/ShopTechnicians";
 import CallCenterOverview from "@/components/call-center/CallCenterOverview";
 
+interface ShopData {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string;
+  city: string;
+  performance_tier?: string;
+  [key: string]: unknown;
+}
+
 const ShopDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [shopData, setShopData] = useState<any>(null);
+  const [shopData, setShopData] = useState<ShopData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("offers");
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        setUser(session.user);
-        // Defer fetch to avoid deadlocks inside the callback
-        setTimeout(() => fetchShopData(session.user.email!), 0);
-      } else {
-        navigate("/shop-auth");
+    const checkAuth = async () => {
+      try {
+        // Check if in demo mode
+        const demoMode = sessionStorage.getItem('demoMode') === 'true';
+        const demoEmail = sessionStorage.getItem('demoEmail');
+
+        if (demoMode && demoEmail) {
+          // Demo mode - use mock data
+          setIsDemoMode(true);
+          const mockUser = { email: demoEmail } as User;
+          const mockShopData: ShopData = {
+            id: 'demo-shop',
+            name: 'AutoFix Demo Shop',
+            email: demoEmail,
+            phone: '555-0123',
+            address: '123 Demo Street',
+            city: 'Demo City',
+            performance_tier: 'Gold'
+          };
+
+          setUser(mockUser);
+          setShopData(mockShopData);
+          setLoading(false);
+        } else {
+          // Real auth mode
+          setIsDemoMode(false);
+          const { data: { session } } = await supabase.auth.getSession();
+
+          if (!session) {
+            navigate('/shop-auth');
+            return;
+          }
+
+          setUser(session.user);
+
+          if (session.user.email) {
+            await fetchShopData(session.user.email);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        navigate('/shop-auth');
+      }
+    };
+
+    checkAuth();
+
+    // Subscribe to auth changes (only for real auth mode)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!sessionStorage.getItem('demoMode')) {
+        if (event === 'SIGNED_OUT' || !session) {
+          navigate('/shop-auth');
+        } else if (session?.user && !user) {
+          setUser(session.user);
+          if (session.user.email) {
+            await fetchShopData(session.user.email);
+          }
+        }
       }
     });
 
-    // Then check existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/shop-auth");
-        return;
-      }
-      setUser(session.user);
-      fetchShopData(session.user.email!);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const fetchShopData = async (email: string) => {
-    console.log('ShopDashboard: Fetching shop data for:', email);
     try {
       const { data: shop, error } = await supabase
         .from('shops')
@@ -64,28 +117,52 @@ const ShopDashboard = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('ShopDashboard: Database error:', error);
         throw error;
       }
 
-      console.log('ShopDashboard: Shop data fetched:', !!shop);
+      if (!shop) {
+        toast({
+          title: "Error",
+          description: "No shop profile found. Please contact support.",
+          variant: "destructive"
+        });
+        navigate('/shop-auth');
+        return;
+      }
+
       setShopData(shop);
     } catch (error: any) {
-      console.error('ShopDashboard: Error fetching shop data:', error);
+      console.error('Error fetching shop data:', error);
       toast({
         title: "Error",
         description: "Failed to load shop data",
         variant: "destructive"
       });
     } finally {
-      console.log('ShopDashboard: Setting loading to false');
       setLoading(false);
     }
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/shop-auth");
+    if (isDemoMode) {
+      // Demo mode - just clear session storage and navigate
+      sessionStorage.removeItem('demoMode');
+      sessionStorage.removeItem('demoEmail');
+      navigate("/shop-auth");
+    } else {
+      // Real auth - sign out from Supabase
+      try {
+        await supabase.auth.signOut();
+        navigate("/shop-auth");
+      } catch (error) {
+        console.error('Error signing out:', error);
+        toast({
+          title: "Error",
+          description: "Failed to sign out",
+          variant: "destructive"
+        });
+      }
+    }
   };
 
   if (loading) {
@@ -123,6 +200,11 @@ const ShopDashboard = () => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
+                {isDemoMode && (
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">
+                    🧪 Demo Mode
+                  </Badge>
+                )}
                 {shopData?.performance_tier && (
                   <Badge variant="secondary">
                     {shopData.performance_tier} Partner

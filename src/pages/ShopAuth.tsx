@@ -11,6 +11,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Wrench } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
+const DEMO_MODE = import.meta.env.VITE_ENABLE_DEMO_MODE === "true";
+const DEMO_EMAILS = ["demo.shop@autofix.com", "demo@shop.com"];
+
 const ShopAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,45 +23,82 @@ const ShopAuth = () => {
   const handleAuth = async (email: string, password: string, isSignUp: boolean) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/shop-dashboard`
-          }
-        });
+      // Check if demo mode is enabled and email is a demo email
+      const isDemoLogin = DEMO_MODE && DEMO_EMAILS.includes(email.toLowerCase());
 
-        if (error) throw error;
+      if (isDemoLogin) {
+        // Demo mode bypass - simulate loading
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        toast({
-          title: "Account created",
-          description: "Please check your email to verify your account."
-        });
+        // Store demo mode flag in sessionStorage
+        sessionStorage.setItem('demoMode', 'true');
+        sessionStorage.setItem('demoEmail', email);
+
+        if (isSignUp) {
+          toast({
+            title: "Demo Account",
+            description: "Demo mode enabled - no account created."
+          });
+        } else {
+          toast({
+            title: "Demo Mode Active",
+            description: "Signed in with demo credentials."
+          });
+          navigate("/shop-dashboard");
+        }
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        // Real authentication mode
+        if (isSignUp) {
+          // Sign up new shop user
+          const { data, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+          });
 
-        if (error) throw error;
+          if (signUpError) throw signUpError;
 
-        toast({
-          title: "Success",
-          description: "Signed in successfully"
-        });
-        
-        navigate("/shop-dashboard");
+          toast({
+            title: "Account created",
+            description: "Please check your email to verify your account.",
+          });
+        } else {
+          // Sign in existing shop user
+          const { data, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (signInError) throw signInError;
+
+          // Verify shop exists in database
+          const { data: shop, error: shopError } = await supabase
+            .from('shops')
+            .select('id')
+            .eq('email', email)
+            .single();
+
+          if (shopError || !shop) {
+            await supabase.auth.signOut();
+            throw new Error("No shop profile found for this email. Please contact support.");
+          }
+
+          // Clear demo mode flags
+          sessionStorage.removeItem('demoMode');
+          sessionStorage.removeItem('demoEmail');
+
+          toast({
+            title: "Welcome back!",
+            description: "Successfully signed in.",
+          });
+
+          navigate("/shop-dashboard");
+        }
       }
     } catch (error: any) {
-      setError(error.message || "Authentication failed");
-      toast({
-        title: "Error",
-        description: error.message || "Authentication failed",
-        variant: "destructive"
-      });
+      console.error('Authentication error:', error);
+      setError(error.message || "Authentication failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -130,13 +170,14 @@ const ShopAuth = () => {
           {isLoading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
         </Button>
 
-        {/* Testing tip */}
-        {!isSignUp && (
+        {/* Demo Credentials - Only show if demo mode is enabled */}
+        {!isSignUp && DEMO_MODE && (
           <div className="mt-4 p-3 bg-muted/50 rounded-lg border">
-            <h4 className="text-sm font-medium text-foreground mb-2">Testing tip</h4>
+            <h4 className="text-sm font-medium text-foreground mb-2">Demo Credentials (Testing Mode)</h4>
             <div className="space-y-1 text-xs text-muted-foreground">
-              <p>Use the Sign Up tab to create a test account, then sign in here.</p>
-              <p className="mt-1">For faster testing, you can disable email confirmation in Supabase Auth settings.</p>
+              <p><strong>Email:</strong> demo.shop@autofix.com</p>
+              <p><strong>Password:</strong> Any password works</p>
+              <p className="text-amber-600 font-medium mt-2">⚠️ Demo mode is currently enabled</p>
             </div>
           </div>
         )}

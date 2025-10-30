@@ -10,6 +10,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+const DEMO_MODE = import.meta.env.VITE_ENABLE_DEMO_MODE === "true";
+const DEMO_EMAILS = ["demo.insurer@allstate.com", "demo@insurer.com"];
+
 export default function InsurerAuth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,26 +27,58 @@ export default function InsurerAuth() {
     setError('');
 
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Check if demo mode is enabled and email is a demo email
+      const isDemoLogin = DEMO_MODE && DEMO_EMAILS.includes(email.toLowerCase());
 
-      if (authError) throw authError;
+      if (isDemoLogin) {
+        // Demo mode bypass - simulate loading
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-      toast({
-        title: 'Welcome back!',
-        description: 'Successfully signed in to your insurer account.',
-      });
-      
-      navigate('/insurer-dashboard');
+        // Store demo mode flag in sessionStorage
+        sessionStorage.setItem('demoMode', 'true');
+        sessionStorage.setItem('demoEmail', email);
+
+        toast({
+          title: 'Demo Mode Active',
+          description: 'Signed in with demo credentials.',
+        });
+
+        navigate('/insurer-dashboard');
+      } else {
+        // Real authentication mode
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError) throw signInError;
+
+        // Verify insurer profile exists
+        const { data: profile, error: profileError } = await supabase
+          .from('insurer_profiles')
+          .select('id')
+          .eq('email', email)
+          .single();
+
+        if (profileError || !profile) {
+          await supabase.auth.signOut();
+          throw new Error("No insurer profile found for this email. Please contact support.");
+        }
+
+        // Clear demo mode flags
+        sessionStorage.removeItem('demoMode');
+        sessionStorage.removeItem('demoEmail');
+
+        toast({
+          title: 'Welcome back!',
+          description: 'Successfully signed in to your insurer account.',
+        });
+
+        navigate('/insurer-dashboard');
+      }
     } catch (err: any) {
-      setError(err.message || 'Invalid credentials');
-      toast({
-        title: 'Error',
-        description: err.message || 'Invalid credentials',
-        variant: 'destructive'
-      });
+      console.error('Authentication error:', err);
+      setError(err.message || 'Invalid credentials. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -134,14 +169,17 @@ export default function InsurerAuth() {
                 </Button>
               </form>
 
-              {/* Demo Credentials */}
-              <div className="mt-6 p-3 bg-muted/50 rounded-lg border">
-                <h4 className="text-sm font-medium text-foreground mb-2">Demo Credentials</h4>
-                <div className="space-y-1 text-xs text-muted-foreground">
-                  <p><strong>Email:</strong> demo.insurer@allstate.com</p>
-                  <p><strong>Password:</strong> password123</p>
+              {/* Demo Credentials - Only show if demo mode is enabled */}
+              {DEMO_MODE && (
+                <div className="mt-6 p-3 bg-muted/50 rounded-lg border">
+                  <h4 className="text-sm font-medium text-foreground mb-2">Demo Credentials (Testing Mode)</h4>
+                  <div className="space-y-1 text-xs text-muted-foreground">
+                    <p><strong>Email:</strong> demo.insurer@allstate.com</p>
+                    <p><strong>Password:</strong> Any password works</p>
+                    <p className="text-amber-600 font-medium mt-2">⚠️ Demo mode is currently enabled</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="mt-4 text-center text-sm text-muted-foreground">
                 <p>Need access? Contact your DriveX administrator.</p>
