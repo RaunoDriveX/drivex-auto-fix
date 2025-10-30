@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
@@ -19,19 +20,55 @@ interface JobResponseRequest {
   notes?: string;
 }
 
+// Input validation schema
+const JobResponseSchema = z.object({
+  jobOfferId: z.string().uuid(),
+  response: z.enum(['accept', 'decline']),
+  declineReason: z.string().max(500).optional(),
+  counterOffer: z.number().positive().max(999999).optional(),
+  notes: z.string().max(1000).optional(),
+});
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Get authenticated user from Supabase client
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate input
+    const rawInput = await req.json();
+    const validatedInput = JobResponseSchema.parse(rawInput);
     const {
       jobOfferId,
       response,
       declineReason,
       counterOffer,
       notes
-    }: JobResponseRequest = await req.json();
+    }: JobResponseRequest = validatedInput;
 
     console.log(`Processing ${response} response for job offer ${jobOfferId}`);
 

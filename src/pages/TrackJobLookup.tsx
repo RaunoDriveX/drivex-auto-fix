@@ -39,15 +39,20 @@ export default function TrackJobLookup() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('appointments')
-        .select('id, customer_name, service_type, appointment_date, appointment_time, job_status, shop_name')
-        .eq('customer_email', email.trim())
-        .order('created_at', { ascending: false });
+      // Use secure edge function instead of direct RLS query
+      const { data, error } = await supabase.functions.invoke('lookup-jobs-by-email', {
+        body: { email: email.trim() }
+      });
 
       if (error) throw error;
 
-      if (!data || data.length === 0) {
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      const appointments = data.appointments || [];
+
+      if (appointments.length === 0) {
         toast({
           title: "No Jobs Found",
           description: "We couldn't find any repair jobs associated with this email address.",
@@ -56,14 +61,14 @@ export default function TrackJobLookup() {
         return;
       }
 
-      // If only one job, navigate directly
-      if (data.length === 1) {
-        navigate(`/track/${data[0].id}`);
+      // If only one job, navigate directly using tracking_token
+      if (appointments.length === 1) {
+        navigate(`/track-job/${appointments[0].tracking_token}`);
         return;
       }
 
       // Show job selection for multiple jobs
-      setJobs(data);
+      setJobs(appointments);
     } catch (error) {
       console.error('Error searching jobs:', error);
       toast({
@@ -86,7 +91,7 @@ export default function TrackJobLookup() {
       return;
     }
 
-    navigate(`/track/${appointmentId.trim()}`);
+    navigate(`/track-job/${appointmentId.trim()}`);
   };
 
   const [jobs, setJobs] = useState<any[]>([]);
@@ -125,7 +130,7 @@ export default function TrackJobLookup() {
                 <Card 
                   key={job.id} 
                   className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => navigate(`/track/${job.id}`)}
+                  onClick={() => navigate(`/track-job/${job.tracking_token}`)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">

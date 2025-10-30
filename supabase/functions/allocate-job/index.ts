@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
@@ -10,6 +11,23 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const JobAllocationSchema = z.object({
+  appointmentId: z.string().uuid(),
+  serviceType: z.enum(['repair', 'replacement']),
+  damageType: z.string().max(100).optional(),
+  vehicleInfo: z.object({
+    make: z.string().max(100),
+    model: z.string().max(100),
+    year: z.number().int().min(1900).max(new Date().getFullYear() + 1),
+  }).optional(),
+  customerLocation: z.object({
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
+  }).optional(),
+  insurerName: z.string().max(200).optional(),
+});
 
 interface JobAllocationRequest {
   appointmentId: string;
@@ -33,6 +51,19 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate input
+    const rawInput = await req.json();
+    const validatedInput = JobAllocationSchema.parse(rawInput);
+    
     const {
       appointmentId,
       serviceType,
@@ -40,7 +71,7 @@ const handler = async (req: Request): Promise<Response> => {
       vehicleInfo,
       customerLocation,
       insurerName
-    }: JobAllocationRequest = await req.json();
+    }: JobAllocationRequest = validatedInput;
 
     console.log(`Starting job allocation for appointment ${appointmentId}, service: ${serviceType}`);
 
@@ -51,313 +82,223 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('id', appointmentId)
       .single();
 
-    if (appointmentError || !appointment) {
-      throw new Error(`Appointment not found: ${appointmentError?.message}`);
+    if (appointmentError) {
+      console.error('Error fetching appointment:', appointmentError);
+      throw appointmentError;
     }
 
-    // Detect ADAS calibration needs
+    // Check ADAS calibration needs
     let requiresAdasCalibration = false;
-    let adasCalibrationReason = '';
-    
-    if (appointment.vehicle_info) {
-      const { data: adasResult, error: adasError } = await supabase.functions.invoke('detect-adas-calibration', {
-        body: {
-          vehicleInfo: appointment.vehicle_info,
-          damageType: appointment.damage_type,
-          damageLocation: appointment.ai_assessment_details?.location
-        }
-      });
+    if (vehicleInfo) {
+      try {
+        const { data: adasCheck, error: adasError } = await supabase.functions.invoke('detect-adas-calibration', {
+          body: {
+            vehicleMake: vehicleInfo.make,
+            vehicleModel: vehicleInfo.model,
+            vehicleYear: vehicleInfo.year,
+            damageType: damageType || appointment.damage_type,
+            damageLocation: appointment.damage_location || ''
+          }
+        });
 
-      if (!adasError && adasResult) {
-        requiresAdasCalibration = adasResult.requiresCalibration;
-        adasCalibrationReason = adasResult.calibrationReason;
-        
-        // Update appointment with ADAS calibration requirement
-        await supabase
-          .from('appointments')
-          .update({
-            requires_adas_calibration: requiresAdasCalibration,
-            adas_calibration_reason: adasCalibrationReason
-          })
-          .eq('id', appointmentId);
+        if (!adasError && adasCheck) {
+          requiresAdasCalibration = adasCheck.requiresCalibration;
+          console.log(`ADAS calibration required: ${requiresAdasCalibration}`);
+        }
+      } catch (adasError) {
+        console.error('Error checking ADAS requirements:', adasError);
       }
     }
 
-    // Get preferred shops for insurer if specified
+    // Fetch preferred shops for this insurer
     let preferredShopIds: string[] = [];
-    if (insurerName) {
-      // First get the insurer profile
+    if (insurerName || appointment.insurer_name) {
       const { data: insurerProfile } = await supabase
         .from('insurer_profiles')
         .select('id')
-        .eq('insurer_name', insurerName)
+        .eq('insurer_name', insurerName || appointment.insurer_name)
         .single();
-      
+
       if (insurerProfile) {
-        // Then get preferred shops for this insurer
         const { data: preferredShops } = await supabase
           .from('insurer_preferred_shops')
           .select('shop_id')
           .eq('insurer_id', insurerProfile.id)
-          .eq('is_active', true)
-          .order('priority_level', { ascending: true });
-        
-        if (preferredShops) {
-          preferredShopIds = preferredShops.map(shop => shop.shop_id);
-          console.log(`Found ${preferredShopIds.length} preferred shops for insurer: ${insurerName}`);
-        }
-      } else {
-        console.log(`No insurer profile found for: ${insurerName}`);
+          .eq('is_active', true);
+
+        preferredShopIds = preferredShops?.map(ps => ps.shop_id) || [];
+        console.log(`Found ${preferredShopIds.length} preferred shops for insurer`);
       }
     }
 
-    // Find eligible shops based on service capabilities
+    // Build query for eligible shops
     let shopsQuery = supabase
       .from('shops')
-      .select('*');
+      .select('*')
+      .eq('insurance_approved', true);
 
     // Filter by service capability
     if (serviceType === 'repair') {
       shopsQuery = shopsQuery.in('service_capability', ['repair_only', 'both']);
-      
-      // Further filter by repair type for repairs
-      if (damageType === 'chip') {
-        shopsQuery = shopsQuery.in('repair_types', ['chip_repair', 'both_repairs']);
-      } else if (damageType === 'crack') {
-        shopsQuery = shopsQuery.in('repair_types', ['crack_repair', 'both_repairs']);
+      if (damageType) {
+        if (damageType.includes('chip')) {
+          shopsQuery = shopsQuery.in('repair_types', ['chip_only', 'crack_only', 'both_repairs']);
+        } else if (damageType.includes('crack')) {
+          shopsQuery = shopsQuery.in('repair_types', ['crack_only', 'both_repairs']);
+        }
       }
     } else {
       shopsQuery = shopsQuery.in('service_capability', ['replacement_only', 'both']);
     }
 
-    // If ADAS calibration is required, filter to only calibration-capable shops
+    // Filter by ADAS capability if needed
     if (requiresAdasCalibration) {
       shopsQuery = shopsQuery.eq('adas_calibration_capability', true);
-      console.log('Filtering to only ADAS calibration-capable shops for this job');
     }
 
-    // Filter by skill requirements - only include shops with qualified technicians
-    console.log('Applying skill-based filtering...');
-    
     const { data: eligibleShops, error: shopsError } = await shopsQuery;
 
     if (shopsError) {
-      throw new Error(`Error fetching shops: ${shopsError.message}`);
-    }
-
-    // Additional filtering for qualified technicians
-    const qualifiedShops = [];
-    for (const shop of eligibleShops || []) {
-      const { data: isQualified, error: qualificationError } = await supabase
-        .rpc('shop_has_qualified_technicians', {
-          _shop_id: shop.id,
-          _service_type: serviceType,
-          _damage_type: damageType,
-          _vehicle_type: vehicleInfo?.make || null
-        });
-
-      if (qualificationError) {
-        console.error(`Error checking qualifications for shop ${shop.id}:`, qualificationError);
-        continue; // Skip this shop if we can't verify qualifications
-      }
-
-      if (isQualified) {
-        qualifiedShops.push(shop);
-      } else {
-        console.log(`Shop ${shop.name} lacks qualified technicians for this job`);
-      }
+      console.error('Error fetching shops:', shopsError);
+      throw shopsError;
     }
 
     if (!eligibleShops || eligibleShops.length === 0) {
-      const message = requiresAdasCalibration 
-        ? 'No ADAS calibration-capable shops found for this job'
-        : 'No eligible shops found for this job';
-      
-      console.log(message);
-      return new Response(JSON.stringify({ 
-        success: false, 
-        message,
-        requiresAdasCalibration,
-        jobOffers: []
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'No eligible shops found for this service type'
       }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log(`Found ${qualifiedShops.length} qualified shops${requiresAdasCalibration ? ' with ADAS calibration capability' : ''}${qualifiedShops.length !== (eligibleShops?.length || 0) ? ` (filtered from ${eligibleShops?.length || 0} total)` : ''}`);
+    console.log(`Found ${eligibleShops.length} eligible shops`);
 
-    if (!qualifiedShops || qualifiedShops.length === 0) {
-      const message = requiresAdasCalibration 
-        ? 'No ADAS calibration-capable shops with qualified technicians found'
-        : 'No shops with qualified technicians found for this job';
-      
-      console.log(message);
-      return new Response(JSON.stringify({ 
-        success: false, 
-        message,
-        requiresAdasCalibration,
-        jobOffers: []
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Filter for qualified shops
+    const qualifiedShops = [];
+    for (const shop of eligibleShops) {
+      const { data: isQualified } = await supabase.rpc('shop_has_qualified_technicians', {
+        _shop_id: shop.id,
+        _service_type: serviceType,
+        _damage_type: damageType || null,
+        _vehicle_type: null
       });
-    }
 
-    // Calculate pricing based on service type and parts availability
-    let basePrice = serviceType === 'repair' ? 89 : 350;
-    let partAvailable = true;
-    let leadTimeDays = 1;
-
-    if (serviceType === 'replacement' && vehicleInfo) {
-      // Check parts availability
-      const { data: parts } = await supabase
-        .from('windshield_parts')
-        .select('*')
-        .eq('make', vehicleInfo.make)
-        .eq('model', vehicleInfo.model)
-        .lte('year_from', vehicleInfo.year)
-        .gte('year_to', vehicleInfo.year)
-        .limit(1);
-
-      if (parts && parts.length > 0) {
-        const part = parts[0];
-        basePrice = part.aftermarket_price || 350;
-        leadTimeDays = part.lead_time_days || 1;
-        partAvailable = part.availability_status === 'in_stock';
+      if (isQualified) {
+        qualifiedShops.push(shop);
       }
     }
+
+    console.log(`${qualifiedShops.length} shops have qualified technicians`);
+
+    if (qualifiedShops.length === 0) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'No shops with qualified technicians found'
+      }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Calculate pricing and lead times
+    const basePrice = serviceType === 'replacement' ? 350 : 80;
+    const adasUpcharge = requiresAdasCalibration ? 150 : 0;
+    const estimatedLeadTime = 2; // days
 
     // Separate preferred and non-preferred shops
-    let preferredShops = [];
-    let nonPreferredShops = [];
-    
-    if (preferredShopIds.length > 0) {
-      preferredShops = qualifiedShops.filter(shop => preferredShopIds.includes(shop.id));
-      nonPreferredShops = qualifiedShops.filter(shop => !preferredShopIds.includes(shop.id));
-      console.log(`Separated shops: ${preferredShops.length} preferred, ${nonPreferredShops.length} non-preferred`);
-    } else {
-      nonPreferredShops = qualifiedShops;
-    }
+    const preferredShops = qualifiedShops.filter(s => preferredShopIds.includes(s.id));
+    const nonPreferredShops = qualifiedShops.filter(s => !preferredShopIds.includes(s.id));
 
-    // Score and rank qualified shops for job allocation
+    // Score and rank shops
     const scoreShop = (shop: any, isPreferred: boolean) => {
       let score = 0;
-      
-      // Massive bonus for preferred shops (ensures they are always selected first)
+
+      // Preference bonus (highest weight)
       if (isPreferred) score += 1000;
-      
-      // Performance tier bonus
-      if (shop.performance_tier === 'premium') score += 20;
-      else if (shop.performance_tier === 'gold') score += 15;
-      else score += 5;
-      
-      // Acceptance rate (0-30 points)
-      score += (shop.acceptance_rate || 0) * 0.3;
-      
-      // Response time (faster = better, max 15 points)
-      const responseTimeScore = Math.max(0, 15 - (shop.response_time_minutes || 60) * 0.25);
+
+      // Performance tier
+      const tierScores: Record<string, number> = {
+        'platinum': 100,
+        'gold': 75,
+        'silver': 50,
+        'standard': 25
+      };
+      score += tierScores[shop.performance_tier] || 0;
+
+      // Acceptance rate
+      score += (shop.acceptance_rate || 0) * 50;
+
+      // Response time (lower is better)
+      const responseTimeScore = Math.max(0, 50 - (shop.response_time_minutes || 0));
       score += responseTimeScore;
-      
-      // Quality score (0-25 points)
-      score += (shop.quality_score || 3) * 5;
-      
-      // Recent activity penalty (if declined recently or not responded)
-      const daysSinceLastOffer = shop.last_job_offered_at 
-        ? (Date.now() - new Date(shop.last_job_offered_at).getTime()) / (1000 * 60 * 60 * 24)
-        : 30;
-      
-      // Reduce score for shops that declined recently
-      if (daysSinceLastOffer < 7 && shop.acceptance_rate < 70) {
-        score *= 0.7; // 30% penalty
-      }
-      
-      // Parts availability bonus for replacements
-      if (serviceType === 'replacement') {
-        const stockLevel = shop.spare_parts_stock?.[`${vehicleInfo?.make?.toLowerCase()}_${vehicleInfo?.model?.toLowerCase()}`] || 0;
-        if (stockLevel > 0) score += 10;
-        
-        // Lead time penalty
-        if (shop.average_lead_time_days > leadTimeDays) {
-          score *= 0.8;
-        }
-      }
-      
-      // ADAS calibration capability bonus for calibration-required jobs
-      if (requiresAdasCalibration && shop.adas_calibration_capability) {
-        score += 25; // Significant bonus for matching capability
-        console.log(`ADAS bonus applied to ${shop.name}: +25 points`);
+
+      // Quality score
+      score += (shop.quality_score || 5) * 8;
+
+      // Parts availability (if needed)
+      if (shop.spare_parts_stock && serviceType === 'replacement') {
+        score += 20;
       }
 
-      // Skill-based qualification bonus - already filtered so all shops get this
-      score += 15; // Bonus for having qualified technicians
-      
-      // Distance factor (if location available)
+      // ADAS capability bonus
+      if (requiresAdasCalibration && shop.adas_calibration_capability) {
+        score += 30;
+      }
+
+      // Distance penalty (if location provided)
       if (customerLocation && shop.latitude && shop.longitude) {
         const distance = calculateDistance(
-          customerLocation.latitude, 
+          customerLocation.latitude,
           customerLocation.longitude,
-          parseFloat(shop.latitude), 
-          parseFloat(shop.longitude)
+          shop.latitude,
+          shop.longitude
         );
-        
-        // Penalty for distance > 20km
-        if (distance > 20) score *= 0.8;
-        if (distance > 50) score *= 0.6;
+        score -= Math.min(distance * 2, 50); // Cap distance penalty at 50
       }
-      
-      return {
-        ...shop,
-        allocationScore: Math.round(score * 100) / 100,
-        isPreferred
-      };
+
+      return score;
     };
 
-    // Score preferred and non-preferred shops
-    const scoredPreferredShops = preferredShops.map(shop => scoreShop(shop, true));
-    const scoredNonPreferredShops = nonPreferredShops.map(shop => scoreShop(shop, false));
-    
-    // Combine and sort all shops (preferred will always rank higher due to bonus)
-    const allScoredShops = [...scoredPreferredShops, ...scoredNonPreferredShops];
+    const rankedShops = [
+      ...preferredShops.map(shop => ({
+        shop,
+        score: scoreShop(shop, true),
+        isPreferred: true
+      })),
+      ...nonPreferredShops.map(shop => ({
+        shop,
+        score: scoreShop(shop, false),
+        isPreferred: false
+      }))
+    ]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5); // Take top 5
 
-    // Sort by score (highest first) and take top candidates
-    const rankedShops = allScoredShops
-      .sort((a, b) => b.allocationScore - a.allocationScore)
-      .slice(0, Math.min(5, allScoredShops.length)); // Top 5 shops max
+    console.log(`Ranked top ${rankedShops.length} shops by allocation score`);
 
-    // Check if we have preferred shops in the selection
-    const hasPreferredShops = rankedShops.some(shop => shop.isPreferred);
-    const isOutOfNetwork = preferredShopIds.length > 0 && !hasPreferredShops;
-
-    console.log(`Ranked ${rankedShops.length} shops for job allocation${hasPreferredShops ? ' (including preferred shops)' : ''}${isOutOfNetwork ? ' - OUT OF NETWORK' : ''}`);
-
-    // Create job offers for top-ranked shops
+    // Create job offers
     const jobOffers = [];
-    const offerExpiryTime = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours to respond
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // 24 hours
 
-    for (const shop of rankedShops) {
-      // Calculate shop-specific pricing with small variations for competitive bidding
-      const priceVariation = 0.9 + (Math.random() * 0.2); // ±10% variation
-      const shopPrice = Math.round(basePrice * priceVariation * 100) / 100;
-      
-      // Estimated completion time
-      const completionHours = serviceType === 'repair' ? 0.5 : 2.5;
-      const completionTime = `${completionHours} hours`;
+    for (const rankedShop of rankedShops) {
+      const shop = rankedShop.shop;
+      const offeredPrice = basePrice + adasUpcharge;
 
-      // Create job offer
       const { data: jobOffer, error: offerError } = await supabase
         .from('job_offers')
         .insert({
           appointment_id: appointmentId,
           shop_id: shop.id,
-          offered_price: shopPrice,
-          estimated_completion_time: `${completionHours} hours`,
-          expires_at: offerExpiryTime.toISOString(),
+          offered_price: offeredPrice,
+          estimated_completion_time: `${estimatedLeadTime} days`,
           status: 'offered',
+          expires_at: expiresAt.toISOString(),
           requires_adas_calibration: requiresAdasCalibration,
-          adas_calibration_notes: adasCalibrationReason,
-          is_preferred_shop: shop.isPreferred || false,
-          is_out_of_network: !shop.isPreferred && preferredShopIds.length > 0
+          is_preferred_shop: rankedShop.isPreferred,
+          notes: `Allocation score: ${rankedShop.score.toFixed(2)}`
         })
         .select()
         .single();
@@ -367,85 +308,69 @@ const handler = async (req: Request): Promise<Response> => {
         continue;
       }
 
-      // Send notification to shop
-      const notificationTitle = requiresAdasCalibration 
-        ? `New ${serviceType} job available (ADAS Required)`
-        : `New ${serviceType} job available`;
-      
-      const notificationMessage = requiresAdasCalibration
-        ? `${serviceType} job for ${vehicleInfo?.make || 'vehicle'} - €${shopPrice} (ADAS calibration required)`
-        : `${serviceType} job for ${vehicleInfo?.make || 'vehicle'} - €${shopPrice}`;
-
-      const { error: notificationError } = await supabase
+      // Create notification for the shop
+      await supabase
         .from('shop_notifications')
         .insert({
           shop_id: shop.id,
           notification_type: 'job_offer',
-          title: notificationTitle,
-          message: notificationMessage,
+          title: 'New Job Offer',
+          message: `New ${serviceType} job offer for ${vehicleInfo?.year || ''} ${vehicleInfo?.make || ''} ${vehicleInfo?.model || ''}`,
           data: {
             appointment_id: appointmentId,
             job_offer_id: jobOffer.id,
             service_type: serviceType,
-            offered_price: shopPrice,
-            expires_at: offerExpiryTime.toISOString(),
-            customer_location: appointment.city || 'Unknown',
-            requires_adas_calibration: requiresAdasCalibration,
-            adas_calibration_reason: adasCalibrationReason
+            price: offeredPrice,
+            expires_at: expiresAt.toISOString()
           }
         });
-
-      if (notificationError) {
-        console.error(`Error creating notification for shop ${shop.id}:`, notificationError);
-      }
 
       // Update shop statistics
       await supabase
         .from('shops')
         .update({
           jobs_offered_count: (shop.jobs_offered_count || 0) + 1,
-          last_job_offered_at: new Date().toISOString()
+          last_job_offered_at: now.toISOString()
         })
         .eq('id', shop.id);
 
       jobOffers.push({
+        jobOfferId: jobOffer.id,
         shopId: shop.id,
         shopName: shop.name,
-        offeredPrice: shopPrice,
-        allocationScore: shop.allocationScore,
-        estimatedCompletion: completionTime,
-        expiresAt: offerExpiryTime.toISOString(),
-        isPreferred: shop.isPreferred || false,
-        isOutOfNetwork: !shop.isPreferred && preferredShopIds.length > 0
+        offeredPrice,
+        isPreferred: rankedShop.isPreferred
       });
-
-      console.log(`Job offer sent to ${shop.name} for €${shopPrice}`);
     }
 
-    console.log(`Successfully allocated job to ${jobOffers.length} shops in under 30 seconds`);
+    console.log(`Created ${jobOffers.length} job offers`);
 
     return new Response(JSON.stringify({
       success: true,
-      appointmentId,
-      serviceType,
-      requiresAdasCalibration,
-      adasCalibrationReason,
-      jobOffers,
-      totalShopsContacted: jobOffers.length,
-      allocationCompleted: true
+      allocatedShops: jobOffers.length,
+      jobOffers
     }), {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error: any) {
-    console.error("Error in job allocation:", error);
-    return new Response(JSON.stringify({ 
-      error: error.message,
-      success: false 
-    }), {
+    console.error('Error in job allocation:', error);
+    
+    // Handle validation errors specifically
+    if (error.name === 'ZodError') {
+      return new Response(JSON.stringify({
+        error: 'Invalid input data',
+        details: error.errors
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 };
@@ -455,17 +380,17 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   const R = 6371; // Radius of the Earth in kilometers
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  const d = R * c; // Distance in kilometers
-  return d;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in kilometers
+  return distance;
 }
 
 function deg2rad(deg: number): number {
-  return deg * (Math.PI/180);
+  return deg * (Math.PI / 180);
 }
 
 serve(handler);

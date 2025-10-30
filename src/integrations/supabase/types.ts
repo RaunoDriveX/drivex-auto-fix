@@ -54,6 +54,7 @@ export type Database = {
           shop_name: string
           status: string
           total_cost: number | null
+          tracking_token: string | null
           updated_at: string
           vehicle_info: Json | null
         }
@@ -96,6 +97,7 @@ export type Database = {
           shop_name: string
           status?: string
           total_cost?: number | null
+          tracking_token?: string | null
           updated_at?: string
           vehicle_info?: Json | null
         }
@@ -138,6 +140,7 @@ export type Database = {
           shop_name?: string
           status?: string
           total_cost?: number | null
+          tracking_token?: string | null
           updated_at?: string
           vehicle_info?: Json | null
         }
@@ -558,6 +561,7 @@ export type Database = {
           timeout_seconds: number | null
           updated_at: string
           webhook_secret: string | null
+          webhook_secret_hash: string | null
           webhook_url: string
         }
         Insert: {
@@ -572,6 +576,7 @@ export type Database = {
           timeout_seconds?: number | null
           updated_at?: string
           webhook_secret?: string | null
+          webhook_secret_hash?: string | null
           webhook_url: string
         }
         Update: {
@@ -586,6 +591,7 @@ export type Database = {
           timeout_seconds?: number | null
           updated_at?: string
           webhook_secret?: string | null
+          webhook_secret_hash?: string | null
           webhook_url?: string
         }
         Relationships: [
@@ -724,7 +730,7 @@ export type Database = {
           appointment_id: string | null
           created_at: string
           decline_reason: string | null
-          estimated_completion_time: unknown | null
+          estimated_completion_time: unknown
           expires_at: string
           id: string
           is_out_of_network: boolean | null
@@ -743,7 +749,7 @@ export type Database = {
           appointment_id?: string | null
           created_at?: string
           decline_reason?: string | null
-          estimated_completion_time?: unknown | null
+          estimated_completion_time?: unknown
           expires_at: string
           id?: string
           is_out_of_network?: boolean | null
@@ -762,7 +768,7 @@ export type Database = {
           appointment_id?: string | null
           created_at?: string
           decline_reason?: string | null
-          estimated_completion_time?: unknown | null
+          estimated_completion_time?: unknown
           expires_at?: string
           id?: string
           is_out_of_network?: boolean | null
@@ -1689,13 +1695,11 @@ export type Database = {
         }
         Returns: boolean
       }
-      get_user_insurer_id: {
-        Args: { _user_id: string }
-        Returns: string
-      }
-      is_insurer_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
+      get_user_insurer_id: { Args: { _user_id: string }; Returns: string }
+      is_insurer_admin: { Args: { _user_id: string }; Returns: boolean }
+      set_webhook_secret: {
+        Args: { _config_id: string; _secret: string }
+        Returns: undefined
       }
       shop_has_qualified_technicians: {
         Args: {
@@ -1704,6 +1708,10 @@ export type Database = {
           _shop_id: string
           _vehicle_type?: string
         }
+        Returns: boolean
+      }
+      verify_webhook_signature: {
+        Args: { _config_id: string; _payload: string; _signature: string }
         Returns: boolean
       }
     }
