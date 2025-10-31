@@ -113,30 +113,18 @@ export function UserManagement() {
           description: 'User updated successfully.',
         });
       } else {
-        // Create new user - First create the auth user
-        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-          email: formData.email,
-          password: Math.random().toString(36).slice(-12), // Temporary password
-          email_confirm: true,
-        });
-
-        if (authError) throw authError;
-
-        if (!authData.user) throw new Error('Failed to create user');
-
-        // Add to insurer_users table
-        const { error: insertError } = await supabase
-          .from('insurer_users')
-          .insert({
-            insurer_id: profile.id,
-            user_id: authData.user.id,
+        // Create new user via secure edge function
+        const { data, error } = await supabase.functions.invoke('create-insurer-user', {
+          body: {
             email: formData.email,
             full_name: formData.full_name,
             role: formData.role,
-            created_by: user.id,
-          });
+            insurer_id: profile.id,
+          },
+        });
 
-        if (insertError) throw insertError;
+        if (error) throw error;
+        if (!data?.success) throw new Error(data?.error || 'Failed to create user');
 
         toast({
           title: 'Success',
