@@ -38,50 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Verify authentication
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Get authenticated user from Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    console.log(`Job response from user: ${user.email}`);
-
-    // Verify user owns a shop
-    const { data: shop, error: shopError } = await supabase
-      .from('shops')
-      .select('id')
-      .eq('email', user.email)
-      .single();
-
-    if (shopError || !shop) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized - no shop associated with this user' }),
-        { 
-          status: 403,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Validate input
+    // Parse and validate input
     const rawInput = await req.json();
     const validatedInput = JobResponseSchema.parse(rawInput);
     const {
@@ -94,7 +51,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Processing ${response} response for job offer ${jobOfferId}`);
 
-    // Get job offer details and verify ownership
+    // Get job offer details
     const { data: jobOffer, error: offerError } = await supabase
       .from('job_offers')
       .select(`
@@ -102,12 +59,11 @@ const handler = async (req: Request): Promise<Response> => {
         appointments:appointment_id (*)
       `)
       .eq('id', jobOfferId)
-      .eq('shop_id', shop.id)  // Verify this offer belongs to user's shop
       .single();
 
     if (offerError || !jobOffer) {
       return new Response(
-        JSON.stringify({ error: 'Job offer not found or access denied' }),
+        JSON.stringify({ error: 'Job offer not found' }),
         { 
           status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
