@@ -60,6 +60,22 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Get authenticated user
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    console.log(`Allocating job for user: ${user.email}`);
+
     // Validate input
     const rawInput = await req.json();
     const validatedInput = JobAllocationSchema.parse(rawInput);

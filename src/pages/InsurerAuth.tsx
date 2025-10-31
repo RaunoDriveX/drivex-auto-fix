@@ -10,7 +10,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const DEMO_MODE = import.meta.env.VITE_ENABLE_DEMO_MODE === "true";
+// Only allow demo mode in development environment
+const DEMO_MODE = import.meta.env.MODE === 'development' && 
+                  import.meta.env.VITE_ENABLE_DEMO_MODE === "true";
 const DEMO_EMAILS = ["demo.insurer@allstate.com", "demo@insurer.com"];
 
 export default function InsurerAuth() {

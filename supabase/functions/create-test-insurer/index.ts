@@ -1,10 +1,19 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+// Zod schema for input validation
+const CreateInsurerSchema = z.object({
+  email: z.string().email().max(255),
+  password: z.string().min(8).max(72),
+  insurerName: z.string().trim().min(1).max(200),
+  fullName: z.string().trim().min(1).max(100)
+});
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -25,7 +34,24 @@ serve(async (req) => {
       }
     )
 
-    const { email, password, insurerName, fullName } = await req.json()
+    // Parse and validate request body
+    const requestBody = await req.json()
+    const validationResult = CreateInsurerSchema.safeParse(requestBody);
+
+    if (!validationResult.success) {
+      return new Response(
+        JSON.stringify({
+          error: 'Invalid request data',
+          details: validationResult.error.errors
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        },
+      )
+    }
+
+    const { email, password, insurerName, fullName } = validationResult.data;
 
     console.log(`Creating test insurer user: ${email} for ${insurerName}`)
 
@@ -56,6 +82,8 @@ serve(async (req) => {
       .single()
 
     if (profileError || !insurerProfile) {
+      // Clean up auth user
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
       throw new Error(`Insurer profile not found: ${insurerName}`)
     }
 

@@ -44,12 +44,13 @@ const ShopDashboard = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check if in demo mode
-        const demoMode = sessionStorage.getItem('demoMode') === 'true';
+        // Only allow demo mode in development
+        const isDevelopment = import.meta.env.MODE === 'development';
+        const demoMode = isDevelopment && sessionStorage.getItem('demoMode') === 'true';
         const demoEmail = sessionStorage.getItem('demoEmail');
 
         if (demoMode && demoEmail) {
-          // Demo mode - use mock data
+          // Demo mode - only in development
           setIsDemoMode(true);
           const mockUser = { email: demoEmail } as User;
           const mockShopData: ShopData = {

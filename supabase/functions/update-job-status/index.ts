@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
@@ -11,13 +12,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface StatusUpdateRequest {
-  appointmentId: string;
-  newStatus: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
-  shopId: string;
-  notes?: string;
-  estimatedCompletion?: string;
-}
+// Zod schema for input validation
+const UpdateStatusSchema = z.object({
+  appointmentId: z.string().uuid(),
+  newStatus: z.enum(['scheduled', 'in_progress', 'completed', 'cancelled']),
+  shopId: z.string().uuid(),
+  notes: z.string().max(1000).optional(),
+  estimatedCompletion: z.string().datetime().optional()
+});
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -25,13 +27,64 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Get authenticated user
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Parse and validate request body
+    const requestBody = await req.json();
+    const validationResult = UpdateStatusSchema.safeParse(requestBody);
+
+    if (!validationResult.success) {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid request data',
+        details: validationResult.error.errors 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const {
       appointmentId,
       newStatus,
       shopId,
       notes,
       estimatedCompletion
-    }: StatusUpdateRequest = await req.json();
+    } = validationResult.data;
+
+    // Verify shop ownership
+    const { data: shop, error: shopError } = await supabase
+      .from('shops')
+      .select('id')
+      .eq('id', shopId)
+      .eq('email', user.email)
+      .single();
+
+    if (shopError || !shop) {
+      return new Response(JSON.stringify({ 
+        error: 'Unauthorized - you do not own this shop' 
+      }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     console.log(`Processing status update: ${appointmentId} -> ${newStatus} by shop ${shopId}`);
 
@@ -40,10 +93,16 @@ const handler = async (req: Request): Promise<Response> => {
       .from('appointments')
       .select('*')
       .eq('id', appointmentId)
+      .eq('shop_id', shopId)  // Ensure appointment belongs to this shop
       .single();
 
     if (appointmentError || !appointment) {
-      throw new Error(`Appointment not found: ${appointmentError?.message}`);
+      return new Response(JSON.stringify({ 
+        error: 'Appointment not found or access denied' 
+      }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const currentStatus = appointment.job_status || 'scheduled';
@@ -57,7 +116,12 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
-      throw new Error(`Invalid status transition from ${currentStatus} to ${newStatus}`);
+      return new Response(JSON.stringify({ 
+        error: `Invalid status transition from ${currentStatus} to ${newStatus}` 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Prepare update data
@@ -98,7 +162,7 @@ const handler = async (req: Request): Promise<Response> => {
     const auditData = {
       appointment_id: appointmentId,
       job_offer_id: jobOffer?.id || null,
-      claim_id: appointment.id, // Using appointment ID as claim ID for now
+      claim_id: appointment.id,
       old_status: currentStatus,
       new_status: newStatus,
       status_changed_at: new Date().toISOString(),
@@ -196,7 +260,7 @@ async function sendWebhookNotification(appointment: any, auditLog: any, newStatu
 
   const { data: webhookConfig } = await supabase
     .from('insurer_webhook_configs')
-    .select('*')
+    .select('webhook_url, webhook_secret_hash, events_subscribed, retry_attempts, timeout_seconds, is_active, id')
     .eq('insurer_id', insurerProfile.id)
     .eq('is_active', true)
     .single();
@@ -232,29 +296,15 @@ async function sendWebhookNotification(appointment: any, auditLog: any, newStatu
     }
   };
 
-  // Sign payload if secret is configured
+  // Sign payload using stored hash (for verification only - secret must be stored by insurer)
   let headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'User-Agent': 'DriveX-Webhooks/1.0'
   };
 
-  if (webhookConfig.webhook_secret) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(JSON.stringify(webhookPayload));
-    const key = await crypto.subtle.importKey(
-      'raw',
-      encoder.encode(webhookConfig.webhook_secret),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign']
-    );
-    const signature = await crypto.subtle.sign('HMAC', key, data);
-    const signatureHex = Array.from(new Uint8Array(signature))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-    headers['X-DriveX-Signature'] = `sha256=${signatureHex}`;
-  }
-
+  // Note: We no longer have access to plaintext secret
+  // Insurers must store the secret themselves and verify using the hash
+  
   let attempt = 0;
   let lastError;
   

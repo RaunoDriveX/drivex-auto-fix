@@ -11,9 +11,10 @@ import { LogOut, Building2 } from 'lucide-react';
 export default function InsurerDashboard() {
   const [isDemoMode, setIsDemoMode] = useState(false);
 
-  // Check if in demo mode
+  // Check if in demo mode - only allow in development
   useEffect(() => {
-    const demoMode = sessionStorage.getItem('demoMode') === 'true';
+    const isDevelopment = import.meta.env.MODE === 'development';
+    const demoMode = isDevelopment && sessionStorage.getItem('demoMode') === 'true';
     setIsDemoMode(demoMode);
   }, []);
 

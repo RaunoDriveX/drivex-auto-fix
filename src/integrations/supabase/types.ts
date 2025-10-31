@@ -560,7 +560,6 @@ export type Database = {
           retry_attempts: number | null
           timeout_seconds: number | null
           updated_at: string
-          webhook_secret: string | null
           webhook_secret_hash: string | null
           webhook_url: string
         }
@@ -575,7 +574,6 @@ export type Database = {
           retry_attempts?: number | null
           timeout_seconds?: number | null
           updated_at?: string
-          webhook_secret?: string | null
           webhook_secret_hash?: string | null
           webhook_url: string
         }
@@ -590,7 +588,6 @@ export type Database = {
           retry_attempts?: number | null
           timeout_seconds?: number | null
           updated_at?: string
-          webhook_secret?: string | null
           webhook_secret_hash?: string | null
           webhook_url?: string
         }

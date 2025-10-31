@@ -11,7 +11,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Wrench, ArrowLeft } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
-const DEMO_MODE = import.meta.env.VITE_ENABLE_DEMO_MODE === "true";
+// Only allow demo mode in development environment
+const DEMO_MODE = import.meta.env.MODE === 'development' && 
+                  import.meta.env.VITE_ENABLE_DEMO_MODE === "true";
 const DEMO_EMAILS = ["demo.shop@autofix.com", "demo@shop.com"];
 
 const ShopAuth = () => {
