@@ -58,8 +58,11 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
     e.preventDefault();
     setLoading(true);
     
+    // Save form reference before async operations
+    const form = e.currentTarget;
+    
     try {
-      const formData = new FormData(e.currentTarget);
+      const formData = new FormData(form);
       const customerName = formData.get('name') as string;
       const customerEmail = formData.get('email') as string;
       const customerPhone = formData.get('phone') as string;
@@ -158,7 +161,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
       }
 
       toast.success("Booking confirmed! Check your email for confirmation details.");
-      (e.currentTarget as HTMLFormElement).reset();
+      form.reset();
       setSelectedDate(undefined);
       setSelectedTimeSlot("");
       setIsInsuranceClaim("");
