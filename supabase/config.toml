@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.send-reminder-email]
 verify_jwt = false
+
+[functions.handle-job-response]
+verify_jwt = true
