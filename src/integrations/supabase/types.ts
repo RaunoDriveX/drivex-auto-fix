@@ -1707,10 +1707,20 @@ export type Database = {
         }
         Returns: boolean
       }
-      verify_webhook_signature: {
-        Args: { _config_id: string; _payload: string; _signature: string }
-        Returns: boolean
-      }
+      verify_webhook_signature:
+        | {
+            Args: {
+              _config_id: string
+              _payload: string
+              _secret: string
+              _signature: string
+            }
+            Returns: boolean
+          }
+        | {
+            Args: { _config_id: string; _payload: string; _signature: string }
+            Returns: boolean
+          }
     }
     Enums: {
       achievement_type:

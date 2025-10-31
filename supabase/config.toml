@@ -1,7 +1,7 @@
 project_id = "dsvmigyunbwdefibbpgm"
 
 [functions.allocate-job]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-confirmation-email]
 verify_jwt = false
