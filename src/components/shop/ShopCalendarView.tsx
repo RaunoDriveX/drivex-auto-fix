@@ -250,11 +250,11 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
                   DayContent: ({ date }) => {
                     const dayEvents = getEventsForDate(date);
                     return (
-                      <div className="relative w-full h-full min-h-[60px] p-1">
-                        <div className="text-sm font-medium">
+                      <div className="relative w-full h-full min-h-[60px] p-1 flex flex-col">
+                        <div className="text-sm font-medium text-center">
                           {date.getDate()}
                         </div>
-                        <div className="space-y-1 mt-1">
+                        <div className="space-y-1 mt-1 flex-1">
                           {dayEvents.slice(0, 2).map((event, index) => (
                             <div
                               key={`${event.id}-${index}`}
