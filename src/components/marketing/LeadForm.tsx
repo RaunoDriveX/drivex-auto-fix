@@ -230,7 +230,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
               </p>
 
               <Button asChild size="lg" className="gap-2">
-                <Link to="/">
+                <Link to="/" onClick={() => window.scrollTo(0, 0)}>
                   <Home className="h-4 w-4" />
                   Back to Home
                 </Link>
