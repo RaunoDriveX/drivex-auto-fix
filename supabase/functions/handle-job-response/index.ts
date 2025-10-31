@@ -1,11 +1,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { Resend } from "npm:resend@2.0.0";
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -231,6 +234,46 @@ const handler = async (req: Request): Promise<Response> => {
       console.log(`Job accepted by ${shopDetails.name} for €${counterOffer || jobOffer.offered_price}`);
     } else {
       console.log(`Job declined by ${shopDetails.name}. Reason: ${declineReason || 'Not specified'}`);
+      
+      // Send decline notification email
+      try {
+        const appointment = jobOffer.appointments as any;
+        const emailResponse = await resend.emails.send({
+          from: "DriveX <onboarding@resend.dev>",
+          to: [appointment.customer_email],
+          subject: `Job Offer Declined - ${shopDetails.name}`,
+          html: `
+            <h1>Job Offer Update</h1>
+            <p>Dear ${appointment.customer_name},</p>
+            <p>We wanted to inform you that <strong>${shopDetails.name}</strong> has declined the job offer for your ${appointment.service_type} service scheduled on ${new Date(appointment.appointment_date).toLocaleDateString()}.</p>
+            
+            <h2>Decline Reason:</h2>
+            <p>${declineReason || 'No reason provided'}</p>
+            
+            ${notes ? `
+            <h2>Additional Notes:</h2>
+            <p>${notes}</p>
+            ` : ''}
+            
+            <h2>Job Details:</h2>
+            <ul>
+              <li><strong>Service Type:</strong> ${appointment.service_type}</li>
+              <li><strong>Date:</strong> ${new Date(appointment.appointment_date).toLocaleDateString()}</li>
+              <li><strong>Time:</strong> ${appointment.appointment_time}</li>
+              ${appointment.damage_type ? `<li><strong>Damage Type:</strong> ${appointment.damage_type}</li>` : ''}
+            </ul>
+            
+            <p>Don't worry! We're working on finding another qualified shop for your appointment. You will receive another notification once a shop accepts your job offer.</p>
+            
+            <p>Best regards,<br>The DriveX Team</p>
+          `,
+        });
+        
+        console.log("Decline notification email sent successfully:", emailResponse);
+      } catch (emailError) {
+        console.error("Failed to send decline notification email:", emailError);
+        // Don't throw - email failure shouldn't fail the entire operation
+      }
     }
 
     // Send notification about response
