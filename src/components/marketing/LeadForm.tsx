@@ -84,11 +84,14 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
 
       // Extract time from slot (format: "09:00 - 09:30")
       const timeSlot = selectedTimeSlot.split(' - ')[0];
+      const totalCost = jobType === "repair" ? 89 : 350;
+      const newAppointmentId = crypto.randomUUID();
       
-      // Create appointment
-      const { data: appointment, error: appointmentError } = await supabase
+      // Create appointment (no select after insert to avoid RLS on SELECT)
+      const { error: appointmentError } = await supabase
         .from('appointments')
         .insert({
+          id: newAppointmentId,
           customer_name: customerName,
           customer_email: customerEmail,
           customer_phone: customerPhone,
@@ -100,10 +103,8 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
           is_insurance_claim: isInsurance,
           insurer_name: isInsurance ? insurerName : null,
           status: 'confirmed',
-          total_cost: jobType === "repair" ? 89 : 350
-        })
-        .select()
-        .single();
+          total_cost: totalCost
+        });
 
       if (appointmentError) {
         console.error('Error creating appointment:', appointmentError);
@@ -115,14 +116,14 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
       try {
         const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
           body: {
-            appointmentId: appointment.id,
+            appointmentId: newAppointmentId,
             customerName,
             customerEmail,
             shopName,
             appointmentDate: format(selectedDate, 'yyyy-MM-dd'),
             appointmentTime: timeSlot,
             serviceType: jobType,
-            totalCost: appointment.total_cost
+            totalCost: totalCost
           }
         });
 
@@ -134,7 +135,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
         await supabase
           .from('appointments')
           .update({ confirmation_email_sent: true })
-          .eq('id', appointment.id);
+          .eq('id', newAppointmentId);
       } catch (emailError) {
         console.error('Error with confirmation email:', emailError);
       }
@@ -143,7 +144,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
       try {
         const { error: allocationError } = await supabase.functions.invoke('allocate-job', {
           body: {
-            appointmentId: appointment.id,
+            appointmentId: newAppointmentId,
             serviceType: jobType,
             damageType: 'chip', // This could be determined from AI analysis
             vehicleInfo: {
