@@ -150,38 +150,38 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Get current shop stats
-    const { data: shop, error: shopError } = await supabase
+    const { data: shopDetails, error: shopDetailsError } = await supabase
       .from('shops')
       .select('*')
       .eq('id', jobOffer.shop_id)
       .single();
 
-    if (shopError) {
-      throw new Error(`Shop not found: ${shopError.message}`);
+    if (shopDetailsError) {
+      throw new Error(`Shop not found: ${shopDetailsError.message}`);
     }
 
     // Update shop performance metrics
     const newAcceptedCount = response === 'accept' 
-      ? (shop.jobs_accepted_count || 0) + 1 
-      : (shop.jobs_accepted_count || 0);
+      ? (shopDetails.jobs_accepted_count || 0) + 1 
+      : (shopDetails.jobs_accepted_count || 0);
     
     const newDeclinedCount = response === 'decline' 
-      ? (shop.jobs_declined_count || 0) + 1 
-      : (shop.jobs_declined_count || 0);
+      ? (shopDetails.jobs_declined_count || 0) + 1 
+      : (shopDetails.jobs_declined_count || 0);
 
     const totalResponses = newAcceptedCount + newDeclinedCount;
     const newAcceptanceRate = totalResponses > 0 ? (newAcceptedCount / totalResponses) * 100 : 0;
 
     // Calculate new average response time
-    const currentResponseTime = shop.response_time_minutes || 0;
-    const totalOffers = shop.jobs_offered_count || 1;
+    const currentResponseTime = shopDetails.response_time_minutes || 0;
+    const totalOffers = shopDetails.jobs_offered_count || 1;
     const newAvgResponseTime = ((currentResponseTime * (totalOffers - 1)) + responseTime) / totalOffers;
 
     // Determine new performance tier based on metrics
     let newPerformanceTier = 'standard';
-    if (newAcceptanceRate >= 90 && newAvgResponseTime <= 15 && (shop.quality_score || 0) >= 4.5) {
+    if (newAcceptanceRate >= 90 && newAvgResponseTime <= 15 && (shopDetails.quality_score || 0) >= 4.5) {
       newPerformanceTier = 'premium';
-    } else if (newAcceptanceRate >= 80 && newAvgResponseTime <= 30 && (shop.quality_score || 0) >= 4.0) {
+    } else if (newAcceptanceRate >= 80 && newAvgResponseTime <= 30 && (shopDetails.quality_score || 0) >= 4.0) {
       newPerformanceTier = 'gold';
     }
 
@@ -218,7 +218,7 @@ const handler = async (req: Request): Promise<Response> => {
         .from('appointments')
         .update({
           shop_id: jobOffer.shop_id,
-          shop_name: shop.name,
+          shop_name: shopDetails.name,
           status: 'confirmed',
           total_cost: counterOffer || jobOffer.offered_price
         })
@@ -228,9 +228,9 @@ const handler = async (req: Request): Promise<Response> => {
         console.error('Failed to update appointment:', appointmentUpdateError);
       }
 
-      console.log(`Job accepted by ${shop.name} for €${counterOffer || jobOffer.offered_price}`);
+      console.log(`Job accepted by ${shopDetails.name} for €${counterOffer || jobOffer.offered_price}`);
     } else {
-      console.log(`Job declined by ${shop.name}. Reason: ${declineReason || 'Not specified'}`);
+      console.log(`Job declined by ${shopDetails.name}. Reason: ${declineReason || 'Not specified'}`);
     }
 
     // Send notification about response
