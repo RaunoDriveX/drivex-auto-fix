@@ -257,7 +257,7 @@ const handler = async (req: Request): Promise<Response> => {
       return score;
     };
 
-    const rankedShops = [
+    const initialRanked = [
       ...preferredShops.map(shop => ({
         shop,
         score: scoreShop(shop, true, shop.id === appointment.shop_id),
@@ -271,8 +271,36 @@ const handler = async (req: Request): Promise<Response> => {
         isBookedShop: shop.id === appointment.shop_id
       }))
     ]
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5); // Take top 5
+      .sort((a, b) => b.score - a.score);
+
+    // Ensure the originally booked shop always receives an offer
+    let rankedShops = initialRanked;
+    try {
+      if (appointment.shop_id) {
+        const alreadyIncluded = rankedShops.some(r => r.shop.id === appointment.shop_id);
+        if (!alreadyIncluded) {
+          const { data: bookedShop } = await supabase
+            .from('shops')
+            .select('*')
+            .eq('id', appointment.shop_id)
+            .single();
+
+          if (bookedShop) {
+            const isPreferredBooked = preferredShopIds.includes(bookedShop.id);
+            const bookedEntry = {
+              shop: bookedShop,
+              score: scoreShop(bookedShop, isPreferredBooked, true),
+              isPreferred: isPreferredBooked,
+              isBookedShop: true
+            };
+            rankedShops = [bookedEntry, ...rankedShops.filter(r => r.shop.id !== bookedShop.id)].slice(0, 5);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Could not ensure booked shop is included in ranked list:', e);
+    }
+
 
     console.log(`Ranked top ${rankedShops.length} shops by allocation score`);
 
