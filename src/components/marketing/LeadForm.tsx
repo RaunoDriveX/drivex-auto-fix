@@ -147,7 +147,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
               latitude: 52.3676, // Amsterdam coordinates as example
               longitude: 4.9041
             },
-            insurerName: isInsurance ? insurerName : null
+            ...(isInsurance && insurerName ? { insurerName } : {})
           }
         });
 
