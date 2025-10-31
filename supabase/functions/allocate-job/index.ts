@@ -142,9 +142,9 @@ const handler = async (req: Request): Promise<Response> => {
       shopsQuery = shopsQuery.in('service_capability', ['repair_only', 'both']);
       if (damageType) {
         if (damageType.includes('chip')) {
-          shopsQuery = shopsQuery.in('repair_types', ['chip_only', 'crack_only', 'both_repairs']);
+          shopsQuery = shopsQuery.in('repair_types', ['chip_repair', 'both_repairs']);
         } else if (damageType.includes('crack')) {
-          shopsQuery = shopsQuery.in('repair_types', ['crack_only', 'both_repairs']);
+          shopsQuery = shopsQuery.in('repair_types', ['crack_repair', 'both_repairs']);
         }
       }
     } else {
