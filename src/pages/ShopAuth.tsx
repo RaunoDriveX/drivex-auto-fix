@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Wrench } from "lucide-react";
+import { Wrench, ArrowLeft } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 const DEMO_MODE = import.meta.env.VITE_ENABLE_DEMO_MODE === "true";
@@ -193,34 +193,45 @@ const ShopAuth = () => {
       </Helmet>
       
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Wrench className="h-6 w-6 text-primary" />
-              <CardTitle className="text-2xl">Shop Portal</CardTitle>
-            </div>
-            <CardDescription>
-              Access your repair shop dashboard
-            </CardDescription>
-          </CardHeader>
+        <div className="w-full max-w-md space-y-4">
+          <Card>
+            <CardHeader className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Wrench className="h-6 w-6 text-primary" />
+                <CardTitle className="text-2xl">Shop Portal</CardTitle>
+              </div>
+              <CardDescription>
+                Access your repair shop dashboard
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+              <Tabs defaultValue="signin" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="signin">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="signin" className="mt-6">
+                  <AuthForm isSignUp={false} />
+                </TabsContent>
+                
+                <TabsContent value="signup" className="mt-6">
+                  <AuthForm isSignUp={true} />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
           
-          <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="signin" className="mt-6">
-                <AuthForm isSignUp={false} />
-              </TabsContent>
-              
-              <TabsContent value="signup" className="mt-6">
-                <AuthForm isSignUp={true} />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+          <div className="flex justify-center">
+            <Button variant="ghost" asChild className="gap-2">
+              <Link to="/" onClick={() => window.scrollTo(0, 0)}>
+                <ArrowLeft className="h-4 w-4" />
+                Back to Home
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </>
   );
