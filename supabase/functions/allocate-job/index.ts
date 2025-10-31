@@ -205,8 +205,11 @@ const handler = async (req: Request): Promise<Response> => {
     const nonPreferredShops = qualifiedShops.filter(s => !preferredShopIds.includes(s.id));
 
     // Score and rank shops
-    const scoreShop = (shop: any, isPreferred: boolean) => {
+    const scoreShop = (shop: any, isPreferred: boolean, isBookedShop: boolean = false) => {
       let score = 0;
+
+      // Booked shop bonus (ensure it's always considered)
+      if (isBookedShop) score += 500;
 
       // Preference bonus (highest weight)
       if (isPreferred) score += 1000;
@@ -257,13 +260,15 @@ const handler = async (req: Request): Promise<Response> => {
     const rankedShops = [
       ...preferredShops.map(shop => ({
         shop,
-        score: scoreShop(shop, true),
-        isPreferred: true
+        score: scoreShop(shop, true, shop.id === appointment.shop_id),
+        isPreferred: true,
+        isBookedShop: shop.id === appointment.shop_id
       })),
       ...nonPreferredShops.map(shop => ({
         shop,
-        score: scoreShop(shop, false),
-        isPreferred: false
+        score: scoreShop(shop, false, shop.id === appointment.shop_id),
+        isPreferred: false,
+        isBookedShop: shop.id === appointment.shop_id
       }))
     ]
       .sort((a, b) => b.score - a.score)
