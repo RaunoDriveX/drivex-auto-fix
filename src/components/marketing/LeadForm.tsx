@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { format, addDays, isToday, isTomorrow } from "date-fns";
-import { CalendarIcon, Clock } from "lucide-react";
+import { CalendarIcon, Clock, CheckCircle2, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import CallCenterCTA from "@/components/CallCenterCTA";
@@ -25,6 +26,13 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
   const [isInsuranceClaim, setIsInsuranceClaim] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
+  const [bookingComplete, setBookingComplete] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState<{
+    shopName: string;
+    date: string;
+    time: string;
+    email: string;
+  } | null>(null);
 
   const jobDuration = jobType === "repair" ? "30 minutes" : "2.5 hours";
   const jobDurationMinutes = jobType === "repair" ? 30 : 150;
@@ -161,10 +169,15 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
       }
 
       toast.success("Booking confirmed! Check your email for confirmation details.");
-      form.reset();
-      setSelectedDate(undefined);
-      setSelectedTimeSlot("");
-      setIsInsuranceClaim("");
+      
+      // Set booking complete state
+      setBookingComplete(true);
+      setBookingDetails({
+        shopName,
+        date: format(selectedDate, 'EEEE, MMMM d, yyyy'),
+        time: timeSlot,
+        email: customerEmail
+      });
       
     } catch (error) {
       console.error('Error during booking:', error);
@@ -173,6 +186,61 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
       setLoading(false);
     }
   };
+
+  // Show success state if booking is complete
+  if (bookingComplete && bookingDetails) {
+    return (
+      <section id="lead-form" aria-labelledby="lead-form-heading" className="bg-background">
+        <div className="container mx-auto max-w-3xl">
+          <Card className="shadow-lg border-success/40 bg-success/5">
+            <CardContent className="p-8 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="rounded-full bg-success/10 p-4">
+                  <CheckCircle2 className="h-16 w-16 text-success" />
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                Booking Confirmed!
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                Your appointment has been successfully scheduled
+              </p>
+              
+              <div className="bg-background rounded-lg p-6 mb-6 text-left space-y-3">
+                <div className="flex items-start gap-3">
+                  <span className="text-muted-foreground font-medium min-w-[100px]">Shop:</span>
+                  <span className="text-foreground font-semibold">{bookingDetails.shopName}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-muted-foreground font-medium min-w-[100px]">Date:</span>
+                  <span className="text-foreground">{bookingDetails.date}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-muted-foreground font-medium min-w-[100px]">Time:</span>
+                  <span className="text-foreground">{bookingDetails.time}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-muted-foreground font-medium min-w-[100px]">Email:</span>
+                  <span className="text-foreground">{bookingDetails.email}</span>
+                </div>
+              </div>
+
+              <p className="text-sm text-muted-foreground mb-6">
+                A confirmation email with all the details has been sent to your email address.
+              </p>
+
+              <Button asChild size="lg" className="gap-2">
+                <Link to="/">
+                  <Home className="h-4 w-4" />
+                  Back to Home
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="lead-form" aria-labelledby="lead-form-heading" className="bg-background">
