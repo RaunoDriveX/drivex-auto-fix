@@ -69,9 +69,21 @@ const handler = async (req: Request): Promise<Response> => {
       .from('shops')
       .select('id')
       .eq('email', user.email)
-      .single();
+      .maybeSingle();
 
-    if (shopError || !shop) {
+    if (shopError) {
+      console.error('Shop query error:', shopError);
+      return new Response(
+        JSON.stringify({ error: 'Database error checking shop access' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (!shop) {
+      console.log(`No shop found for user email: ${user.email}`);
       return new Response(
         JSON.stringify({ error: 'Unauthorized - no shop associated with this user' }),
         { 
@@ -80,6 +92,8 @@ const handler = async (req: Request): Promise<Response> => {
         }
       );
     }
+
+    console.log(`Shop verified: ${shop.id}`);
 
     // Parse and validate input
     const rawInput = await req.json();
@@ -103,9 +117,21 @@ const handler = async (req: Request): Promise<Response> => {
       `)
       .eq('id', jobOfferId)
       .eq('shop_id', shop.id)
-      .single();
+      .maybeSingle();
 
-    if (offerError || !jobOffer) {
+    if (offerError) {
+      console.error('Job offer query error:', offerError);
+      return new Response(
+        JSON.stringify({ error: 'Database error fetching job offer' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (!jobOffer) {
+      console.log(`Job offer not found or access denied for offer ${jobOfferId} and shop ${shop.id}`);
       return new Response(
         JSON.stringify({ error: 'Job offer not found or access denied' }),
         { 
