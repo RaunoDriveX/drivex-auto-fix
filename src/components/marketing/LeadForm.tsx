@@ -186,8 +186,8 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
         email: customerEmail
       });
 
-      // Run email and job allocation in parallel without blocking UI
-      Promise.all([
+      // Run background tasks in parallel without blocking UI
+      const backgroundTasks = [
         // Fetch short code and send confirmation email
         supabase
           .from('appointments')
@@ -221,32 +221,40 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
                 .update({ confirmation_email_sent: true })
                 .eq('id', newAppointmentId);
             }
-          }),
-        // Trigger AI job allocation to shops
-        supabase.functions.invoke('allocate-job', {
-          body: {
-            appointmentId: newAppointmentId,
-            serviceType: jobType,
-            damageType: 'chip',
-            vehicleInfo: {
-              make: 'Toyota',
-              model: 'Camry',
-              year: 2020
-            },
-            customerLocation: {
-              latitude: 52.3676,
-              longitude: 4.9041
-            },
-            ...(isInsurance && insurerName ? { insurerName } : {})
-          }
-        }).then(({ error: allocationError }) => {
-          if (allocationError) {
-            console.error('Error in job allocation:', allocationError);
-          } else {
-            console.log('Job successfully allocated to eligible shops');
-          }
-        })
-      ]).catch(error => {
+          })
+      ];
+      
+      // Only trigger job allocation for insurance claims
+      // Direct bookings don't need to be routed to multiple shops
+      if (isInsurance) {
+        backgroundTasks.push(
+          supabase.functions.invoke('allocate-job', {
+            body: {
+              appointmentId: newAppointmentId,
+              serviceType: jobType,
+              damageType: 'chip',
+              vehicleInfo: {
+                make: 'Toyota',
+                model: 'Camry',
+                year: 2020
+              },
+              customerLocation: {
+                latitude: 52.3676,
+                longitude: 4.9041
+              },
+              insurerName
+            }
+          }).then(({ error: allocationError }) => {
+            if (allocationError) {
+              console.error('Error in job allocation:', allocationError);
+            } else {
+              console.log('Job successfully allocated to eligible shops');
+            }
+          })
+        );
+      }
+      
+      Promise.all(backgroundTasks).catch(error => {
         console.error('Error in background tasks:', error);
       });
       
