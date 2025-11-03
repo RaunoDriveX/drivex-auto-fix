@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target, Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import JobOfferUpsells from "./JobOfferUpsells";
@@ -50,6 +51,7 @@ interface ShopJobOffersProps {
 
 const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
   const [jobOffers, setJobOffers] = useState<JobOffer[]>([]);
+  const [acceptedJobs, setAcceptedJobs] = useState<JobOffer[]>([]);
   const [loading, setLoading] = useState(true);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState("");
@@ -76,7 +78,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
   const fetchJobOffers = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch pending offers
+      const { data: offersData, error: offersError } = await supabase
         .from('job_offers')
         .select(`
           *,
@@ -104,8 +107,39 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         .gte('expires_at', new Date().toISOString())
         .order('offered_at', { ascending: false });
 
-      if (error) throw error;
-      setJobOffers((data as JobOffer[])?.filter(offer => offer.appointments !== null) || []);
+      if (offersError) throw offersError;
+      setJobOffers((offersData as JobOffer[])?.filter(offer => offer.appointments !== null) || []);
+
+      // Fetch accepted jobs
+      const { data: acceptedData, error: acceptedError } = await supabase
+        .from('job_offers')
+        .select(`
+          *,
+          appointments (
+            customer_name,
+            customer_email,
+            customer_phone,
+            service_type,
+            damage_type,
+            appointment_date,
+            appointment_time,
+            vehicle_info,
+            notes,
+            is_insurance_claim,
+            damage_photos,
+            additional_notes,
+            ai_confidence_score,
+            ai_assessment_details,
+            ai_recommended_repair,
+            driver_view_obstruction
+          )
+        `)
+        .eq('shop_id', shopId)
+        .eq('status', 'accepted')
+        .order('offered_at', { ascending: false });
+
+      if (acceptedError) throw acceptedError;
+      setAcceptedJobs((acceptedData as JobOffer[])?.filter(offer => offer.appointments !== null) || []);
     } catch (error: any) {
       console.error('Error fetching job offers:', error);
       toast({
@@ -196,19 +230,35 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
   return (
     <div className="space-y-6">
+      <Tabs defaultValue="pending" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="pending">
+            Pending Offers
+            {jobOffers.length > 0 && (
+              <Badge variant="secondary" className="ml-2">{jobOffers.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="accepted">
+            Accepted Jobs
+            {acceptedJobs.length > 0 && (
+              <Badge variant="default" className="ml-2">{acceptedJobs.length}</Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-      {jobOffers.length === 0 ? (
-        <Card>
-          <CardContent className="py-6">
-            <div className="text-center text-muted-foreground">
-              <p>No active job offers at the moment.</p>
-              <p className="text-sm mt-2">New offers will appear here when available.</p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-6">
-          {jobOffers.map((offer) => {
+        <TabsContent value="pending" className="mt-6">
+          {jobOffers.length === 0 ? (
+            <Card>
+              <CardContent className="py-6">
+                <div className="text-center text-muted-foreground">
+                  <p>No active job offers at the moment.</p>
+                  <p className="text-sm mt-2">New offers will appear here when available.</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-6">
+              {jobOffers.map((offer) => {
             // Safety check to ensure appointments data exists
             if (!offer.appointments) {
               console.warn('Job offer missing appointments data:', offer.id);
@@ -537,27 +587,142 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                           placeholder="e.g., Fully booked, outside service area, etc."
                         />
                       </div>
-                      
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleJobResponse(offer.id, 'decline')}
-                          disabled={respondingTo === offer.id}
-                        >
-                          Decline Job
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                       
+                       <AlertDialogFooter>
+                         <AlertDialogCancel>Cancel</AlertDialogCancel>
+                         <AlertDialogAction
+                           onClick={() => handleJobResponse(offer.id, 'decline')}
+                           disabled={respondingTo === offer.id}
+                         >
+                           Decline Job
+                         </AlertDialogAction>
+                       </AlertDialogFooter>
+                     </AlertDialogContent>
+                   </AlertDialog>
+                 </div>
+               </CardContent>
+             </Card>
+             );
+           }).filter(Boolean)}
+         </div>
+        )}
+        </TabsContent>
+
+        <TabsContent value="accepted" className="mt-6">
+          {acceptedJobs.length === 0 ? (
+            <Card>
+              <CardContent className="py-6">
+                <div className="text-center text-muted-foreground">
+                  <p>No accepted jobs yet.</p>
+                  <p className="text-sm mt-2">Accepted jobs will appear here.</p>
                 </div>
               </CardContent>
             </Card>
-            );
-          }).filter(Boolean)}
-        </div>
-      )}
-    </div>
-  );
-};
+          ) : (
+            <div className="grid gap-6">
+              {acceptedJobs.map((offer) => {
+                if (!offer.appointments) {
+                  console.warn('Job offer missing appointments data:', offer.id);
+                  return null;
+                }
+                
+                return (
+                  <Card key={offer.id} className="border-l-4 border-l-green-500 overflow-hidden">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-2xl mb-3">{offer.appointments.service_type}</CardTitle>
+                          
+                          {offer.appointments.vehicle_info && (
+                            <div className="space-y-2 mb-3">
+                              <div className="flex items-center gap-2">
+                                <Car className="h-5 w-5 text-gray-600" />
+                                <span className="text-lg font-semibold text-gray-700">
+                                  {offer.appointments.vehicle_info.make} {offer.appointments.vehicle_info.model}
+                                  {offer.appointments.vehicle_info.year && ` (${offer.appointments.vehicle_info.year})`}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="flex gap-2 mt-3">
+                            <Badge variant="default" className="flex items-center gap-1">
+                              <CheckCircle className="h-3 w-3" />
+                              Accepted
+                            </Badge>
+                            {offer.appointments.is_insurance_claim && (
+                              <Badge variant="secondary" className="flex items-center gap-1">
+                                <CreditCard className="h-3 w-3" />
+                                Insurance Claim
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <h4 className="font-semibold text-lg">Job Details</h4>
+                          
+                          <div className="flex items-center gap-3">
+                            <DollarSign className="h-5 w-5 text-green-600" />
+                            <div>
+                              <p className="font-medium text-lg">${offer.offered_price}</p>
+                              <p className="text-sm text-muted-foreground">Job Price</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">{new Date(offer.appointments.appointment_date).toLocaleDateString()}</p>
+                              <p className="text-sm text-muted-foreground">Appointment Date</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <Clock className="h-5 w-5 text-orange-600" />
+                            <div>
+                              <p className="font-medium">{offer.appointments.appointment_time}</p>
+                              <p className="text-sm text-muted-foreground">Appointment Time</p>
+                            </div>
+                          </div>
+                        </div>
 
-export default ShopJobOffers;
+                        <div className="space-y-3">
+                          <h4 className="font-semibold text-lg">Customer Information</h4>
+                          
+                          <div className="flex items-center gap-3">
+                            <Mail className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <p className="font-medium">{offer.appointments.customer_name}</p>
+                              <p className="text-sm text-muted-foreground">{offer.appointments.customer_email}</p>
+                            </div>
+                          </div>
+                          
+                          {offer.appointments.customer_phone && (
+                            <div className="flex items-center gap-3">
+                              <Phone className="h-5 w-5 text-green-600" />
+                              <div>
+                                <p className="font-medium">{offer.appointments.customer_phone}</p>
+                                <p className="text-sm text-muted-foreground">Phone</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              }).filter(Boolean)}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+     </div>
+   );
+ };
+ 
+ export default ShopJobOffers;
