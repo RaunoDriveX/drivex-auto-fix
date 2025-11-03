@@ -14,11 +14,11 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { tracking_token } = await req.json();
+    const { tracking_token, job_code } = await req.json();
 
-    if (!tracking_token || typeof tracking_token !== 'string') {
+    if ((!tracking_token || typeof tracking_token !== 'string') && (!job_code || typeof job_code !== 'string')) {
       return new Response(
-        JSON.stringify({ error: 'Valid tracking_token is required' }),
+        JSON.stringify({ error: 'Provide tracking_token or job_code' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     // Use service role to bypass RLS and query with exact token match
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { data: appointment, error } = await supabase
+    let query = supabase
       .from('appointments')
       .select(`
         id,
@@ -52,9 +52,16 @@ Deno.serve(async (req) => {
           email,
           rating
         )
-      `)
-      .eq('tracking_token', tracking_token)
-      .single();
+      `);
+
+    if (tracking_token) {
+      query = query.eq('tracking_token', tracking_token);
+    } else if (job_code) {
+      // match first 8 chars of UUID id
+      query = query.like('id', `${job_code.toLowerCase()}%`);
+    }
+
+    const { data: appointment, error } = await query.single();
 
     if (error || !appointment) {
       return new Response(

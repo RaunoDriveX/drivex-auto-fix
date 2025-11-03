@@ -13,8 +13,8 @@ import {
   Search, 
   MapPin, 
   Clock, 
-  Mail,
   Phone,
+  Mail,
   Car,
   Wrench
 } from 'lucide-react';
@@ -33,7 +33,7 @@ export default function TrackJobLookup() {
       return;
     }
 
-    navigate(`/track-job/${jobId.trim()}`);
+    navigate(`/track/${jobId.trim()}`);
   };
 
   return (

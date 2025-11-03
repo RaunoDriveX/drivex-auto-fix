@@ -62,8 +62,9 @@ export default function JobTracking() {
 
     try {
       // Use secure edge function instead of direct RLS query
+      const isShortCode = appointmentId.length === 8;
       const { data, error } = await supabase.functions.invoke('get-job-tracking', {
-        body: { tracking_token: appointmentId }
+        body: isShortCode ? { job_code: appointmentId } : { tracking_token: appointmentId }
       });
 
       if (error) throw error;
