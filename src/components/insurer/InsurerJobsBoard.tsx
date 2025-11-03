@@ -323,7 +323,7 @@ export const InsurerJobsBoard: React.FC = () => {
                   <div>
                     <span className="text-muted-foreground">Scheduled:</span>
                     <p className="font-medium">
-                      {format(new Date(job.appointment_date), 'MMM d')} at {job.appointment_time}
+                      {format(new Date(job.appointment_date), 'MMM d')} at {job.appointment_time?.substring(0, 5)}
                     </p>
                   </div>
                   <div>

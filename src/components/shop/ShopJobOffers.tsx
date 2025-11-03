@@ -438,13 +438,13 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-3">
-                        <Clock className="h-5 w-5 text-orange-600" />
-                        <div>
-                          <p className="font-medium">{offer.appointments.appointment_time}</p>
-                          <p className="text-sm text-muted-foreground">Appointment Time</p>
-                        </div>
-                      </div>
+                          <div className="flex items-center gap-3">
+                            <Clock className="h-5 w-5 text-orange-600" />
+                            <div>
+                              <p className="font-medium">{offer.appointments.appointment_time.substring(0, 5)}</p>
+                              <p className="text-sm text-muted-foreground">Appointment Time</p>
+                            </div>
+                          </div>
                       
                       {offer.estimated_completion_time && (
                         <div className="flex items-center gap-3">
@@ -685,7 +685,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                           <div className="flex items-center gap-3">
                             <Clock className="h-5 w-5 text-orange-600" />
                             <div>
-                              <p className="font-medium">{offer.appointments.appointment_time}</p>
+                              <p className="font-medium">{offer.appointments.appointment_time.substring(0, 5)}</p>
                               <p className="text-sm text-muted-foreground">Appointment Time</p>
                             </div>
                           </div>
