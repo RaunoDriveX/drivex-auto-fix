@@ -174,9 +174,22 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
         return;
       }
 
-      // Send confirmation email
-      try {
-        const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+      // Show success immediately
+      toast.success("Booking confirmed! Check your email for confirmation details.");
+      
+      // Set booking complete state immediately
+      setBookingComplete(true);
+      setBookingDetails({
+        shopName,
+        date: format(selectedDate, 'EEEE, MMMM d, yyyy'),
+        time: timeSlot,
+        email: customerEmail
+      });
+
+      // Run email and job allocation in parallel without blocking UI
+      Promise.all([
+        // Send confirmation email
+        supabase.functions.invoke('send-confirmation-email', {
           body: {
             appointmentId: newAppointmentId,
             customerName,
@@ -187,24 +200,19 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
             serviceType: jobType,
             totalCost: totalCost
           }
-        });
-
-        if (emailError) {
-          console.error('Error sending confirmation email:', emailError);
-        }
-
-        // Update appointment to mark confirmation email as sent
-        await supabase
-          .from('appointments')
-          .update({ confirmation_email_sent: true })
-          .eq('id', newAppointmentId);
-      } catch (emailError) {
-        console.error('Error with confirmation email:', emailError);
-      }
-
-      // Trigger AI job allocation to shops
-      try {
-        const { error: allocationError } = await supabase.functions.invoke('allocate-job', {
+        }).then(({ error: emailError }) => {
+          if (emailError) {
+            console.error('Error sending confirmation email:', emailError);
+          } else {
+            // Update appointment to mark confirmation email as sent
+            supabase
+              .from('appointments')
+              .update({ confirmation_email_sent: true })
+              .eq('id', newAppointmentId);
+          }
+        }),
+        // Trigger AI job allocation to shops
+        supabase.functions.invoke('allocate-job', {
           body: {
             appointmentId: newAppointmentId,
             serviceType: jobType,
@@ -220,26 +228,15 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
             },
             ...(isInsurance && insurerName ? { insurerName } : {})
           }
-        });
-
-        if (allocationError) {
-          console.error('Error in job allocation:', allocationError);
-        } else {
-          console.log('Job successfully allocated to eligible shops');
-        }
-      } catch (allocationError) {
-        console.error('Error with job allocation:', allocationError);
-      }
-
-      toast.success("Booking confirmed! Check your email for confirmation details.");
-      
-      // Set booking complete state
-      setBookingComplete(true);
-      setBookingDetails({
-        shopName,
-        date: format(selectedDate, 'EEEE, MMMM d, yyyy'),
-        time: timeSlot,
-        email: customerEmail
+        }).then(({ error: allocationError }) => {
+          if (allocationError) {
+            console.error('Error in job allocation:', allocationError);
+          } else {
+            console.log('Job successfully allocated to eligible shops');
+          }
+        })
+      ]).catch(error => {
+        console.error('Error in background tasks:', error);
       });
       
     } catch (error) {
