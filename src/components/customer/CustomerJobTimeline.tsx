@@ -221,15 +221,10 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Job Timeline
-          </CardTitle>
-          <Badge variant="secondary" className="text-xs">
-            {config?.label || currentStatus}
-          </Badge>
-        </div>
+        <CardTitle className="flex items-center gap-2">
+          <Clock className="h-5 w-5" />
+          Job Timeline
+        </CardTitle>
         <CardDescription>
           Track your repair progress from start to finish
         </CardDescription>
