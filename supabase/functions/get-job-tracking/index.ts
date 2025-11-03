@@ -64,10 +64,54 @@ Deno.serve(async (req) => {
       appointment = result.data;
       error = result.error;
     } else if (job_code) {
-      // Search by first 8 characters of UUID
-      const result = await query.ilike('id', `${job_code}%`).maybeSingle();
-      appointment = result.data;
-      error = result.error;
+      // Search by first 8 characters of UUID (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+      // User provides first 8 chars, we add the dash for proper UUID matching
+      const formattedCode = `${job_code.toLowerCase()}-`;
+      console.log('Searching for job code:', job_code, 'formatted as:', formattedCode);
+      
+      // Since UUID is stored as uuid type, we need to use text casting
+      // The .ilike() doesn't work on uuid columns, so we search using the pattern
+      const { data: allAppointments, error: fetchError } = await supabase
+        .from('appointments')
+        .select(`
+          id,
+          job_status,
+          estimated_completion,
+          job_started_at,
+          job_completed_at,
+          appointment_date,
+          appointment_time,
+          service_type,
+          damage_type,
+          shop_name,
+          shop_id,
+          customer_name,
+          additional_notes,
+          created_at,
+          total_cost,
+          vehicle_info,
+          shops:shop_id (
+            name,
+            address,
+            city,
+            postal_code,
+            phone,
+            email,
+            rating
+          )
+        `);
+      
+      if (fetchError) {
+        error = fetchError;
+      } else if (allAppointments) {
+        // Filter in memory by checking if ID starts with the code
+        appointment = allAppointments.find(apt => 
+          apt.id.toLowerCase().startsWith(formattedCode)
+        );
+        if (!appointment) {
+          error = { message: 'No matching appointment found' };
+        }
+      }
     }
 
     if (error || !appointment) {
