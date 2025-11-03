@@ -164,7 +164,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
           appointment_time: timeSlot,
           is_insurance_claim: isInsurance,
           insurer_name: isInsurance ? insurerName : null,
-          status: 'confirmed',
+          status: 'pending',
           total_cost: totalCost
         });
 

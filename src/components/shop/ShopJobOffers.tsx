@@ -22,8 +22,11 @@ interface JobOffer {
   expires_at: string;
   estimated_completion_time: string | null;
   notes: string;
+  offered_at?: string;
+  responded_at?: string;
   requires_adas_calibration?: boolean;
   adas_calibration_notes?: string;
+  is_direct_booking?: boolean;
   appointments: {
     customer_name: string;
     customer_email: string;
@@ -60,8 +63,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
   useEffect(() => {
     fetchJobOffers();
     
-    // Subscribe to realtime updates only for actual changes
-    const subscription = supabase
+    // Subscribe to realtime updates for job offers and appointments
+    const jobOffersChannel = supabase
       .channel(`job-offers-${shopId}`)
       .on('postgres_changes', 
         { event: 'UPDATE', schema: 'public', table: 'job_offers', filter: `shop_id=eq.${shopId}` },
@@ -70,16 +73,30 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
           fetchJobOffers();
         }
       )
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'appointments', filter: `shop_id=eq.${shopId}` },
+        () => {
+          console.log('New appointment created, refetching...');
+          fetchJobOffers();
+        }
+      )
+      .on('postgres_changes', 
+        { event: 'UPDATE', schema: 'public', table: 'appointments', filter: `shop_id=eq.${shopId}` },
+        () => {
+          console.log('Appointment updated, refetching...');
+          fetchJobOffers();
+        }
+      )
       .subscribe();
     
     return () => {
-      supabase.removeChannel(subscription);
+      supabase.removeChannel(jobOffersChannel);
     };
   }, [shopId]);
 
   const fetchJobOffers = async () => {
     try {
-      // Fetch pending offers
+      // Fetch pending job offers (from insurance routing)
       const { data: offersData, error: offersError } = await supabase
         .from('job_offers')
         .select(`
@@ -109,9 +126,41 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         .order('offered_at', { ascending: false });
 
       if (offersError) throw offersError;
-      setJobOffers((offersData as JobOffer[])?.filter(offer => offer.appointments !== null) || []);
+      
+      // Fetch pending direct bookings (no job offer created)
+      const { data: directBookings, error: directError } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('shop_id', shopId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
 
-      // Fetch accepted jobs
+      if (directError) throw directError;
+
+      // Transform direct bookings to match JobOffer structure
+      const directBookingsAsOffers: JobOffer[] = (directBookings || []).map(booking => ({
+        id: booking.id,
+        appointment_id: booking.id,
+        shop_id: booking.shop_id,
+        offered_price: booking.total_cost || 0,
+        status: 'offered',
+        offered_at: booking.created_at,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        estimated_completion_time: null,
+        notes: '',
+        appointments: booking,
+        is_direct_booking: true
+      }));
+
+      // Combine both types
+      const allOffers: JobOffer[] = [
+        ...((offersData as JobOffer[])?.filter(offer => offer.appointments !== null) || []),
+        ...directBookingsAsOffers
+      ].sort((a, b) => new Date(b.offered_at || 0).getTime() - new Date(a.offered_at || 0).getTime());
+
+      setJobOffers(allOffers);
+
+      // Fetch accepted jobs from job offers
       const { data: acceptedData, error: acceptedError } = await supabase
         .from('job_offers')
         .select(`
@@ -140,7 +189,40 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         .order('offered_at', { ascending: false });
 
       if (acceptedError) throw acceptedError;
-      setAcceptedJobs((acceptedData as JobOffer[])?.filter(offer => offer.appointments !== null) || []);
+      
+      // Fetch confirmed direct bookings
+      const { data: confirmedBookings, error: confirmedError } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('shop_id', shopId)
+        .eq('status', 'confirmed')
+        .order('created_at', { ascending: false });
+
+      if (confirmedError) throw confirmedError;
+
+      // Transform confirmed bookings to match JobOffer structure
+      const confirmedBookingsAsJobs: JobOffer[] = (confirmedBookings || []).map(booking => ({
+        id: booking.id,
+        appointment_id: booking.id,
+        shop_id: booking.shop_id,
+        offered_price: booking.total_cost || 0,
+        status: 'accepted',
+        offered_at: booking.created_at,
+        responded_at: booking.updated_at,
+        expires_at: '',
+        estimated_completion_time: null,
+        notes: '',
+        appointments: booking,
+        is_direct_booking: true
+      }));
+
+      // Combine both types
+      const allAccepted: JobOffer[] = [
+        ...((acceptedData as JobOffer[])?.filter(offer => offer.appointments !== null) || []),
+        ...confirmedBookingsAsJobs
+      ].sort((a, b) => new Date(b.offered_at || 0).getTime() - new Date(a.offered_at || 0).getTime());
+
+      setAcceptedJobs(allAccepted);
     } catch (error: any) {
       console.error('Error fetching job offers:', error);
       toast({
