@@ -25,42 +25,46 @@ export default function InsurerAuth() {
       if (isSignUp) {
         // Sign up new insurer user
         const redirectUrl = `${window.location.origin}/insurer-dashboard`;
-        const { data, error: signUpError } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: redirectUrl
           }
         });
-        // After sign up, sign in to obtain an authenticated session (required for RLS)
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
 
-        if (signInError) {
-          // If email confirmation is enabled, sign-in may fail until verified
-          throw new Error('Please verify your email, then sign in to complete setup.');
-        }
+        if (signUpError) throw signUpError;
 
-        // Create insurer profile AFTER authentication so RLS allows INSERT
-        const { error: profileError } = await supabase
-          .from('insurer_profiles')
-          .insert({
-            insurer_name: insurerName,
-            email: email,
-            contact_person: contactPerson,
-            phone: phone
+        // Check if email confirmation is required
+        if (signUpData.session) {
+          // Email confirmation disabled - user is already signed in
+          // Create insurer profile immediately
+          const { error: profileError } = await supabase
+            .from('insurer_profiles')
+            .insert({
+              insurer_name: insurerName,
+              email: email,
+              contact_person: contactPerson,
+              phone: phone
+            });
+
+          if (profileError) throw profileError;
+
+          toast({
+            title: 'Account created!',
+            description: 'Your insurer account has been created successfully.',
           });
 
-        if (profileError) throw profileError;
-
-        toast({
-          title: 'Account created!',
-          description: 'Your insurer account has been created successfully.',
-        });
-
-        navigate('/insurer-dashboard');
+          navigate('/insurer-dashboard');
+        } else {
+          // Email confirmation enabled - user needs to verify email
+          toast({
+            title: 'Verify your email',
+            description: 'Please check your email and click the verification link to complete signup.',
+          });
+          
+          setError('Please check your email for a verification link to complete your registration.');
+        }
       } else {
         // Sign in existing insurer user
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
