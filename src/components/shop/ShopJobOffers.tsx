@@ -138,19 +138,25 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       if (directError) throw directError;
 
       // Transform direct bookings to match JobOffer structure
-      const directBookingsAsOffers: JobOffer[] = (directBookings || []).map(booking => ({
-        id: booking.id,
-        appointment_id: booking.id,
-        shop_id: booking.shop_id,
-        offered_price: booking.total_cost || 0,
-        status: 'offered',
-        offered_at: booking.created_at,
-        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        estimated_completion_time: null,
-        notes: '',
-        appointments: booking,
-        is_direct_booking: true
-      }));
+      const directBookingsAsOffers: JobOffer[] = (directBookings || []).map(booking => {
+        // Set expires_at to appointment date at 16:00
+        const appointmentDate = new Date(booking.appointment_date);
+        appointmentDate.setHours(16, 0, 0, 0);
+        
+        return {
+          id: booking.id,
+          appointment_id: booking.id,
+          shop_id: booking.shop_id,
+          offered_price: booking.total_cost || 0,
+          status: 'offered',
+          offered_at: booking.created_at,
+          expires_at: appointmentDate.toISOString(),
+          estimated_completion_time: null,
+          notes: '',
+          appointments: booking,
+          is_direct_booking: true
+        };
+      });
 
       // Combine both types
       const allOffers: JobOffer[] = [
