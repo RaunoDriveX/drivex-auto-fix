@@ -32,10 +32,18 @@ export default function InsurerAuth() {
             emailRedirectTo: redirectUrl
           }
         });
+        // After sign up, sign in to obtain an authenticated session (required for RLS)
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-        if (signUpError) throw signUpError;
+        if (signInError) {
+          // If email confirmation is enabled, sign-in may fail until verified
+          throw new Error('Please verify your email, then sign in to complete setup.');
+        }
 
-        // Create insurer profile
+        // Create insurer profile AFTER authentication so RLS allows INSERT
         const { error: profileError } = await supabase
           .from('insurer_profiles')
           .insert({
@@ -51,14 +59,6 @@ export default function InsurerAuth() {
           title: 'Account created!',
           description: 'Your insurer account has been created successfully.',
         });
-
-        // Auto sign in after signup
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (signInError) throw signInError;
 
         navigate('/insurer-dashboard');
       } else {
