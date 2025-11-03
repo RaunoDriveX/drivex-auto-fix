@@ -36,6 +36,7 @@ interface JobDetails {
   vehicle_info?: any;
   additional_notes?: string;
   shop_name: string;
+  insurer_name?: string;
   shops?: {
     name: string;
     phone?: string;
@@ -293,6 +294,15 @@ export default function JobTracking() {
                   <p className="text-sm text-muted-foreground">{jobDetails.damage_type}</p>
                 )}
               </div>
+              {jobDetails.insurer_name && (
+                <>
+                  <Separator />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Insurer</p>
+                    <p className="font-medium">{jobDetails.insurer_name}</p>
+                  </div>
+                </>
+              )}
               
               {jobDetails.vehicle_info && (
                 <>
@@ -310,14 +320,16 @@ export default function JobTracking() {
               )}
               
               {jobDetails.total_cost && (
-                <>
+              <>
                   <Separator />
                   <div>
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
                       <DollarSign className="h-4 w-4" />
                       Estimated Cost
                     </p>
-                    <p className="font-medium">€{jobDetails.total_cost}</p>
+                    <p className="font-medium">
+                      {jobDetails.total_cost !== undefined && jobDetails.total_cost !== null ? `€${jobDetails.total_cost}` : 'Not yet available'}
+                    </p>
                   </div>
                 </>
               )}
