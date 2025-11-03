@@ -52,6 +52,7 @@ export type Database = {
           service_type: string
           shop_id: string
           shop_name: string
+          short_code: string | null
           status: string
           total_cost: number | null
           tracking_token: string | null
@@ -95,6 +96,7 @@ export type Database = {
           service_type?: string
           shop_id: string
           shop_name: string
+          short_code?: string | null
           status?: string
           total_cost?: number | null
           tracking_token?: string | null
@@ -138,6 +140,7 @@ export type Database = {
           service_type?: string
           shop_id?: string
           shop_name?: string
+          short_code?: string | null
           status?: string
           total_cost?: number | null
           tracking_token?: string | null

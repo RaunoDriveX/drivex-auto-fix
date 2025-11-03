@@ -188,29 +188,40 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
 
       // Run email and job allocation in parallel without blocking UI
       Promise.all([
-        // Send confirmation email
-        supabase.functions.invoke('send-confirmation-email', {
-          body: {
-            appointmentId: newAppointmentId,
-            customerName,
-            customerEmail,
-            shopName,
-            appointmentDate: format(selectedDate, 'yyyy-MM-dd'),
-            appointmentTime: timeSlot,
-            serviceType: jobType,
-            totalCost: totalCost
-          }
-        }).then(({ error: emailError }) => {
-          if (emailError) {
-            console.error('Error sending confirmation email:', emailError);
-          } else {
-            // Update appointment to mark confirmation email as sent
-            supabase
-              .from('appointments')
-              .update({ confirmation_email_sent: true })
-              .eq('id', newAppointmentId);
-          }
-        }),
+        // Fetch short code and send confirmation email
+        supabase
+          .from('appointments')
+          .select('short_code')
+          .eq('id', newAppointmentId)
+          .single()
+          .then(({ data: appointmentData }) => {
+            const jobCode = appointmentData?.short_code || newAppointmentId.slice(0, 8).toUpperCase();
+            
+            return supabase.functions.invoke('send-confirmation-email', {
+              body: {
+                appointmentId: newAppointmentId,
+                jobCode,
+                customerName,
+                customerEmail,
+                shopName,
+                appointmentDate: format(selectedDate, 'yyyy-MM-dd'),
+                appointmentTime: timeSlot,
+                serviceType: jobType,
+                totalCost: totalCost
+              }
+            });
+          })
+          .then(({ error: emailError }) => {
+            if (emailError) {
+              console.error('Error sending confirmation email:', emailError);
+            } else {
+              // Update appointment to mark confirmation email as sent
+              supabase
+                .from('appointments')
+                .update({ confirmation_email_sent: true })
+                .eq('id', newAppointmentId);
+            }
+          }),
         // Trigger AI job allocation to shops
         supabase.functions.invoke('allocate-job', {
           body: {
