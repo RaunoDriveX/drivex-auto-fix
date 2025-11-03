@@ -19,14 +19,15 @@ import {
   Mail, 
   Car, 
   ExternalLink,
-  Calendar,
-  DollarSign
+  Calendar
 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 
 interface JobDetails {
   id: string;
   customer_name: string;
+  customer_email?: string;
+  customer_phone?: string;
   service_type: string;
   damage_type?: string;
   appointment_date: string;
@@ -36,7 +37,13 @@ interface JobDetails {
   job_completed_at?: string;
   estimated_completion?: string;
   total_cost?: number;
-  vehicle_info?: any;
+  vehicle_info?: {
+    year?: number;
+    make?: string;
+    model?: string;
+    licensePlate?: string;
+    vin?: string;
+  };
   additional_notes?: string;
   shop_name: string;
   shop_id: string;
@@ -258,9 +265,21 @@ export default function JobTracking() {
                       <Car className="h-4 w-4" />
                       Vehicle Information
                     </p>
-                    <p className="font-medium">
-                      {jobDetails.vehicle_info.year} {jobDetails.vehicle_info.make} {jobDetails.vehicle_info.model}
-                    </p>
+                    <div className="space-y-1 mt-2">
+                      <p className="font-medium">
+                        {jobDetails.vehicle_info.year} {jobDetails.vehicle_info.make} {jobDetails.vehicle_info.model}
+                      </p>
+                      {jobDetails.vehicle_info.licensePlate && (
+                        <p className="text-sm text-muted-foreground">
+                          License Plate: {jobDetails.vehicle_info.licensePlate}
+                        </p>
+                      )}
+                      {jobDetails.vehicle_info.vin && (
+                        <p className="text-sm text-muted-foreground">
+                          VIN: {jobDetails.vehicle_info.vin}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </>
               )}
@@ -269,8 +288,7 @@ export default function JobTracking() {
               <>
                   <Separator />
                   <div>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <DollarSign className="h-4 w-4" />
+                    <p className="text-sm text-muted-foreground">
                       Estimated Cost
                     </p>
                     <p className="font-medium">
@@ -279,6 +297,63 @@ export default function JobTracking() {
                   </div>
                 </>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Customer Contact Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Contact Information</CardTitle>
+              <CardDescription>
+                Keep your contact details up to date
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Name</p>
+                <p className="font-medium">{jobDetails.customer_name}</p>
+              </div>
+              
+              <Separator />
+              
+              {jobDetails.customer_email && (
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <a 
+                      href={`mailto:${jobDetails.customer_email}`}
+                      className="text-primary hover:underline"
+                    >
+                      {jobDetails.customer_email}
+                    </a>
+                  </div>
+                </div>
+              )}
+              
+              {jobDetails.customer_phone && (
+                <>
+                  <Separator />
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <a 
+                        href={`tel:${jobDetails.customer_phone}`}
+                        className="text-primary hover:underline"
+                      >
+                        {jobDetails.customer_phone}
+                      </a>
+                    </div>
+                  </div>
+                </>
+              )}
+              
+              <div className="pt-2">
+                <p className="text-xs text-muted-foreground">
+                  Need to update your contact details? Contact the shop directly.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>

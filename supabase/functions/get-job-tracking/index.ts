@@ -42,6 +42,8 @@ Deno.serve(async (req) => {
         shop_name,
         shop_id,
         customer_name,
+        customer_email,
+        customer_phone,
         insurer_name,
         additional_notes,
         created_at,
