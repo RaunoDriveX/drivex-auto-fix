@@ -245,15 +245,42 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
     setRespondingTo(jobOfferId);
 
     try {
-      const { error } = await supabase.functions.invoke('handle-job-response', {
-        body: {
-          jobOfferId,
-          response,
-          declineReason: response === 'decline' ? declineReason : undefined
-        }
-      });
+      // Check if this is a direct booking
+      const offer = jobOffers.find(o => o.id === jobOfferId);
+      const isDirectBooking = offer?.is_direct_booking;
 
-      if (error) throw error;
+      if (isDirectBooking) {
+        // Handle direct booking - update appointment status directly
+        if (response === 'accept') {
+          const { error } = await supabase
+            .from('appointments')
+            .update({ status: 'confirmed' })
+            .eq('id', jobOfferId);
+          
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('appointments')
+            .update({ 
+              status: 'cancelled',
+              notes: declineReason || 'Declined by shop'
+            })
+            .eq('id', jobOfferId);
+          
+          if (error) throw error;
+        }
+      } else {
+        // Handle job offer (insurance routing) - call edge function
+        const { error } = await supabase.functions.invoke('handle-job-response', {
+          body: {
+            jobOfferId,
+            response,
+            declineReason: response === 'decline' ? declineReason : undefined
+          }
+        });
+
+        if (error) throw error;
+      }
 
       toast({
         title: response === 'accept' ? "Job Accepted" : "Job Declined",
