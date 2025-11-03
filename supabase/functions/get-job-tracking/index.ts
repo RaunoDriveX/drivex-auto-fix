@@ -9,6 +9,7 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 Deno.serve(async (req) => {
+  console.log('Job tracking function called - public endpoint');
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -45,16 +46,7 @@ Deno.serve(async (req) => {
         additional_notes,
         created_at,
         total_cost,
-        vehicle_info,
-        shops:shop_id (
-          name,
-          address,
-          city,
-          postal_code,
-          phone,
-          email,
-          rating
-        )
+        vehicle_info
       `);
 
     let appointment;
@@ -70,6 +62,7 @@ Deno.serve(async (req) => {
       // Search by short_code (first 8 characters of UUID)
       console.log('Searching for job code:', job_code);
       const result = await query.eq('short_code', job_code.toUpperCase()).maybeSingle();
+      console.log('Query result:', { data: result.data, error: result.error });
       appointment = result.data;
       error = result.error;
     }
@@ -79,6 +72,19 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'Job not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Fetch shop details separately if appointment found
+    if (appointment && appointment.shop_id) {
+      const { data: shopData } = await supabase
+        .from('shops')
+        .select('name, address, city, postal_code, phone, email, rating')
+        .eq('id', appointment.shop_id)
+        .maybeSingle();
+      
+      if (shopData) {
+        appointment.shops = shopData;
+      }
     }
 
     // Fetch audit trail for status history
