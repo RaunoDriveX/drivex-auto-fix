@@ -93,26 +93,6 @@ export default function JobTracking() {
     }
   };
 
-  const getStatusProgress = (status: string) => {
-    switch (status) {
-      case 'scheduled': return 25;
-      case 'in_progress': return 60;
-      case 'completed': return 100;
-      case 'cancelled': return 0;
-      default: return 0;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'scheduled': return 'bg-blue-500';
-      case 'in_progress': return 'bg-yellow-500';
-      case 'completed': return 'bg-green-500';
-      case 'cancelled': return 'bg-red-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
   const formatAddress = (shop: any) => {
     if (!shop) return 'Address not available';
     return `${shop.address}, ${shop.city} ${shop.postal_code}`;
@@ -163,40 +143,6 @@ export default function JobTracking() {
             Real-time updates for your windshield repair with {jobDetails.shop_name}
           </p>
         </div>
-
-        {/* Current Status Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Current Status
-              </CardTitle>
-              <Badge 
-                variant="secondary" 
-                className={`${getStatusColor(jobDetails.job_status)} text-white`}
-              >
-                {jobDetails.job_status.replace('_', ' ').toUpperCase()}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Progress</span>
-                <span>{getStatusProgress(jobDetails.job_status)}%</span>
-              </div>
-              <Progress value={getStatusProgress(jobDetails.job_status)} />
-            </div>
-            
-            {jobDetails.estimated_completion && (
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4" />
-                <span>Estimated completion: {format(new Date(jobDetails.estimated_completion), 'PPpp')}</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
         {/* Job Timeline */}
         <CustomerJobTimeline 

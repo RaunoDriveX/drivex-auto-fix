@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -179,6 +180,16 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
     return scheduledDateTime < now && currentStatus === 'scheduled';
   };
 
+  const getStatusProgress = () => {
+    switch (currentStatus) {
+      case 'scheduled': return 25;
+      case 'in_progress': return 60;
+      case 'completed': return 100;
+      case 'cancelled': return 0;
+      default: return 0;
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -205,18 +216,35 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
 
   const timelineSteps = getTimelineSteps();
 
+  const config = statusConfig[currentStatus as keyof typeof statusConfig];
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5" />
-          Job Timeline
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Job Timeline
+          </CardTitle>
+          <Badge variant="secondary" className="text-xs">
+            {config?.label || currentStatus}
+          </Badge>
+        </div>
         <CardDescription>
           Track your repair progress from start to finish
         </CardDescription>
+        
+        {/* Progress Bar */}
+        <div className="space-y-2 mt-4">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>Progress</span>
+            <span>{getStatusProgress()}%</span>
+          </div>
+          <Progress value={getStatusProgress()} className="h-2" />
+        </div>
+
         {isOverdue() && (
-          <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-2 rounded">
+          <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-2 rounded mt-4">
             <AlertTriangle className="h-4 w-4" />
             <span className="text-sm">Your scheduled appointment time has passed. The shop will contact you soon.</span>
           </div>
