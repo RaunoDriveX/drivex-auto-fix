@@ -47,25 +47,27 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
   useEffect(() => {
     fetchCalendarData();
     
-    // Subscribe to realtime updates for job offers and appointments
+    // Subscribe to realtime updates only for actual changes (not initial load)
     const subscription = supabase
-      .channel('calendar-changes')
+      .channel(`calendar-${shopId}`)
       .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'job_offers', filter: `shop_id=eq.${shopId}` },
+        { event: 'UPDATE', schema: 'public', table: 'job_offers', filter: `shop_id=eq.${shopId}` },
         () => {
+          console.log('Job offer updated in calendar, refetching...');
           fetchCalendarData();
         }
       )
       .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'appointments', filter: `shop_id=eq.${shopId}` },
+        { event: 'UPDATE', schema: 'public', table: 'appointments', filter: `shop_id=eq.${shopId}` },
         () => {
+          console.log('Appointment updated in calendar, refetching...');
           fetchCalendarData();
         }
       )
       .subscribe();
     
     return () => {
-      subscription.unsubscribe();
+      supabase.removeChannel(subscription);
     };
   }, [shopId, selectedDate]);
 
