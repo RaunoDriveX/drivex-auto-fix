@@ -301,6 +301,44 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_notification_preferences: {
+        Row: {
+          appointment_id: string
+          created_at: string
+          email_enabled: boolean | null
+          id: string
+          sms_enabled: boolean | null
+          updated_at: string
+          whatsapp_enabled: boolean | null
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string
+          email_enabled?: boolean | null
+          id?: string
+          sms_enabled?: boolean | null
+          updated_at?: string
+          whatsapp_enabled?: boolean | null
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string
+          email_enabled?: boolean | null
+          id?: string
+          sms_enabled?: boolean | null
+          updated_at?: string
+          whatsapp_enabled?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_notification_preferences_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: true
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurance_claims: {
         Row: {
           ai_assessment_details: Json | null
