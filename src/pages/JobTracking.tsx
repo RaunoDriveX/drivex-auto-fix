@@ -7,6 +7,8 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { CustomerJobTimeline } from "@/components/customer/CustomerJobTimeline";
 import { CustomerJobNotifications } from "@/components/customer/CustomerJobNotifications";
+import { RescheduleDialog } from "@/components/customer/RescheduleDialog";
+import { CancelAppointmentDialog } from "@/components/customer/CancelAppointmentDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { 
@@ -36,6 +38,7 @@ interface JobDetails {
   vehicle_info?: any;
   additional_notes?: string;
   shop_name: string;
+  shop_id: string;
   insurer_name?: string;
   shops?: {
     name: string;
@@ -51,6 +54,8 @@ export default function JobTracking() {
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const [jobDetails, setJobDetails] = useState<JobDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   useEffect(() => {
     if (appointmentId) {
@@ -157,6 +162,34 @@ export default function JobTracking() {
             Real-time updates for your windshield repair with {jobDetails.shop_name}
           </p>
         </div>
+
+        {/* Management Actions - Only show if job is scheduled or in_progress */}
+        {jobDetails.job_status === 'scheduled' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Manage Appointment</CardTitle>
+              <CardDescription>
+                Need to make changes? You can reschedule or cancel your appointment.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setRescheduleOpen(true)}
+                className="flex-1"
+              >
+                Reschedule Appointment
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setCancelOpen(true)}
+                className="flex-1 text-destructive hover:text-destructive"
+              >
+                Cancel Appointment
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Current Status Card */}
         <Card>
@@ -350,6 +383,28 @@ export default function JobTracking() {
             </CardContent>
           </Card>
         )}
+
+        {/* Reschedule Dialog */}
+        <RescheduleDialog
+          open={rescheduleOpen}
+          onOpenChange={setRescheduleOpen}
+          appointmentId={jobDetails.id}
+          shopId={jobDetails.shop_id}
+          currentDate={jobDetails.appointment_date}
+          currentTime={jobDetails.appointment_time}
+          onRescheduleSuccess={fetchJobDetails}
+        />
+
+        {/* Cancel Dialog */}
+        <CancelAppointmentDialog
+          open={cancelOpen}
+          onOpenChange={setCancelOpen}
+          appointmentId={jobDetails.id}
+          shopId={jobDetails.shop_id}
+          appointmentDate={jobDetails.appointment_date}
+          appointmentTime={jobDetails.appointment_time}
+          onCancelSuccess={fetchJobDetails}
+        />
       </div>
     </div>
   );
