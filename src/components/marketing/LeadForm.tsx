@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
   const [isInsuranceClaim, setIsInsuranceClaim] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [bookingDetails, setBookingDetails] = useState<{
     shopName: string;
@@ -37,6 +38,63 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
   const jobDuration = jobType === "repair" ? "30 minutes" : "2.5 hours";
   const jobDurationMinutes = jobType === "repair" ? 30 : 150;
 
+  // Fetch booked time slots when date is selected
+  useEffect(() => {
+    const fetchBookedSlots = async () => {
+      if (!selectedDate) {
+        setBookedSlots([]);
+        return;
+      }
+
+      try {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        
+        // Fetch all confirmed appointments for this shop and date
+        const { data: confirmedAppointments, error: confirmedError } = await supabase
+          .from('appointments')
+          .select('appointment_time')
+          .eq('shop_id', shopId)
+          .eq('appointment_date', dateStr)
+          .eq('status', 'confirmed');
+
+        if (confirmedError) {
+          console.error('Error fetching confirmed appointments:', confirmedError);
+        }
+
+        // Fetch all appointments with accepted job offers for this shop and date
+        const { data: acceptedJobs, error: acceptedError } = await supabase
+          .from('appointments')
+          .select(`
+            appointment_time,
+            job_offers!inner(status)
+          `)
+          .eq('shop_id', shopId)
+          .eq('appointment_date', dateStr)
+          .eq('job_offers.status', 'accepted');
+
+        if (acceptedError) {
+          console.error('Error fetching accepted jobs:', acceptedError);
+        }
+
+        // Combine both lists and extract unique booked times
+        const allBooked = [
+          ...(confirmedAppointments?.map(apt => apt.appointment_time?.substring(0, 5)) || []),
+          ...(acceptedJobs?.map(apt => apt.appointment_time?.substring(0, 5)) || [])
+        ];
+        
+        // Remove duplicates
+        const uniqueBooked = [...new Set(allBooked)].filter(Boolean);
+        setBookedSlots(uniqueBooked);
+        
+        console.log('Booked slots for', dateStr, ':', uniqueBooked);
+      } catch (error) {
+        console.error('Error in fetchBookedSlots:', error);
+      }
+    };
+
+    fetchBookedSlots();
+  }, [selectedDate, shopId]);
+
   const generateTimeSlots = (date: Date) => {
     const slots = [];
     const startHour = 8; // 8 AM
@@ -47,7 +105,11 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
         if (hour * 60 + minute + jobDurationMinutes <= endHour * 60) {
           const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
           const endTime = `${Math.floor((hour * 60 + minute + jobDurationMinutes) / 60).toString().padStart(2, '0')}:${((hour * 60 + minute + jobDurationMinutes) % 60).toString().padStart(2, '0')}`;
-          slots.push(`${time} - ${endTime}`);
+          
+          // Only add slot if it's not already booked
+          if (!bookedSlots.includes(time)) {
+            slots.push(`${time} - ${endTime}`);
+          }
         }
       }
     }
