@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Use service role to bypass RLS and query with exact token match
+    // Use service role to bypass RLS
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     let query = supabase
@@ -43,6 +43,8 @@ Deno.serve(async (req) => {
         customer_name,
         additional_notes,
         created_at,
+        total_cost,
+        vehicle_info,
         shops:shop_id (
           name,
           address,
@@ -54,14 +56,19 @@ Deno.serve(async (req) => {
         )
       `);
 
-    if (tracking_token) {
-      query = query.eq('tracking_token', tracking_token);
-    } else if (job_code) {
-      // match first 8 chars of UUID id
-      query = query.like('id', `${job_code.toLowerCase()}%`);
-    }
+    let appointment;
+    let error;
 
-    const { data: appointment, error } = await query.single();
+    if (tracking_token) {
+      const result = await query.eq('tracking_token', tracking_token).maybeSingle();
+      appointment = result.data;
+      error = result.error;
+    } else if (job_code) {
+      // Search by first 8 characters of UUID
+      const result = await query.ilike('id', `${job_code}%`).maybeSingle();
+      appointment = result.data;
+      error = result.error;
+    }
 
     if (error || !appointment) {
       return new Response(
