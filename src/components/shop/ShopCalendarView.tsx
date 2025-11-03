@@ -46,6 +46,27 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
 
   useEffect(() => {
     fetchCalendarData();
+    
+    // Subscribe to realtime updates for job offers and appointments
+    const subscription = supabase
+      .channel('calendar-changes')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'job_offers', filter: `shop_id=eq.${shopId}` },
+        () => {
+          fetchCalendarData();
+        }
+      )
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'appointments', filter: `shop_id=eq.${shopId}` },
+        () => {
+          fetchCalendarData();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [shopId, selectedDate]);
 
   const fetchCalendarData = async () => {

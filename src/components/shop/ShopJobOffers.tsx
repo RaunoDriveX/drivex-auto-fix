@@ -57,6 +57,21 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
   useEffect(() => {
     fetchJobOffers();
+    
+    // Subscribe to realtime updates
+    const subscription = supabase
+      .channel('job-offers-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'job_offers', filter: `shop_id=eq.${shopId}` },
+        () => {
+          fetchJobOffers();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [shopId]);
 
   const fetchJobOffers = async () => {
