@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -21,6 +22,9 @@ interface TimelineProps {
   completedAt?: string;
   scheduledDate: string;
   scheduledTime: string;
+  shopId: string;
+  onRescheduleClick?: () => void;
+  onCancelClick?: () => void;
 }
 
 interface TimelineEvent {
@@ -71,7 +75,10 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   startedAt,
   completedAt,
   scheduledDate,
-  scheduledTime
+  scheduledTime,
+  shopId,
+  onRescheduleClick,
+  onCancelClick
 }) => {
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,6 +219,28 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
           <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-2 rounded">
             <AlertTriangle className="h-4 w-4" />
             <span className="text-sm">Your scheduled appointment time has passed. The shop will contact you soon.</span>
+          </div>
+        )}
+        
+        {/* Management Actions */}
+        {currentStatus === 'scheduled' && onRescheduleClick && onCancelClick && (
+          <div className="flex gap-3 mt-4">
+            <Button 
+              variant="outline" 
+              onClick={onRescheduleClick}
+              className="flex-1"
+              size="sm"
+            >
+              Reschedule
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={onCancelClick}
+              className="flex-1 text-destructive hover:text-destructive"
+              size="sm"
+            >
+              Cancel
+            </Button>
           </div>
         )}
       </CardHeader>

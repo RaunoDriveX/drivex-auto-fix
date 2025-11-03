@@ -11,6 +11,7 @@ import { RescheduleDialog } from "@/components/customer/RescheduleDialog";
 import { CancelAppointmentDialog } from "@/components/customer/CancelAppointmentDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { formatInsurerName } from "@/lib/utils";
 import { 
   Clock, 
   MapPin, 
@@ -163,34 +164,6 @@ export default function JobTracking() {
           </p>
         </div>
 
-        {/* Management Actions - Only show if job is scheduled or in_progress */}
-        {jobDetails.job_status === 'scheduled' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Manage Appointment</CardTitle>
-              <CardDescription>
-                Need to make changes? You can reschedule or cancel your appointment.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex gap-3">
-              <Button 
-                variant="outline" 
-                onClick={() => setRescheduleOpen(true)}
-                className="flex-1"
-              >
-                Reschedule Appointment
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setCancelOpen(true)}
-                className="flex-1 text-destructive hover:text-destructive"
-              >
-                Cancel Appointment
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Current Status Card */}
         <Card>
           <CardHeader>
@@ -233,6 +206,9 @@ export default function JobTracking() {
           completedAt={jobDetails.job_completed_at}
           scheduledDate={jobDetails.appointment_date}
           scheduledTime={jobDetails.appointment_time}
+          shopId={jobDetails.shop_id}
+          onRescheduleClick={() => setRescheduleOpen(true)}
+          onCancelClick={() => setCancelOpen(true)}
         />
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -312,15 +288,6 @@ export default function JobTracking() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground">Scheduled Date & Time</p>
-                <p className="font-medium">
-                  {format(new Date(`${jobDetails.appointment_date} ${jobDetails.appointment_time}`), 'PPpp')}
-                </p>
-              </div>
-              
-              <Separator />
-              
-              <div>
                 <p className="text-sm text-muted-foreground">Service Type</p>
                 <p className="font-medium">{jobDetails.service_type}</p>
                 {jobDetails.damage_type && (
@@ -332,7 +299,7 @@ export default function JobTracking() {
                   <Separator />
                   <div>
                     <p className="text-sm text-muted-foreground">Insurer</p>
-                    <p className="font-medium">{jobDetails.insurer_name}</p>
+                    <p className="font-medium">{formatInsurerName(jobDetails.insurer_name)}</p>
                   </div>
                 </>
               )}
