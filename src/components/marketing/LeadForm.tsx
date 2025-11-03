@@ -15,10 +15,6 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import CallCenterCTA from "@/components/CallCenterCTA";
 
-interface InsurerOption {
-  insurer_name: string;
-}
-
 type LeadFormProps = {
   jobType?: "repair" | "replacement";
   shopId?: string;
@@ -32,7 +28,6 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [bookingComplete, setBookingComplete] = useState(false);
-  const [insurers, setInsurers] = useState<InsurerOption[]>([]);
   const [bookingDetails, setBookingDetails] = useState<{
     shopName: string;
     date: string;
@@ -42,24 +37,6 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
 
   const jobDuration = jobType === "repair" ? "30 minutes" : "2.5 hours";
   const jobDurationMinutes = jobType === "repair" ? 30 : 150;
-
-  // Fetch insurers on component mount
-  useEffect(() => {
-    const fetchInsurers = async () => {
-      const { data, error } = await supabase
-        .from('insurer_profiles')
-        .select('insurer_name')
-        .order('insurer_name');
-      
-      if (error) {
-        console.error('Error fetching insurers:', error);
-      } else {
-        setInsurers(data || []);
-      }
-    };
-    
-    fetchInsurers();
-  }, []);
 
   // Fetch booked time slots when date is selected
   useEffect(() => {
@@ -379,16 +356,25 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
                 <>
                   <div className="grid gap-2">
                     <Label htmlFor="insurerName">Insurance company</Label>
-                    <Select name="insurerName" required>
+                    <Select name="insurerName">
                       <SelectTrigger>
                         <SelectValue placeholder="Select your insurance company" />
                       </SelectTrigger>
                       <SelectContent className="bg-background border border-border z-50">
-                        {insurers.map((insurer) => (
-                          <SelectItem key={insurer.insurer_name} value={insurer.insurer_name}>
-                            {insurer.insurer_name}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="Joseph Test Insurance">Joseph Test Insurance</SelectItem>
+                        <SelectItem value="allianz">Allianz</SelectItem>
+                        <SelectItem value="axa">AXA</SelectItem>
+                        <SelectItem value="ing">ING</SelectItem>
+                        <SelectItem value="aegon">Aegon</SelectItem>
+                        <SelectItem value="nn">Nationale Nederlanden</SelectItem>
+                        <SelectItem value="achmea">Achmea</SelectItem>
+                        <SelectItem value="univé">Univé</SelectItem>
+                        <SelectItem value="centraal-beheer">Centraal Beheer</SelectItem>
+                        <SelectItem value="ohra">Ohra</SelectItem>
+                        <SelectItem value="fbto">FBTO</SelectItem>
+                        <SelectItem value="asr">ASR</SelectItem>
+                        <SelectItem value="delta-lloyd">Delta Lloyd</SelectItem>
+                        <SelectItem value="other">Other / Not listed</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
