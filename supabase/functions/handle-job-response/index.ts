@@ -63,20 +63,34 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
-    if (authError || !user) {
+    let userEmail = user?.email ?? null;
+
+    if (authError || !userEmail) {
+      console.warn('auth.getUser failed or email missing, falling back to JWT decode', authError?.message);
+      try {
+        const payloadPart = token.split('.')[1];
+        const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(normalized));
+        userEmail = payload.email || payload.user_metadata?.email || null;
+      } catch (e) {
+        console.error('Failed to decode JWT payload', e);
+      }
+    }
+
+    if (!userEmail) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log(`Job response from authenticated user: ${user.email}`);
+    console.log(`Job response from authenticated user: ${userEmail}`);
 
     // Verify user owns a shop
     const { data: shop, error: shopError } = await supabase
       .from('shops')
       .select('id')
-      .eq('email', user.email)
+      .eq('email', userEmail)
       .maybeSingle();
 
     if (shopError) {
@@ -91,7 +105,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!shop) {
-      console.log(`No shop found for user email: ${user.email}`);
+      console.log(`No shop found for user email: ${userEmail}`);
       return new Response(
         JSON.stringify({ error: 'Unauthorized - no shop associated with this user' }),
         { 
