@@ -7,6 +7,7 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -14,6 +15,30 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Require authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authorization required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify user authentication
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('Authentication failed:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired authentication token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { email } = await req.json();
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
@@ -23,7 +48,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Use service role to bypass RLS
+    // Only allow users to look up their own email
+    if (user.email?.toLowerCase() !== email.toLowerCase().trim()) {
+      console.warn(`User ${user.email} attempted to look up jobs for ${email}`);
+      return new Response(
+        JSON.stringify({ error: 'You can only look up appointments for your own email address' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Use service role to bypass RLS for the query
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { data: appointments, error } = await supabase
@@ -33,8 +67,11 @@ Deno.serve(async (req) => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      throw error;
+      console.error('Database query error:', error);
+      throw new Error('Failed to retrieve appointments');
     }
+
+    console.log(`User ${user.email} looked up ${appointments?.length || 0} appointments`);
 
     return new Response(
       JSON.stringify({ appointments: appointments || [] }),
@@ -44,7 +81,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error looking up jobs by email:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'An error occurred while processing your request' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
