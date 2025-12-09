@@ -302,6 +302,10 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
                   <span className="text-muted-foreground font-medium min-w-[100px]">Email:</span>
                   <span className="text-foreground">{bookingDetails.email}</span>
                 </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-muted-foreground font-medium min-w-[100px]">Tracking Code:</span>
+                  <span className="text-foreground font-mono">37bc68df</span>
+                </div>
               </div>
 
               <p className="text-sm text-muted-foreground mb-6">
