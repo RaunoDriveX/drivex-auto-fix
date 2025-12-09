@@ -14,3 +14,9 @@ verify_jwt = true
 
 [functions.get-job-tracking]
 verify_jwt = false
+
+[functions.lookup-jobs-by-email]
+verify_jwt = true
+
+[functions.clear-shop-jobs]
+verify_jwt = true
