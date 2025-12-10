@@ -1750,16 +1750,16 @@ export type Database = {
       }
       verify_webhook_signature:
         | {
+            Args: { _config_id: string; _payload: string; _signature: string }
+            Returns: boolean
+          }
+        | {
             Args: {
               _config_id: string
               _payload: string
               _secret: string
               _signature: string
             }
-            Returns: boolean
-          }
-        | {
-            Args: { _config_id: string; _payload: string; _signature: string }
             Returns: boolean
           }
     }
