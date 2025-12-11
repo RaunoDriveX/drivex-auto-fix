@@ -168,7 +168,7 @@ export default function JobTracking() {
             <XCircle className="h-5 w-5" />
             <AlertTitle>This Job Has Been Cancelled</AlertTitle>
             <AlertDescription>
-              {jobDetails.notes || 'This appointment was cancelled. Please create a new appointment if you still need service.'}
+              This appointment was cancelled. Please create a new appointment if you still need service.
             </AlertDescription>
           </Alert>
         </div>
