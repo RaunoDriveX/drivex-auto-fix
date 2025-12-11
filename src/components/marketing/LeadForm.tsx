@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { format, addDays, isToday, isTomorrow } from "date-fns";
-import { CalendarIcon, Clock, CheckCircle2, Home } from "lucide-react";
+import { CalendarIcon, Clock, CheckCircle2, Home, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import CallCenterCTA from "@/components/CallCenterCTA";
@@ -28,6 +28,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [bookingComplete, setBookingComplete] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [bookingDetails, setBookingDetails] = useState<{
     shopName: string;
     date: string;
@@ -35,6 +36,15 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
     email: string;
     trackingCode: string;
   } | null>(null);
+
+  const copyTrackingCode = async () => {
+    if (bookingDetails?.trackingCode) {
+      await navigator.clipboard.writeText(bookingDetails.trackingCode);
+      setCopied(true);
+      toast.success("Tracking code copied!");
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const jobDuration = jobType === "repair" ? "30 minutes" : "2.5 hours";
   const jobDurationMinutes = jobType === "repair" ? 30 : 150;
@@ -303,9 +313,17 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
                   <span className="text-muted-foreground font-medium min-w-[100px]">Email:</span>
                   <span className="text-foreground">{bookingDetails.email}</span>
                 </div>
-                <div className="flex items-start gap-3">
+                <div className="flex items-center gap-3">
                   <span className="text-muted-foreground font-medium min-w-[100px]">Tracking Code:</span>
                   <span className="text-foreground font-mono font-bold text-lg">{bookingDetails.trackingCode}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={copyTrackingCode}
+                    className="h-8 px-2"
+                  >
+                    {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
+                  </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
                   Use this code at <Link to="/track" className="text-primary hover:underline">Track Your Job</Link> to check your repair status.
