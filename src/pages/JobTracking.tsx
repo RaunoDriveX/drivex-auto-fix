@@ -146,36 +146,6 @@ export default function JobTracking() {
   const shop = jobDetails.shops;
   const isCancelled = jobDetails.job_status === 'cancelled' || jobDetails.status === 'cancelled';
 
-  // Show only cancelled message for cancelled jobs
-  if (isCancelled) {
-    return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/" className="gap-2">
-                <Home className="h-4 w-4" />
-                Back to Home
-              </Link>
-            </Button>
-          </div>
-          
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold">Track Your Repair Job</h1>
-          </div>
-
-          <Alert variant="destructive" className="border-red-300 bg-red-50">
-            <XCircle className="h-5 w-5" />
-            <AlertTitle>This Job Has Been Cancelled</AlertTitle>
-            <AlertDescription>
-              This appointment was cancelled. Please create a new appointment if you still need service.
-            </AlertDescription>
-          </Alert>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -195,6 +165,17 @@ export default function JobTracking() {
             Real-time updates for your windshield repair with {jobDetails.shop_name}
           </p>
         </div>
+
+        {/* Cancelled Job Alert */}
+        {isCancelled && (
+          <Alert variant="destructive" className="border-red-300 bg-red-50">
+            <XCircle className="h-5 w-5" />
+            <AlertTitle>This Job Has Been Cancelled</AlertTitle>
+            <AlertDescription>
+              This appointment was cancelled. Please create a new appointment if you still need service.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Job Timeline */}
         <CustomerJobTimeline
