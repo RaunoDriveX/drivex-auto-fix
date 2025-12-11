@@ -41,6 +41,7 @@ interface Job {
   job_completed_at?: string;
   created_at: string;
   updated_at: string;
+  short_code?: string;
 }
 
 const statusConfig = {
@@ -114,7 +115,8 @@ export const InsurerJobsBoard: React.FC = () => {
           job_started_at,
           job_completed_at,
           created_at,
-          updated_at
+          updated_at,
+          short_code
         `)
         .eq('insurer_name', insurerProfile.insurer_name)
         .order('created_at', { ascending: false });
@@ -319,6 +321,12 @@ export const InsurerJobsBoard: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
+                {job.short_code && (
+                  <div className="text-xs">
+                    <span className="text-muted-foreground">Tracking Code:</span>
+                    <span className="ml-2 font-mono font-bold text-primary">{job.short_code}</span>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">Scheduled:</span>
