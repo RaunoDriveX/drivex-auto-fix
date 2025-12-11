@@ -44,6 +44,7 @@ interface JobOffer {
     ai_assessment_details: any;
     ai_recommended_repair: string;
     driver_view_obstruction: boolean;
+    short_code?: string;
   };
 }
 
@@ -117,7 +118,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             ai_confidence_score,
             ai_assessment_details,
             ai_recommended_repair,
-            driver_view_obstruction
+            driver_view_obstruction,
+            short_code
           )
         `)
         .eq('shop_id', shopId)
@@ -187,7 +189,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             ai_confidence_score,
             ai_assessment_details,
             ai_recommended_repair,
-            driver_view_obstruction
+            driver_view_obstruction,
+            short_code
           )
         `)
         .eq('shop_id', shopId)
@@ -387,7 +390,15 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     {/* Job Type as Title */}
-                    <CardTitle className="text-2xl mb-3">{offer.appointments.service_type}</CardTitle>
+                    <CardTitle className="text-2xl mb-2">{offer.appointments.service_type}</CardTitle>
+                    
+                    {/* Tracking Code */}
+                    {offer.appointments.short_code && (
+                      <div className="text-xs mb-3">
+                        <span className="text-muted-foreground">Tracking Code:</span>
+                        <span className="ml-2 font-mono font-bold text-primary">{offer.appointments.short_code}</span>
+                      </div>
+                    )}
                     
                     {/* Vehicle Make and Model */}
                     {offer.appointments.vehicle_info && (
@@ -747,7 +758,15 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                     <CardHeader className="pb-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <CardTitle className="text-2xl mb-3">{offer.appointments.service_type}</CardTitle>
+                          <CardTitle className="text-2xl mb-2">{offer.appointments.service_type}</CardTitle>
+                          
+                          {/* Tracking Code */}
+                          {offer.appointments.short_code && (
+                            <div className="text-xs mb-3">
+                              <span className="text-muted-foreground">Tracking Code:</span>
+                              <span className="ml-2 font-mono font-bold text-primary">{offer.appointments.short_code}</span>
+                            </div>
+                          )}
                           
                           {offer.appointments.vehicle_info && (
                             <div className="space-y-2 mb-3">
