@@ -99,6 +99,8 @@ Deno.serve(async (req) => {
       .select(`
         id,
         job_status,
+        status,
+        notes,
         estimated_completion,
         job_started_at,
         job_completed_at,
@@ -178,6 +180,8 @@ Deno.serve(async (req) => {
           appointment_date: appointment.appointment_date,
           appointment_time: appointment.appointment_time,
           job_status: appointment.job_status,
+          status: appointment.status,
+          notes: appointment.notes,
           damage_type: appointment.damage_type,
           estimated_completion: appointment.estimated_completion,
           job_started_at: appointment.job_started_at,

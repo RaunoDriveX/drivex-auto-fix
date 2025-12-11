@@ -12,6 +12,7 @@ import { CancelAppointmentDialog } from "@/components/customer/CancelAppointment
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { formatInsurerName, formatServiceType } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   Clock, 
   MapPin, 
@@ -20,7 +21,8 @@ import {
   Car, 
   ExternalLink,
   Calendar,
-  Home
+  Home,
+  XCircle
 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 
@@ -34,6 +36,8 @@ interface JobDetails {
   appointment_date: string;
   appointment_time: string;
   job_status: string;
+  status?: string;
+  notes?: string;
   job_started_at?: string;
   job_completed_at?: string;
   estimated_completion?: string;
@@ -160,6 +164,17 @@ export default function JobTracking() {
             Real-time updates for your windshield repair with {jobDetails.shop_name}
           </p>
         </div>
+
+        {/* Cancelled Job Alert */}
+        {(jobDetails.job_status === 'cancelled' || jobDetails.status === 'cancelled') && (
+          <Alert variant="destructive" className="border-red-300 bg-red-50">
+            <XCircle className="h-5 w-5" />
+            <AlertTitle>This Job Has Been Cancelled</AlertTitle>
+            <AlertDescription>
+              {jobDetails.notes || 'This appointment was cancelled. Please create a new appointment if you still need service.'}
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Job Timeline */}
         <CustomerJobTimeline 
