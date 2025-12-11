@@ -28,8 +28,8 @@ const Inspection = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Generate the smartscan URL using the token
-  const smartscanUrl = token ? `https://smartscan.drivex.io/?urlId=${token}&lang=en` : "";
+  // Static smartscan URL
+  const smartscanUrl = "https://smartscan.drivex.ee/?urlId=FBLhLeT8gOim_Wb-g_SxybH_&lang=de";
   
   const copyToClipboard = async () => {
     try {
