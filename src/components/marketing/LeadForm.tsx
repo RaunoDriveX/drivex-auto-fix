@@ -33,6 +33,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
     date: string;
     time: string;
     email: string;
+    trackingCode: string;
   } | null>(null);
 
   const jobDuration = jobType === "repair" ? "30 minutes" : "2.5 hours";
@@ -174,6 +175,15 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
         return;
       }
 
+      // Fetch the generated short_code from the database
+      const { data: appointmentData } = await supabase
+        .from('appointments')
+        .select('short_code')
+        .eq('id', newAppointmentId)
+        .single();
+
+      const trackingCode = appointmentData?.short_code || newAppointmentId.slice(0, 8).toUpperCase();
+
       // Show success immediately
       toast.success("Booking confirmed! Check your email for confirmation details.");
       
@@ -183,45 +193,36 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
         shopName,
         date: format(selectedDate, 'EEEE, MMMM d, yyyy'),
         time: timeSlot,
-        email: customerEmail
+        email: customerEmail,
+        trackingCode
       });
 
       // Run background tasks in parallel without blocking UI
       const backgroundTasks = [
-        // Fetch short code and send confirmation email
-        supabase
-          .from('appointments')
-          .select('short_code')
-          .eq('id', newAppointmentId)
-          .single()
-          .then(({ data: appointmentData }) => {
-            const jobCode = appointmentData?.short_code || newAppointmentId.slice(0, 8).toUpperCase();
-            
-            return supabase.functions.invoke('send-confirmation-email', {
-              body: {
-                appointmentId: newAppointmentId,
-                jobCode,
-                customerName,
-                customerEmail,
-                shopName,
-                appointmentDate: format(selectedDate, 'yyyy-MM-dd'),
-                appointmentTime: timeSlot,
-                serviceType: jobType,
-                totalCost: totalCost
-              }
-            });
-          })
-          .then(({ error: emailError }) => {
-            if (emailError) {
-              console.error('Error sending confirmation email:', emailError);
-            } else {
-              // Update appointment to mark confirmation email as sent
-              supabase
-                .from('appointments')
-                .update({ confirmation_email_sent: true })
-                .eq('id', newAppointmentId);
-            }
-          })
+        // Send confirmation email
+        supabase.functions.invoke('send-confirmation-email', {
+          body: {
+            appointmentId: newAppointmentId,
+            jobCode: trackingCode,
+            customerName,
+            customerEmail,
+            shopName,
+            appointmentDate: format(selectedDate, 'yyyy-MM-dd'),
+            appointmentTime: timeSlot,
+            serviceType: jobType,
+            totalCost: totalCost
+          }
+        }).then(({ error: emailError }) => {
+          if (emailError) {
+            console.error('Error sending confirmation email:', emailError);
+          } else {
+            // Update appointment to mark confirmation email as sent
+            supabase
+              .from('appointments')
+              .update({ confirmation_email_sent: true })
+              .eq('id', newAppointmentId);
+          }
+        })
       ];
       
       // Only trigger job allocation for insurance claims
@@ -304,8 +305,11 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-muted-foreground font-medium min-w-[100px]">Tracking Code:</span>
-                  <span className="text-foreground font-mono">37bc68df</span>
+                  <span className="text-foreground font-mono font-bold text-lg">{bookingDetails.trackingCode}</span>
                 </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Use this code at <Link to="/track" className="text-primary hover:underline">Track Your Job</Link> to check your repair status.
+                </p>
               </div>
 
               <p className="text-sm text-muted-foreground mb-6">
