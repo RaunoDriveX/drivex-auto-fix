@@ -236,22 +236,13 @@ export const InsurerJobsBoard: React.FC = () => {
     }
   };
 
-  const getCancellationInfo = (job: Job): { type: 'customer' | 'shop' | 'unknown', reason: string } | null => {
+  const getCancellationInfo = (job: Job): { reason: string } | null => {
     if (job.job_status !== 'cancelled' && job.status !== 'cancelled') return null;
     
     if (job.notes) {
-      // Check if cancelled by customer
-      if (job.notes.toLowerCase().includes('cancelled by customer')) {
-        return { type: 'customer', reason: job.notes };
-      }
-      // Check if declined by shop
-      if (job.notes.toLowerCase().includes('declined by shop')) {
-        return { type: 'shop', reason: job.notes };
-      }
-      // Default - unknown source
-      return { type: 'unknown', reason: job.notes };
+      return { reason: job.notes };
     }
-    return { type: 'unknown', reason: 'No reason provided' };
+    return { reason: 'No reason provided' };
   };
 
   if (loading) {
@@ -375,15 +366,11 @@ export const InsurerJobsBoard: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                {/* Cancellation/Decline Alert */}
+                {/* Cancellation Alert */}
                 {getCancellationInfo(job) && (
                   <Alert variant="destructive" className="py-2">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription className="text-xs">
-                      <span className="font-semibold">
-                        {getCancellationInfo(job)?.type === 'customer' ? 'Cancelled by Customer' : 
-                         getCancellationInfo(job)?.type === 'shop' ? 'Declined by Shop' : 'Cancelled'}:
-                      </span>{' '}
                       {getCancellationInfo(job)?.reason}
                     </AlertDescription>
                   </Alert>
