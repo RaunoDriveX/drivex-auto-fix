@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,8 @@ import {
   Mail, 
   Car, 
   ExternalLink,
-  Calendar
+  Calendar,
+  Home
 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 
@@ -144,6 +145,15 @@ export default function JobTracking() {
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/" className="gap-2">
+              <Home className="h-4 w-4" />
+              Back to Home
+            </Link>
+          </Button>
+        </div>
+        
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Track Your Repair Job</h1>
           <p className="text-muted-foreground">
