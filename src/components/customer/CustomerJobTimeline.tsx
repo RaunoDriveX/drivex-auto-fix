@@ -306,7 +306,7 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
                   {!isLast && (
                     <div 
                       className={cn(
-                        "absolute left-4 top-8 w-0.5 h-12",
+                        "absolute left-[15px] top-8 w-0.5 h-12",
                         step.isCompleted ? "bg-primary" : "bg-muted"
                       )} 
                     />
