@@ -80,6 +80,128 @@ const handler = async (req: Request): Promise<Response> => {
       throw appointmentError;
     }
 
+    // Calculate expires_at based on appointment date at 16:00
+    const appointmentDate = new Date(appointment.appointment_date);
+    appointmentDate.setHours(16, 0, 0, 0);
+    const expiresAt = appointmentDate;
+
+    // Check if this is a direct booking (shop already selected)
+    // In this case, only create one offer for the selected shop
+    const isDirectBooking = !!appointment.shop_id;
+    if (isDirectBooking) {
+      console.log(`Direct booking detected for shop ${appointment.shop_id}, creating single offer`);
+      
+      // Get the booked shop details
+      const { data: bookedShop, error: shopError } = await supabase
+        .from('shops')
+        .select('*')
+        .eq('id', appointment.shop_id)
+        .single();
+
+      if (shopError || !bookedShop) {
+        console.error('Error fetching booked shop:', shopError);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Could not find the booked shop'
+        }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Calculate pricing
+      const basePrice = serviceType === 'replacement' ? 350 : 80;
+      
+      // Check ADAS calibration needs
+      let requiresAdasCalibration = false;
+      if (vehicleInfo) {
+        try {
+          const { data: adasCheck } = await supabase.functions.invoke('detect-adas-calibration', {
+            body: {
+              vehicleMake: vehicleInfo.make,
+              vehicleModel: vehicleInfo.model,
+              vehicleYear: vehicleInfo.year,
+              damageType: damageType || appointment.damage_type,
+              damageLocation: appointment.damage_location || ''
+            }
+          });
+          if (adasCheck) {
+            requiresAdasCalibration = adasCheck.requiresCalibration;
+          }
+        } catch (e) {
+          console.warn('ADAS check failed:', e);
+        }
+      }
+
+      const adasUpcharge = requiresAdasCalibration ? 150 : 0;
+      const offeredPrice = basePrice + adasUpcharge;
+
+      // Create single job offer for the booked shop
+      const { data: jobOffer, error: offerError } = await supabase
+        .from('job_offers')
+        .insert({
+          appointment_id: appointmentId,
+          shop_id: bookedShop.id,
+          offered_price: offeredPrice,
+          estimated_completion_time: '2 days',
+          status: 'offered',
+          expires_at: expiresAt.toISOString(),
+          requires_adas_calibration: requiresAdasCalibration,
+          is_preferred_shop: true,
+          notes: 'Direct booking - customer selected this shop'
+        })
+        .select()
+        .single();
+
+      if (offerError) {
+        console.error('Error creating job offer:', offerError);
+        throw offerError;
+      }
+
+      // Create notification for the shop
+      await supabase
+        .from('shop_notifications')
+        .insert({
+          shop_id: bookedShop.id,
+          notification_type: 'job_offer',
+          title: 'New Job Offer',
+          message: `New ${serviceType} job offer`,
+          data: {
+            appointment_id: appointmentId,
+            job_offer_id: jobOffer.id,
+            service_type: serviceType,
+            price: offeredPrice,
+            expires_at: expiresAt.toISOString()
+          }
+        });
+
+      // Update shop statistics
+      await supabase
+        .from('shops')
+        .update({
+          jobs_offered_count: (bookedShop.jobs_offered_count || 0) + 1,
+          last_job_offered_at: new Date().toISOString()
+        })
+        .eq('id', bookedShop.id);
+
+      console.log(`Created single job offer for direct booking to shop ${bookedShop.name}`);
+
+      return new Response(JSON.stringify({
+        success: true,
+        allocatedShops: 1,
+        jobOffers: [{
+          jobOfferId: jobOffer.id,
+          shopId: bookedShop.id,
+          shopName: bookedShop.name,
+          offeredPrice,
+          isPreferred: true
+        }]
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Check ADAS calibration needs
     let requiresAdasCalibration = false;
     if (vehicleInfo) {
@@ -304,10 +426,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Ranked top ${rankedShops.length} shops by allocation score`);
 
-    // Create job offers
+    // Create job offers for insurance routing (multiple shops)
     const jobOffers = [];
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // 24 hours
+    // Use appointment date at 16:00 as expiration (already calculated above for direct bookings)
+    const insuranceExpiresAt = new Date(appointment.appointment_date);
+    insuranceExpiresAt.setHours(16, 0, 0, 0);
 
     for (const rankedShop of rankedShops) {
       const shop = rankedShop.shop;
@@ -321,7 +445,7 @@ const handler = async (req: Request): Promise<Response> => {
           offered_price: offeredPrice,
           estimated_completion_time: `${estimatedLeadTime} days`,
           status: 'offered',
-          expires_at: expiresAt.toISOString(),
+          expires_at: insuranceExpiresAt.toISOString(),
           requires_adas_calibration: requiresAdasCalibration,
           is_preferred_shop: rankedShop.isPreferred,
           notes: `Allocation score: ${rankedShop.score.toFixed(2)}`
@@ -347,7 +471,7 @@ const handler = async (req: Request): Promise<Response> => {
             job_offer_id: jobOffer.id,
             service_type: serviceType,
             price: offeredPrice,
-            expires_at: expiresAt.toISOString()
+            expires_at: insuranceExpiresAt.toISOString()
           }
         });
 
