@@ -217,7 +217,12 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
       if (acceptedError) throw acceptedError;
       
-      // Fetch confirmed direct bookings
+      // Get appointment IDs that have accepted job offers
+      const acceptedAppointmentIds = new Set(
+        (acceptedData || []).map((offer: any) => offer.appointment_id).filter(Boolean)
+      );
+      
+      // Fetch confirmed direct bookings that DON'T have an associated job offer
       const { data: confirmedBookings, error: confirmedError } = await supabase
         .from('appointments')
         .select('*')
@@ -227,8 +232,13 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
       if (confirmedError) throw confirmedError;
 
+      // Filter out confirmed bookings that already have an accepted job offer to avoid duplicates
+      const filteredConfirmedBookings = (confirmedBookings || []).filter(
+        booking => !acceptedAppointmentIds.has(booking.id)
+      );
+
       // Transform confirmed bookings to match JobOffer structure
-      const confirmedBookingsAsJobs: JobOffer[] = (confirmedBookings || []).map(booking => ({
+      const confirmedBookingsAsJobs: JobOffer[] = filteredConfirmedBookings.map(booking => ({
         id: booking.id,
         appointment_id: booking.id,
         shop_id: booking.shop_id,

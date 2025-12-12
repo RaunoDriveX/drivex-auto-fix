@@ -264,13 +264,14 @@ const handler = async (req: Request): Promise<Response> => {
         console.error('Failed to cancel other offers:', cancelError);
       }
 
-      // Update appointment with selected shop
+      // Update appointment with selected shop and job_status
       const { error: appointmentUpdateError } = await supabase
         .from('appointments')
         .update({
           shop_id: jobOffer.shop_id,
           shop_name: shopDetails.name,
           status: 'confirmed',
+          job_status: 'scheduled', // Keep as scheduled until work starts
           total_cost: counterOffer || jobOffer.offered_price
         })
         .eq('id', jobOffer.appointment_id);
@@ -278,6 +279,23 @@ const handler = async (req: Request): Promise<Response> => {
       if (appointmentUpdateError) {
         console.error('Failed to update appointment:', appointmentUpdateError);
       }
+      
+      // Add audit entry for the acceptance
+      await supabase
+        .from('job_status_audit')
+        .insert({
+          appointment_id: jobOffer.appointment_id,
+          job_offer_id: jobOfferId,
+          old_status: 'scheduled',
+          new_status: 'scheduled',
+          changed_by_shop_id: jobOffer.shop_id,
+          notes: `Job accepted by ${shopDetails.name} for €${counterOffer || jobOffer.offered_price}`,
+          metadata: {
+            action: 'job_accepted',
+            shop_name: shopDetails.name,
+            offered_price: counterOffer || jobOffer.offered_price
+          }
+        });
 
       console.log(`Job accepted by ${shopDetails.name} for €${counterOffer || jobOffer.offered_price}`);
     } else {
