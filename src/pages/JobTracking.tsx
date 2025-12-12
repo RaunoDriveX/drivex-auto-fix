@@ -135,9 +135,15 @@ export default function JobTracking() {
       <div className="min-h-screen bg-background p-4">
         <div className="max-w-4xl mx-auto text-center py-12">
           <h1 className="text-2xl font-bold text-destructive mb-4">Job Not Found</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-6">
             The job tracking link may be invalid or expired. Please check the link and try again.
           </p>
+          <Button asChild>
+            <Link to="/" className="gap-2">
+              <Home className="h-4 w-4" />
+              Return to Home
+            </Link>
+          </Button>
         </div>
       </div>
     );
