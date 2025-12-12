@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 interface TimelineProps {
   appointmentId: string;
   currentStatus: string;
+  appointmentStatus?: string;
   startedAt?: string;
   completedAt?: string;
   scheduledDate: string;
@@ -47,6 +48,13 @@ const statusConfig = {
     bgColor: 'bg-blue-100',
     description: 'Your appointment has been scheduled'
   },
+  confirmed: {
+    icon: CheckCircle,
+    label: 'Confirmed',
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
+    description: 'Shop has accepted your job'
+  },
   in_progress: {
     icon: Play,
     label: 'In Progress', 
@@ -73,6 +81,7 @@ const statusConfig = {
 export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   appointmentId,
   currentStatus,
+  appointmentStatus,
   startedAt,
   completedAt,
   scheduledDate,
@@ -81,6 +90,10 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   onRescheduleClick,
   onCancelClick
 }) => {
+  // Determine display status: use appointment status if confirmed, otherwise use job_status
+  const displayStatus = appointmentStatus === 'confirmed' && currentStatus === 'scheduled' 
+    ? 'confirmed' 
+    : currentStatus;
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -136,32 +149,43 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
         status: 'scheduled',
         timestamp: `${scheduledDate} ${scheduledTime}`,
         isCompleted: true,
-        isCurrent: currentStatus === 'scheduled',
-        notes: 'Appointment confirmed and scheduled'
+        isCurrent: displayStatus === 'scheduled',
+        notes: 'Appointment created and pending shop confirmation'
       }
     ];
 
-    if (startedAt || ['in_progress', 'completed'].includes(currentStatus)) {
+    // Add confirmed step if shop has accepted
+    if (appointmentStatus === 'confirmed' || ['in_progress', 'completed'].includes(displayStatus)) {
+      steps.push({
+        status: 'confirmed',
+        timestamp: new Date().toISOString(),
+        isCompleted: true,
+        isCurrent: displayStatus === 'confirmed',
+        notes: 'Shop has accepted your job and confirmed the appointment'
+      });
+    }
+
+    if (startedAt || ['in_progress', 'completed'].includes(displayStatus)) {
       steps.push({
         status: 'in_progress',
         timestamp: startedAt || new Date().toISOString(),
         isCompleted: startedAt ? true : false,
-        isCurrent: currentStatus === 'in_progress',
+        isCurrent: displayStatus === 'in_progress',
         notes: 'Technician has started working on your vehicle'
       });
     }
 
-    if (completedAt || currentStatus === 'completed') {
+    if (completedAt || displayStatus === 'completed') {
       steps.push({
         status: 'completed',
         timestamp: completedAt || new Date().toISOString(), 
         isCompleted: completedAt ? true : false,
-        isCurrent: currentStatus === 'completed',
+        isCurrent: displayStatus === 'completed',
         notes: 'Repair work has been completed successfully'
       });
     }
 
-    if (currentStatus === 'cancelled') {
+    if (displayStatus === 'cancelled') {
       steps.push({
         status: 'cancelled',
         timestamp: new Date().toISOString(),
@@ -177,13 +201,14 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   const isOverdue = () => {
     const scheduledDateTime = new Date(`${scheduledDate} ${scheduledTime}`);
     const now = new Date();
-    return scheduledDateTime < now && currentStatus === 'scheduled';
+    return scheduledDateTime < now && displayStatus === 'scheduled';
   };
 
   const getStatusProgress = () => {
-    switch (currentStatus) {
-      case 'scheduled': return 25;
-      case 'in_progress': return 60;
+    switch (displayStatus) {
+      case 'scheduled': return 20;
+      case 'confirmed': return 40;
+      case 'in_progress': return 70;
       case 'completed': return 100;
       case 'cancelled': return 0;
       default: return 0;
@@ -216,7 +241,7 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
 
   const timelineSteps = getTimelineSteps();
 
-  const config = statusConfig[currentStatus as keyof typeof statusConfig];
+  const config = statusConfig[displayStatus as keyof typeof statusConfig] || statusConfig.scheduled;
 
   return (
     <Card>
@@ -245,8 +270,8 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
           </div>
         )}
         
-        {/* Management Actions */}
-        {currentStatus === 'scheduled' && onRescheduleClick && onCancelClick && (
+        {/* Management Actions - show for pending/scheduled, hide if confirmed or later */}
+        {displayStatus === 'scheduled' && appointmentStatus !== 'confirmed' && onRescheduleClick && onCancelClick && (
           <div className="flex gap-3 mt-4">
             <Button 
               variant="outline" 

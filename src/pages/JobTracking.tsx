@@ -187,6 +187,7 @@ export default function JobTracking() {
         <CustomerJobTimeline
           appointmentId={jobDetails.id}
           currentStatus={jobDetails.job_status}
+          appointmentStatus={jobDetails.status}
           startedAt={jobDetails.job_started_at}
           completedAt={jobDetails.job_completed_at}
           scheduledDate={jobDetails.appointment_date}
