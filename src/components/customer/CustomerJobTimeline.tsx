@@ -293,29 +293,20 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
         )}
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
+        <div className="space-y-0">
           {timelineSteps.map((step, index) => {
             const config = statusConfig[step.status as keyof typeof statusConfig];
             const Icon = config.icon;
             const isLast = index === timelineSteps.length - 1;
 
             return (
-              <div key={step.status} className="relative">
-                <div className="flex items-start space-x-4">
-                  {/* Timeline connector line */}
-                  {!isLast && (
-                    <div 
-                      className={cn(
-                        "absolute left-[15px] top-8 w-0.5 h-12",
-                        step.isCompleted ? "bg-primary" : "bg-muted"
-                      )} 
-                    />
-                  )}
-                  
+              <div key={step.status} className="flex gap-4">
+                {/* Icon column with connector line */}
+                <div className="flex flex-col items-center">
                   {/* Status icon */}
                   <div 
                     className={cn(
-                      "relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2",
+                      "flex items-center justify-center w-8 h-8 rounded-full border-2 shrink-0",
                       step.isCompleted || step.isCurrent 
                         ? `${config.bgColor} ${config.color} border-current` 
                         : "bg-muted text-muted-foreground border-muted"
@@ -324,32 +315,42 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
                     <Icon className="h-4 w-4" />
                   </div>
                   
-                  {/* Status content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className={cn(
-                        "text-sm font-medium",
-                        step.isCurrent && "text-primary"
-                      )}>
-                        {config.label}
-                      </h3>
-                      {step.isCurrent && (
-                        <Badge variant="outline" className="text-xs">
-                          Current
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {step.notes}
-                    </p>
-                    
-                    {step.timestamp && step.isCompleted && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {format(new Date(step.timestamp), 'PPpp')}
-                      </p>
+                  {/* Connector line */}
+                  {!isLast && (
+                    <div 
+                      className={cn(
+                        "w-0.5 flex-1 min-h-8",
+                        step.isCompleted ? "bg-primary" : "bg-muted"
+                      )} 
+                    />
+                  )}
+                </div>
+                
+                {/* Status content */}
+                <div className="flex-1 min-w-0 pb-6">
+                  <div className="flex items-center gap-2">
+                    <h3 className={cn(
+                      "text-sm font-medium",
+                      step.isCurrent && "text-primary"
+                    )}>
+                      {config.label}
+                    </h3>
+                    {step.isCurrent && (
+                      <Badge variant="outline" className="text-xs">
+                        Current
+                      </Badge>
                     )}
                   </div>
+                  
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {step.notes}
+                  </p>
+                  
+                  {step.timestamp && step.isCompleted && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {format(new Date(step.timestamp), 'PPpp')}
+                    </p>
+                  )}
                 </div>
               </div>
             );
