@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench, Plus, Users, Phone } from "lucide-react";
+import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench, Plus, Users, Phone, XCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import type { User } from "@supabase/supabase-js";
 
@@ -20,6 +20,7 @@ import ShopCalendarView from "@/components/shop/ShopCalendarView";
 import ShopUpsellSettings from "@/components/shop/ShopUpsellSettings";
 import ShopTechnicians from "@/components/shop/ShopTechnicians";
 import CallCenterOverview from "@/components/call-center/CallCenterOverview";
+import ShopDeclinedJobs from "@/components/shop/ShopDeclinedJobs";
 
 interface ShopData {
   id: string;
@@ -228,13 +229,20 @@ const ShopDashboard = () => {
               <div className="w-64 bg-card border rounded-lg p-4">
                 <nav className="space-y-2">
                   <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
-                    <TabsList className="grid w-full grid-rows-9 h-auto bg-transparent p-0 gap-1">
+                    <TabsList className="grid w-full grid-rows-10 h-auto bg-transparent p-0 gap-1">
                       <TabsTrigger 
                         value="offers" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
                         <DollarSign className="h-4 w-4" />
                         Active Job Offers
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="declined" 
+                        className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Declined Jobs
                       </TabsTrigger>
                       <TabsTrigger 
                         value="calendar" 
@@ -316,6 +324,25 @@ const ShopDashboard = () => {
                       </div>
                     </div>
                     <ShopJobOffers shopId={shopData.id} shop={shopData} />
+                  </div>
+                )}
+
+                {activeTab === 'declined' && (
+                  <div>
+                    <div className="mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-red-100 p-2 rounded-lg">
+                          <XCircle className="h-5 w-5 text-red-600" />
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-semibold leading-none tracking-tight">Declined Jobs</h2>
+                          <p className="text-sm text-muted-foreground">
+                            Review your declined job history
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <ShopDeclinedJobs shopId={shopData.id} />
                   </div>
                 )}
 
