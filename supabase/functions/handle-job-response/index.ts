@@ -301,6 +301,51 @@ const handler = async (req: Request): Promise<Response> => {
     } else {
       console.log(`Job declined by ${shopDetails.name}. Reason: ${declineReason || 'Not specified'}`);
       
+      // Check if there are other pending offers for this appointment
+      const { data: otherOffers, error: otherOffersError } = await supabase
+        .from('job_offers')
+        .select('id')
+        .eq('appointment_id', jobOffer.appointment_id)
+        .eq('status', 'offered')
+        .neq('id', jobOfferId);
+
+      const hasOtherOffers = otherOffers && otherOffers.length > 0;
+      
+      // If no other pending offers, update appointment status to cancelled
+      if (!hasOtherOffers) {
+        const { error: appointmentUpdateError } = await supabase
+          .from('appointments')
+          .update({
+            status: 'cancelled',
+            job_status: 'cancelled',
+            notes: `Declined by ${shopDetails.name}. Reason: ${declineReason || 'No reason provided'}`
+          })
+          .eq('id', jobOffer.appointment_id);
+
+        if (appointmentUpdateError) {
+          console.error('Failed to update appointment status:', appointmentUpdateError);
+        } else {
+          console.log('Appointment marked as cancelled - no other pending offers');
+        }
+        
+        // Add audit entry for the decline/cancellation
+        await supabase
+          .from('job_status_audit')
+          .insert({
+            appointment_id: jobOffer.appointment_id,
+            job_offer_id: jobOfferId,
+            old_status: 'scheduled',
+            new_status: 'cancelled',
+            changed_by_shop_id: jobOffer.shop_id,
+            notes: `Job declined by ${shopDetails.name}. Reason: ${declineReason || 'No reason provided'}`,
+            metadata: {
+              action: 'job_declined',
+              shop_name: shopDetails.name,
+              decline_reason: declineReason
+            }
+          });
+      }
+      
       // Send decline notification email
       try {
         const appointment = jobOffer.appointments as any;
@@ -329,7 +374,10 @@ const handler = async (req: Request): Promise<Response> => {
               ${appointment.damage_type ? `<li><strong>Damage Type:</strong> ${appointment.damage_type}</li>` : ''}
             </ul>
             
-            <p>Don't worry! We're working on finding another qualified shop for your appointment. You will receive another notification once a shop accepts your job offer.</p>
+            ${hasOtherOffers 
+              ? `<p>Don't worry! We're working on finding another qualified shop for your appointment. You will receive another notification once a shop accepts your job offer.</p>` 
+              : `<p>Unfortunately, no other shops are currently available for this appointment. Please create a new booking to find an available shop.</p>`
+            }
             
             <p>Best regards,<br>The DriveX Team</p>
           `,
