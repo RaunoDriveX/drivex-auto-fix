@@ -129,6 +129,11 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
       if (offersError) throw offersError;
       
+      // Get appointment IDs that already have job offers for this shop
+      const appointmentIdsWithOffers = new Set(
+        (offersData || []).map((offer: any) => offer.appointment_id).filter(Boolean)
+      );
+
       // Fetch pending direct bookings (no job offer created)
       const { data: directBookings, error: directError } = await supabase
         .from('appointments')
@@ -138,9 +143,14 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         .order('created_at', { ascending: false });
 
       if (directError) throw directError;
+      
+      // Filter out appointments that already have job offers to avoid duplicates
+      const filteredDirectBookings = (directBookings || []).filter(
+        booking => !appointmentIdsWithOffers.has(booking.id)
+      );
 
       // Transform direct bookings to match JobOffer structure
-      const directBookingsAsOffers: JobOffer[] = (directBookings || []).map(booking => {
+      const directBookingsAsOffers: JobOffer[] = filteredDirectBookings.map(booking => {
         // Set expires_at to appointment date at 16:00
         const appointmentDate = new Date(booking.appointment_date);
         appointmentDate.setHours(16, 0, 0, 0);
