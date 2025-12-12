@@ -129,9 +129,17 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
       if (offersError) throw offersError;
       
-      // Get appointment IDs that already have job offers for this shop
-      const appointmentIdsWithOffers = new Set(
-        (offersData || []).map((offer: any) => offer.appointment_id).filter(Boolean)
+      // Get ALL appointment IDs that have any job offers for this shop (any status)
+      // This prevents showing direct bookings when a job offer exists (even if declined)
+      const { data: allOffersForShop, error: allOffersError } = await supabase
+        .from('job_offers')
+        .select('appointment_id')
+        .eq('shop_id', shopId);
+      
+      if (allOffersError) throw allOffersError;
+      
+      const appointmentIdsWithAnyOffers = new Set(
+        (allOffersForShop || []).map((offer: any) => offer.appointment_id).filter(Boolean)
       );
 
       // Fetch pending direct bookings (no job offer created)
@@ -144,9 +152,9 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
       if (directError) throw directError;
       
-      // Filter out appointments that already have job offers to avoid duplicates
+      // Filter out appointments that have ANY job offers (including declined) to avoid duplicates
       const filteredDirectBookings = (directBookings || []).filter(
-        booking => !appointmentIdsWithOffers.has(booking.id)
+        booking => !appointmentIdsWithAnyOffers.has(booking.id)
       );
 
       // Transform direct bookings to match JobOffer structure
