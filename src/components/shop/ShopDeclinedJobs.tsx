@@ -32,6 +32,7 @@ interface DeclinedJob {
     service_type: string;
     insurer_name: string | null;
     vehicle_info: any;
+    short_code: string | null;
   } | null;
 }
 
@@ -65,7 +66,8 @@ const ShopDeclinedJobs = ({ shopId }: ShopDeclinedJobsProps) => {
             appointment_time,
             service_type,
             insurer_name,
-            vehicle_info
+            vehicle_info,
+            short_code
           )
         `)
         .eq('shop_id', shopId)
@@ -190,6 +192,12 @@ const ShopDeclinedJobs = ({ shopId }: ShopDeclinedJobsProps) => {
           <CardContent className="space-y-3">
             {job.appointment && (
               <>
+                {job.appointment.short_code && (
+                  <div className="text-xs mb-2">
+                    <span className="text-muted-foreground">Tracking Code: </span>
+                    <span className="font-mono font-bold text-primary">{job.appointment.short_code}</span>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-muted-foreground" />
