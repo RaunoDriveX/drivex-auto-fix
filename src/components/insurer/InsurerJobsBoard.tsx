@@ -144,6 +144,20 @@ export const InsurerJobsBoard: React.FC = () => {
   };
 
   const setupRealtimeSubscription = () => {
+    // Get current user's insurer profile first
+    const getCurrentInsurerName = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) return null;
+
+      const { data: insurerProfile } = await supabase
+        .from('insurer_profiles')
+        .select('insurer_name')
+        .eq('email', user.email)
+        .single();
+
+      return insurerProfile?.insurer_name || null;
+    };
+
     const channel = supabase
       .channel('insurer-jobs-updates')
       .on(
@@ -153,13 +167,18 @@ export const InsurerJobsBoard: React.FC = () => {
           schema: 'public',
           table: 'appointments'
         },
-        (payload) => {
+        async (payload) => {
           console.log('Real-time job update:', payload);
-          setJobs(prevJobs => 
-            prevJobs.map(job => 
-              job.id === payload.new.id ? { ...job, ...payload.new } : job
-            )
-          );
+          const insurerName = await getCurrentInsurerName();
+
+          // Only update if this appointment belongs to this insurer
+          if (insurerName && payload.new.insurer_name === insurerName) {
+            setJobs(prevJobs =>
+              prevJobs.map(job =>
+                job.id === payload.new.id ? { ...job, ...payload.new } : job
+              )
+            );
+          }
         }
       )
       .on(
@@ -169,9 +188,22 @@ export const InsurerJobsBoard: React.FC = () => {
           schema: 'public',
           table: 'appointments'
         },
-        (payload) => {
+        async (payload) => {
           console.log('New job created:', payload);
-          setJobs(prevJobs => [payload.new as Job, ...prevJobs]);
+          const insurerName = await getCurrentInsurerName();
+
+          // Only add if this appointment belongs to this insurer AND doesn't already exist
+          if (insurerName && payload.new.insurer_name === insurerName) {
+            setJobs(prevJobs => {
+              // Check if job already exists to prevent duplicates
+              const exists = prevJobs.some(job => job.id === payload.new.id);
+              if (exists) {
+                console.log('Job already exists, skipping duplicate:', payload.new.id);
+                return prevJobs;
+              }
+              return [payload.new as Job, ...prevJobs];
+            });
+          }
         }
       )
       .subscribe();
