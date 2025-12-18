@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,12 +8,22 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Wrench, ArrowLeft } from "lucide-react";
+import { Wrench, ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+
+interface ShopProfileData {
+  name: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  phone: string;
+}
 
 const ShopAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsProfileSetup, setNeedsProfileSetup] = useState(false);
+  const [authenticatedEmail, setAuthenticatedEmail] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -23,18 +33,39 @@ const ShopAuth = () => {
 
     try {
       if (isSignUp) {
-        // Sign up new shop user
+        const redirectUrl = `${window.location.origin}/shop-dashboard`;
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: redirectUrl
+          }
         });
 
-        if (signUpError) throw signUpError;
+        if (signUpError) {
+          // Handle "user already registered" error
+          if (signUpError.message?.toLowerCase().includes('already registered') || 
+              signUpError.message?.toLowerCase().includes('already exists')) {
+            throw new Error("An account with this email already exists. Please use the Sign In tab instead.");
+          }
+          throw signUpError;
+        }
 
-        toast({
-          title: "Account created",
-          description: "Please check your email to verify your account.",
-        });
+        if (data.session) {
+          // Email confirmation disabled - prompt for shop profile setup
+          setAuthenticatedEmail(email);
+          setNeedsProfileSetup(true);
+          toast({
+            title: "Account created!",
+            description: "Please complete your shop profile to continue.",
+          });
+        } else {
+          toast({
+            title: "Verify your email",
+            description: "Please check your email and click the verification link to complete signup.",
+          });
+          setError("Please check your email for a verification link to complete your registration.");
+        }
       } else {
         // Sign in existing shop user
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -44,7 +75,7 @@ const ShopAuth = () => {
 
         if (signInError) throw signInError;
 
-        // Verify shop exists in database
+        // Check if shop profile exists
         const { data: shop, error: shopError } = await supabase
           .from('shops')
           .select('id')
@@ -52,8 +83,14 @@ const ShopAuth = () => {
           .single();
 
         if (shopError || !shop) {
-          await supabase.auth.signOut();
-          throw new Error("No shop profile found for this email. Please contact support.");
+          // No shop profile - offer to create one
+          setAuthenticatedEmail(email);
+          setNeedsProfileSetup(true);
+          toast({
+            title: "Welcome!",
+            description: "Please complete your shop profile to continue.",
+          });
+          return;
         }
 
         toast({
@@ -69,6 +106,144 @@ const ShopAuth = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCreateShopProfile = async (profileData: ShopProfileData) => {
+    if (!authenticatedEmail) return;
+    
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Generate a unique shop ID
+      const shopId = `shop-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      const { error: insertError } = await supabase
+        .from('shops')
+        .insert({
+          id: shopId,
+          name: profileData.name,
+          address: profileData.address,
+          city: profileData.city,
+          postal_code: profileData.postalCode,
+          email: authenticatedEmail,
+          phone: profileData.phone || null,
+        });
+
+      if (insertError) throw insertError;
+
+      toast({
+        title: "Shop profile created!",
+        description: "Welcome to the DriveX network.",
+      });
+
+      navigate("/shop-dashboard");
+    } catch (error: any) {
+      console.error('Profile creation error:', error);
+      setError(error.message || "Failed to create shop profile. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const ShopProfileForm = () => {
+    const [name, setName] = useState("");
+    const [address, setAddress] = useState("");
+    const [city, setCity] = useState("");
+    const [postalCode, setPostalCode] = useState("");
+    const [phone, setPhone] = useState("");
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      handleCreateShopProfile({ name, address, city, postalCode, phone });
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="text-center mb-4">
+          <p className="text-sm text-muted-foreground">
+            Complete your shop profile to access the dashboard
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="shopName">Shop Name *</Label>
+          <Input
+            id="shopName"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            placeholder="e.g., AutoGlass Express"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="address">Street Address *</Label>
+          <Input
+            id="address"
+            type="text"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+            placeholder="123 Main Street"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="city">City *</Label>
+            <Input
+              id="city"
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              required
+              placeholder="Amsterdam"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="postalCode">Postal Code *</Label>
+            <Input
+              id="postalCode"
+              type="text"
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value)}
+              required
+              placeholder="1234 AB"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone">Phone Number</Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="+31 20 1234567"
+          />
+        </div>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating Profile...
+            </>
+          ) : (
+            "Complete Setup"
+          )}
+        </Button>
+      </form>
+    );
   };
 
   const AuthForm = ({ isSignUp }: { isSignUp: boolean }) => {
@@ -110,6 +285,7 @@ const ShopAuth = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
+            placeholder={isSignUp ? "At least 6 characters" : "Enter your password"}
           />
         </div>
         
@@ -134,7 +310,14 @@ const ShopAuth = () => {
         )}
         
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            isSignUp ? "Create Account" : "Sign In"
+          )}
         </Button>
       </form>
     );
@@ -156,25 +339,32 @@ const ShopAuth = () => {
                 <CardTitle className="text-2xl">Shop Portal</CardTitle>
               </div>
               <CardDescription>
-                Access your repair shop dashboard
+                {needsProfileSetup 
+                  ? "Complete your shop profile" 
+                  : "Access your repair shop dashboard"
+                }
               </CardDescription>
             </CardHeader>
             
             <CardContent>
-              <Tabs defaultValue="signin" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="signin">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="signin" className="mt-6">
-                  <AuthForm isSignUp={false} />
-                </TabsContent>
-                
-                <TabsContent value="signup" className="mt-6">
-                  <AuthForm isSignUp={true} />
-                </TabsContent>
-              </Tabs>
+              {needsProfileSetup ? (
+                <ShopProfileForm />
+              ) : (
+                <Tabs defaultValue="signin" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="signin">Sign In</TabsTrigger>
+                    <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="signin" className="mt-6">
+                    <AuthForm isSignUp={false} />
+                  </TabsContent>
+                  
+                  <TabsContent value="signup" className="mt-6">
+                    <AuthForm isSignUp={true} />
+                  </TabsContent>
+                </Tabs>
+              )}
             </CardContent>
           </Card>
           
