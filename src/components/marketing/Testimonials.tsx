@@ -6,24 +6,24 @@ import { Link } from "react-router-dom";
 const Testimonials = () => {
   const testimonials = [
     {
-      name: "María Elena Rodríguez",
-      location: "Mexico City",
+      name: "Anna Schmidt",
+      location: "Berlin",
       image: "👩‍💼",
-      text: "Glassify helped me save over $150 by comparing prices from different shops. Before, I would just go to the first repair shop I found. Now I know I'm paying a fair price.",
+      text: "Glassify helped me save over €150 by comparing prices from different shops. Before, I would just go to the first repair shop I found. Now I know I'm paying a fair price.",
       benefit: "Saving Money",
       rating: 5
     },
     {
-      name: "Carlos Hernández",
-      location: "Guadalajara, Mexico", 
+      name: "Thomas Müller",
+      location: "Düsseldorf", 
       image: "👨‍🚗",
       text: "In 20 minutes I had my appointment scheduled and the technician came to my office. I didn't waste time searching for shops or waiting in lines. Incredible service.",
       benefit: "Saving Time",
       rating: 5
     },
     {
-      name: "Ana Sofía Morales",
-      location: "Monterrey, Mexico",
+      name: "Sophie Weber",
+      location: "Munich",
       image: "👩‍🎓", 
       text: "Finally someone who defends my interests and not the repair shop's. Glassify explained everything clearly and helped me make the best decision for my wallet.",
       benefit: "Peace of Mind",
