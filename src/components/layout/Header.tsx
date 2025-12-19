@@ -3,6 +3,7 @@ import { Menu, X, Phone, Mail, Search } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CallCenterToolbarWidget from "@/components/call-center/CallCenterToolbarWidget";
+import glassifyLogo from "@/assets/glassify-logo.svg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,9 +33,9 @@ const Header = () => {
           <div className="flex items-center flex-shrink-0">
             <Link to="/" className="flex items-center py-2 hover:opacity-80 transition-opacity duration-200">
               <img 
-                src="/lovable-uploads/df12f014-4490-43bd-b853-4dd0b472d367.png" 
-                alt="Autocristal - Auto Glass Repair & Replacement" 
-                className="h-20 w-auto max-w-[240px] object-contain" 
+                src={glassifyLogo} 
+                alt="Glassify - Auto Glass Repair & Replacement" 
+                className="h-16 w-auto max-w-[200px] object-contain" 
               />
             </Link>
           </div>
