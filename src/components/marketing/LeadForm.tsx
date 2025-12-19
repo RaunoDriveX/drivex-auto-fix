@@ -29,6 +29,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [insurers, setInsurers] = useState<{ id: string; insurer_name: string }[]>([]);
   const [bookingDetails, setBookingDetails] = useState<{
     shopName: string;
     date: string;
@@ -36,6 +37,25 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
     email: string;
     trackingCode: string;
   } | null>(null);
+
+  // Fetch insurers from database
+  useEffect(() => {
+    const fetchInsurers = async () => {
+      const { data, error } = await supabase
+        .from('insurer_profiles')
+        .select('id, insurer_name')
+        .order('insurer_name');
+      
+      if (error) {
+        console.error('Error fetching insurers:', error);
+        return;
+      }
+      
+      setInsurers(data || []);
+    };
+    
+    fetchInsurers();
+  }, []);
 
   const copyTrackingCode = async () => {
     if (bookingDetails?.trackingCode) {
@@ -387,19 +407,11 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
                         <SelectValue placeholder="Select your insurance company" />
                       </SelectTrigger>
                       <SelectContent className="bg-background border border-border z-50">
-                        <SelectItem value="Joseph Test Insurance">Joseph Test Insurance</SelectItem>
-                        <SelectItem value="allianz">Allianz</SelectItem>
-                        <SelectItem value="axa">AXA</SelectItem>
-                        <SelectItem value="ing">ING</SelectItem>
-                        <SelectItem value="aegon">Aegon</SelectItem>
-                        <SelectItem value="nn">Nationale Nederlanden</SelectItem>
-                        <SelectItem value="achmea">Achmea</SelectItem>
-                        <SelectItem value="univé">Univé</SelectItem>
-                        <SelectItem value="centraal-beheer">Centraal Beheer</SelectItem>
-                        <SelectItem value="ohra">Ohra</SelectItem>
-                        <SelectItem value="fbto">FBTO</SelectItem>
-                        <SelectItem value="asr">ASR</SelectItem>
-                        <SelectItem value="delta-lloyd">Delta Lloyd</SelectItem>
+                        {insurers.map((insurer) => (
+                          <SelectItem key={insurer.id} value={insurer.insurer_name}>
+                            {insurer.insurer_name}
+                          </SelectItem>
+                        ))}
                         <SelectItem value="other">Other / Not listed</SelectItem>
                       </SelectContent>
                     </Select>
