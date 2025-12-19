@@ -407,11 +407,25 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
                         <SelectValue placeholder="Select your insurance company" />
                       </SelectTrigger>
                       <SelectContent className="bg-background border border-border z-50">
+                        {/* Database insurers (partners) */}
                         {insurers.map((insurer) => (
                           <SelectItem key={insurer.id} value={insurer.insurer_name}>
                             {insurer.insurer_name}
                           </SelectItem>
                         ))}
+                        {/* Hardcoded common insurers */}
+                        <SelectItem value="allianz">Allianz</SelectItem>
+                        <SelectItem value="axa">AXA</SelectItem>
+                        <SelectItem value="ing">ING</SelectItem>
+                        <SelectItem value="aegon">Aegon</SelectItem>
+                        <SelectItem value="nn">Nationale Nederlanden</SelectItem>
+                        <SelectItem value="achmea">Achmea</SelectItem>
+                        <SelectItem value="univé">Univé</SelectItem>
+                        <SelectItem value="centraal-beheer">Centraal Beheer</SelectItem>
+                        <SelectItem value="ohra">Ohra</SelectItem>
+                        <SelectItem value="fbto">FBTO</SelectItem>
+                        <SelectItem value="asr">ASR</SelectItem>
+                        <SelectItem value="delta-lloyd">Delta Lloyd</SelectItem>
                         <SelectItem value="other">Other / Not listed</SelectItem>
                       </SelectContent>
                     </Select>
