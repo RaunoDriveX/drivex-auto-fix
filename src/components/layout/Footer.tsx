@@ -10,7 +10,7 @@ const Footer = () => {
           
           {/* Company Info */}
           <div>
-            <div className="text-2xl font-bold text-primary mb-4">Autocristal</div>
+            <div className="text-2xl font-bold text-primary mb-4">Glassify</div>
             <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
               Patent-pending AI technology for transparent auto glass repair. 
               Your advocate in the marketplace.
@@ -22,7 +22,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>contacto@autocristal.mx</span>
+                <span>contact@glassify.com</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
@@ -53,7 +53,7 @@ const Footer = () => {
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Careers</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">News & Press</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Partner Network</a></li>
-              <li><a href="mailto:contacto@autocristal.mx" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</a></li>
+              <li><a href="mailto:contact@glassify.com" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</a></li>
             </ul>
           </div>
 
@@ -77,7 +77,7 @@ const Footer = () => {
             
             {/* Copyright */}
             <div className="text-sm text-muted-foreground">
-              © {currentYear} Autocristal. All rights reserved. Patent pending technology.
+              © {currentYear} Glassify. All rights reserved. Patent pending technology.
             </div>
 
             {/* Social Links */}
