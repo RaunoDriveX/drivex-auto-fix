@@ -55,7 +55,7 @@ const WhyChooseUs = () => {
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             300,000 assessments completed with <span className="font-semibold text-foreground">95% accuracy</span> over 6 years. 
-            Autocristal creates transparency in the auto glass repair market.
+            Glassify creates transparency in the auto glass repair market.
           </p>
         </div>
 
@@ -129,7 +129,7 @@ const WhyChooseUs = () => {
             <div className="relative">
               <img
                 src="/lovable-uploads/5cafe942-1574-4628-a9df-559fb4bd6d49.png"
-                alt="Autocristal international team members standing together with classic cars, representing our global presence"
+                alt="Glassify international team members standing together with classic cars, representing our global presence"
                 className="w-full h-auto rounded-xl shadow-2xl"
                 loading="lazy"
               />
