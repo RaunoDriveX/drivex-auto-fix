@@ -97,7 +97,7 @@ const Testimonials = () => {
               Start Your Assessment
             </Link>
             <a 
-              href="mailto:fleet@glassify.com" 
+              href="mailto:fleet@glassify24.com"
               className="px-8 py-4 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/5 transition-colors"
             >
               Contact Fleet Sales
