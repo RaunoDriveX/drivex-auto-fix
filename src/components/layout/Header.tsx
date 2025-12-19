@@ -27,8 +27,8 @@ const Header = () => {
 
   return (
     <header className="bg-white/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-24 gap-4">
+      <div className="container mx-auto px-4 lg:px-2">
+        <div className="flex items-center justify-between h-24 gap-4 -ml-2 lg:-ml-4">
           {/* Logo and Track Job grouped together */}
           <div className="flex items-center gap-6 flex-shrink-0">
             <Link to="/" className="flex items-center py-2 hover:opacity-80 transition-opacity duration-200">
