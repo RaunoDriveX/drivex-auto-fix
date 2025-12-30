@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CallCenterToolbarWidget from "@/components/call-center/CallCenterToolbarWidget";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import glassifyLogo from "@/assets/glassify-logo.svg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

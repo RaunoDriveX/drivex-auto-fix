@@ -346,7 +346,7 @@ const ShopAuth = () => {
             </CardDescription>
           </CardHeader>
           
-          <div className="flex justify-center">
+          <div className="flex justify-center pb-6">
             <Button variant="ghost" asChild className="gap-2">
               <Link to="/" onClick={() => window.scrollTo(0, 0)}>
                 <ArrowLeft className="h-4 w-4" />
@@ -354,7 +354,7 @@ const ShopAuth = () => {
               </Link>
             </Button>
           </div>
-        </div>
+        </Card>
       </div>
     </>
   );
