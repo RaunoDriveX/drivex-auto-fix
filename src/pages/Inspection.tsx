@@ -4,9 +4,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import QRCode from "react-qr-code";
 import { Copy, MessageCircle, Smartphone, ExternalLink, Camera } from "lucide-react";
 import { useState, useEffect } from "react";
+import smartscanQrCode from "@/assets/smartscan-qr-code.png";
 
 const Inspection = () => {
   const { token } = useParams<{ token: string }>();
@@ -28,8 +28,8 @@ const Inspection = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Generate the smartscan URL using the token
-  const smartscanUrl = token ? `https://smartscan.drivex.io/?urlId=${token}&lang=en` : "";
+  // Static smartscan URL
+  const smartscanUrl = "https://smartscan.drivex.ee/?urlId=FBLhLeT8gOim_Wb-g_SxybH_&lang=de";
   
   const copyToClipboard = async () => {
     try {
@@ -129,10 +129,10 @@ const Inspection = () => {
                   </CardHeader>
                   <CardContent className="flex flex-col items-center space-y-4">
                     <div className="p-6 bg-white rounded-xl shadow-md border">
-                      <QRCode
-                        value={smartscanUrl}
-                        size={240}
-                        style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                      <img
+                        src={smartscanQrCode}
+                        alt="Scan QR code to start inspection"
+                        className="w-60 h-60"
                       />
                     </div>
                     <p className="text-sm text-muted-foreground text-center max-w-md">

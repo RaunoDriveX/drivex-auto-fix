@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -17,10 +19,14 @@ import { cn } from '@/lib/utils';
 interface TimelineProps {
   appointmentId: string;
   currentStatus: string;
+  appointmentStatus?: string;
   startedAt?: string;
   completedAt?: string;
   scheduledDate: string;
   scheduledTime: string;
+  shopId: string;
+  onRescheduleClick?: () => void;
+  onCancelClick?: () => void;
 }
 
 interface TimelineEvent {
@@ -41,6 +47,13 @@ const statusConfig = {
     color: 'text-blue-600',
     bgColor: 'bg-blue-100',
     description: 'Your appointment has been scheduled'
+  },
+  confirmed: {
+    icon: CheckCircle,
+    label: 'Confirmed',
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
+    description: 'Shop has accepted your job'
   },
   in_progress: {
     icon: Play,
@@ -68,11 +81,19 @@ const statusConfig = {
 export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   appointmentId,
   currentStatus,
+  appointmentStatus,
   startedAt,
   completedAt,
   scheduledDate,
-  scheduledTime
+  scheduledTime,
+  shopId,
+  onRescheduleClick,
+  onCancelClick
 }) => {
+  // Determine display status: use appointment status if confirmed, otherwise use job_status
+  const displayStatus = appointmentStatus === 'confirmed' && currentStatus === 'scheduled' 
+    ? 'confirmed' 
+    : currentStatus;
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -128,32 +149,43 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
         status: 'scheduled',
         timestamp: `${scheduledDate} ${scheduledTime}`,
         isCompleted: true,
-        isCurrent: currentStatus === 'scheduled',
-        notes: 'Appointment confirmed and scheduled'
+        isCurrent: displayStatus === 'scheduled',
+        notes: 'Appointment created and pending shop confirmation'
       }
     ];
 
-    if (startedAt || ['in_progress', 'completed'].includes(currentStatus)) {
+    // Add confirmed step if shop has accepted
+    if (appointmentStatus === 'confirmed' || ['in_progress', 'completed'].includes(displayStatus)) {
+      steps.push({
+        status: 'confirmed',
+        timestamp: new Date().toISOString(),
+        isCompleted: true,
+        isCurrent: displayStatus === 'confirmed',
+        notes: 'Shop has accepted your job and confirmed the appointment'
+      });
+    }
+
+    if (startedAt || ['in_progress', 'completed'].includes(displayStatus)) {
       steps.push({
         status: 'in_progress',
         timestamp: startedAt || new Date().toISOString(),
         isCompleted: startedAt ? true : false,
-        isCurrent: currentStatus === 'in_progress',
+        isCurrent: displayStatus === 'in_progress',
         notes: 'Technician has started working on your vehicle'
       });
     }
 
-    if (completedAt || currentStatus === 'completed') {
+    if (completedAt || displayStatus === 'completed') {
       steps.push({
         status: 'completed',
         timestamp: completedAt || new Date().toISOString(), 
         isCompleted: completedAt ? true : false,
-        isCurrent: currentStatus === 'completed',
+        isCurrent: displayStatus === 'completed',
         notes: 'Repair work has been completed successfully'
       });
     }
 
-    if (currentStatus === 'cancelled') {
+    if (displayStatus === 'cancelled') {
       steps.push({
         status: 'cancelled',
         timestamp: new Date().toISOString(),
@@ -169,7 +201,18 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   const isOverdue = () => {
     const scheduledDateTime = new Date(`${scheduledDate} ${scheduledTime}`);
     const now = new Date();
-    return scheduledDateTime < now && currentStatus === 'scheduled';
+    return scheduledDateTime < now && displayStatus === 'scheduled';
+  };
+
+  const getStatusProgress = () => {
+    switch (displayStatus) {
+      case 'scheduled': return 20;
+      case 'confirmed': return 40;
+      case 'in_progress': return 70;
+      case 'completed': return 100;
+      case 'cancelled': return 0;
+      default: return 0;
+    }
   };
 
   if (loading) {
@@ -198,6 +241,8 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
 
   const timelineSteps = getTimelineSteps();
 
+  const config = statusConfig[displayStatus as keyof typeof statusConfig] || statusConfig.scheduled;
+
   return (
     <Card>
       <CardHeader>
@@ -208,37 +253,60 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
         <CardDescription>
           Track your repair progress from start to finish
         </CardDescription>
+        
+        {/* Progress Bar */}
+        <div className="space-y-2 mt-4">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>Progress</span>
+            <span>{getStatusProgress()}%</span>
+          </div>
+          <Progress value={getStatusProgress()} className="h-2" />
+        </div>
+
         {isOverdue() && (
-          <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-2 rounded">
+          <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-2 rounded mt-4">
             <AlertTriangle className="h-4 w-4" />
             <span className="text-sm">Your scheduled appointment time has passed. The shop will contact you soon.</span>
           </div>
         )}
+        
+        {/* Management Actions - show for pending/scheduled, hide if confirmed or later */}
+        {displayStatus === 'scheduled' && appointmentStatus !== 'confirmed' && onRescheduleClick && onCancelClick && (
+          <div className="flex gap-3 mt-4">
+            <Button 
+              variant="outline" 
+              onClick={onRescheduleClick}
+              className="flex-1"
+              size="sm"
+            >
+              Reschedule
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={onCancelClick}
+              className="flex-1 text-destructive hover:text-destructive"
+              size="sm"
+            >
+              Cancel
+            </Button>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
+        <div className="space-y-0">
           {timelineSteps.map((step, index) => {
             const config = statusConfig[step.status as keyof typeof statusConfig];
             const Icon = config.icon;
             const isLast = index === timelineSteps.length - 1;
 
             return (
-              <div key={step.status} className="relative">
-                <div className="flex items-start space-x-4">
-                  {/* Timeline connector line */}
-                  {!isLast && (
-                    <div 
-                      className={cn(
-                        "absolute left-4 top-8 w-0.5 h-12",
-                        step.isCompleted ? "bg-primary" : "bg-muted"
-                      )} 
-                    />
-                  )}
-                  
+              <div key={step.status} className="flex gap-4">
+                {/* Icon column with connector line */}
+                <div className="flex flex-col items-center">
                   {/* Status icon */}
                   <div 
                     className={cn(
-                      "relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2",
+                      "flex items-center justify-center w-8 h-8 rounded-full border-2 shrink-0",
                       step.isCompleted || step.isCurrent 
                         ? `${config.bgColor} ${config.color} border-current` 
                         : "bg-muted text-muted-foreground border-muted"
@@ -247,32 +315,42 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
                     <Icon className="h-4 w-4" />
                   </div>
                   
-                  {/* Status content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className={cn(
-                        "text-sm font-medium",
-                        step.isCurrent && "text-primary"
-                      )}>
-                        {config.label}
-                      </h3>
-                      {step.isCurrent && (
-                        <Badge variant="outline" className="text-xs">
-                          Current
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {step.notes}
-                    </p>
-                    
-                    {step.timestamp && step.isCompleted && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {format(new Date(step.timestamp), 'PPpp')}
-                      </p>
+                  {/* Connector line */}
+                  {!isLast && (
+                    <div 
+                      className={cn(
+                        "w-0.5 flex-1 min-h-8",
+                        step.isCompleted ? "bg-primary" : "bg-muted"
+                      )} 
+                    />
+                  )}
+                </div>
+                
+                {/* Status content */}
+                <div className="flex-1 min-w-0 pb-6">
+                  <div className="flex items-center gap-2">
+                    <h3 className={cn(
+                      "text-sm font-medium",
+                      step.isCurrent && "text-primary"
+                    )}>
+                      {config.label}
+                    </h3>
+                    {step.isCurrent && (
+                      <Badge variant="outline" className="text-xs">
+                        Current
+                      </Badge>
                     )}
                   </div>
+                  
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {step.notes}
+                  </p>
+                  
+                  {step.timestamp && step.isCompleted && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {format(new Date(step.timestamp), 'PPpp')}
+                    </p>
+                  )}
                 </div>
               </div>
             );

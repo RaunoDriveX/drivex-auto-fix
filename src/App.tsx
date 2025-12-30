@@ -38,6 +38,7 @@ const App = () => {
             <Route path="/claim/:appointmentId" element={<ClaimSubmission />} />
             <Route path="/track" element={<TrackJobLookup />} />
             <Route path="/track/:appointmentId" element={<JobTracking />} />
+            <Route path="/track-job/:appointmentId" element={<JobTracking />} />
             <Route path="/shop-auth" element={<ShopAuth />} />
             <Route path="/shop-dashboard" element={<ShopDashboard />} />
             <Route path="/insurer-auth" element={<InsurerAuth />} />

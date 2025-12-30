@@ -1,13 +1,25 @@
 project_id = "dsvmigyunbwdefibbpgm"
 
+[functions.allocate-job]
+verify_jwt = true
+
 [functions.send-confirmation-email]
 verify_jwt = false
 
 [functions.send-reminder-email]
 verify_jwt = false
 
-[functions.allocate-job]
+[functions.handle-job-response]
+verify_jwt = true
+
+[functions.get-job-tracking]
 verify_jwt = false
 
-[functions.handle-job-response]
+[functions.lookup-jobs-by-email]
+verify_jwt = true
+
+[functions.clear-shop-jobs]
+verify_jwt = true
+
+[functions.clear-all-jobs]
 verify_jwt = false

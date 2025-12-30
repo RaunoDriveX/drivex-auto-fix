@@ -46,6 +46,29 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
 
   useEffect(() => {
     fetchCalendarData();
+    
+    // Subscribe to realtime updates only for actual changes (not initial load)
+    const subscription = supabase
+      .channel(`calendar-${shopId}`)
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'job_offers', filter: `shop_id=eq.${shopId}` },
+        () => {
+          console.log('Job offer updated in calendar, refetching...');
+          fetchCalendarData();
+        }
+      )
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'appointments', filter: `shop_id=eq.${shopId}` },
+        () => {
+          console.log('Appointment updated in calendar, refetching...');
+          fetchCalendarData();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, [shopId, selectedDate]);
 
   const fetchCalendarData = async () => {
@@ -54,19 +77,42 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
       const monthStart = startOfMonth(selectedDate);
       const monthEnd = endOfMonth(selectedDate);
 
-      // Fetch appointments and job offers
+      // Fetch job offers for this shop
+      const { data: jobOffers, error: jobOffersError } = await supabase
+        .from('job_offers')
+        .select(`
+          *,
+          appointments (
+            customer_name,
+            customer_email,
+            service_type,
+            appointment_date,
+            appointment_time,
+            damage_type,
+            vehicle_info
+          )
+        `)
+        .eq('shop_id', shopId)
+        .eq('status', 'offered')
+        .gte('appointments.appointment_date', format(monthStart, 'yyyy-MM-dd'))
+        .lte('appointments.appointment_date', format(monthEnd, 'yyyy-MM-dd'));
+
+      if (jobOffersError) throw jobOffersError;
+
+      // Fetch accepted appointments
       const { data: appointments, error: appointmentsError } = await supabase
         .from('appointments')
         .select(`
           *,
-          job_offers (
+          job_offers!inner (
             id,
             status,
             offered_price,
             shop_id
           )
         `)
-        .eq('shop_id', shopId)
+        .eq('job_offers.shop_id', shopId)
+        .eq('job_offers.status', 'accepted')
         .gte('appointment_date', format(monthStart, 'yyyy-MM-dd'))
         .lte('appointment_date', format(monthEnd, 'yyyy-MM-dd'));
 
@@ -82,12 +128,28 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
 
       if (availabilityError) throw availabilityError;
 
-      // Transform appointments to events
+      // Transform job offers to events
+      const jobOfferEvents: CalendarEvent[] = (jobOffers || [])
+        .filter(jo => jo.appointments !== null)
+        .map(jo => ({
+          id: jo.id,
+          type: 'appointment',
+          date: jo.appointments.appointment_date,
+          time: jo.appointments.appointment_time?.substring(0, 5),
+          title: `${jo.appointments.service_type} - ${jo.appointments.customer_name}`,
+          status: 'offered',
+          customer_name: jo.appointments.customer_name,
+          service_type: jo.appointments.service_type,
+          offered_price: jo.offered_price,
+          vehicle_info: jo.appointments.vehicle_info,
+        }));
+
+      // Transform accepted appointments to events
       const appointmentEvents: CalendarEvent[] = (appointments || []).map(apt => ({
         id: apt.id,
         type: 'appointment',
         date: apt.appointment_date,
-        time: apt.appointment_time,
+        time: apt.appointment_time?.substring(0, 5),
         title: `${apt.service_type} - ${apt.customer_name}`,
         status: apt.job_offers?.[0]?.status || apt.status,
         customer_name: apt.customer_name,
@@ -107,7 +169,7 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
         is_available: avail.is_available,
       }));
 
-      setEvents([...appointmentEvents, ...availabilityEvents]);
+      setEvents([...jobOfferEvents, ...appointmentEvents, ...availabilityEvents]);
     } catch (error: any) {
       console.error('Error fetching calendar data:', error);
       toast({
@@ -246,15 +308,26 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
                 selected={selectedDate}
                 onSelect={(date) => date && setSelectedDate(date)}
                 className="rounded-md border"
+                modifiers={{
+                  hasEvents: events.map(e => parseISO(e.date))
+                }}
+                modifiersStyles={{
+                  hasEvents: {
+                    fontWeight: 'bold',
+                    textDecoration: 'underline',
+                    textDecorationColor: 'hsl(var(--primary))',
+                    textDecorationThickness: '2px',
+                  }
+                }}
                 components={{
                   DayContent: ({ date }) => {
                     const dayEvents = getEventsForDate(date);
                     return (
-                      <div className="relative w-full h-full min-h-[60px] p-1">
-                        <div className="text-sm font-medium">
+                      <div className="relative w-full h-full min-h-[60px] p-1 flex flex-col">
+                        <div className="text-sm font-medium text-center">
                           {date.getDate()}
                         </div>
-                        <div className="space-y-1 mt-1">
+                        <div className="space-y-1 mt-1 flex-1">
                           {dayEvents.slice(0, 2).map((event, index) => (
                             <div
                               key={`${event.id}-${index}`}

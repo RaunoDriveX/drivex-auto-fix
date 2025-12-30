@@ -1,10 +1,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,23 +23,114 @@ interface JobResponseRequest {
   notes?: string;
 }
 
+// Input validation schema
+const JobResponseSchema = z.object({
+  jobOfferId: z.string().uuid(),
+  response: z.enum(['accept', 'decline']),
+  declineReason: z.string().max(500).optional(),
+  counterOffer: z.number().positive().max(999999).optional(),
+  notes: z.string().max(1000).optional(),
+});
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Get authenticated user using the bearer token explicitly
+    const token = authHeader.replace('Bearer ', '').trim();
+    if (!token) {
+      console.warn('Authorization header present but token missing');
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    let userEmail = user?.email ?? null;
+
+    if (authError || !userEmail) {
+      console.warn('auth.getUser failed or email missing, falling back to JWT decode', authError?.message);
+      try {
+        const payloadPart = token.split('.')[1];
+        const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(normalized));
+        userEmail = payload.email || payload.user_metadata?.email || null;
+      } catch (e) {
+        console.error('Failed to decode JWT payload', e);
+      }
+    }
+
+    if (!userEmail) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log(`Job response from authenticated user: ${userEmail}`);
+
+    // Verify user owns a shop
+    const { data: shop, error: shopError } = await supabase
+      .from('shops')
+      .select('id')
+      .eq('email', userEmail)
+      .maybeSingle();
+
+    if (shopError) {
+      console.error('Shop query error:', shopError);
+      return new Response(
+        JSON.stringify({ error: 'Database error checking shop access' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (!shop) {
+      console.log(`No shop found for user email: ${userEmail}`);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - no shop associated with this user' }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    console.log(`Shop verified: ${shop.id}`);
+
+    // Parse and validate input
+    const rawInput = await req.json();
+    const validatedInput = JobResponseSchema.parse(rawInput);
     const {
       jobOfferId,
       response,
       declineReason,
       counterOffer,
       notes
-    }: JobResponseRequest = await req.json();
+    }: JobResponseRequest = validatedInput;
 
     console.log(`Processing ${response} response for job offer ${jobOfferId}`);
 
-    // Get the job offer details
+    // Get job offer details and verify ownership
     const { data: jobOffer, error: offerError } = await supabase
       .from('job_offers')
       .select(`
@@ -43,10 +138,29 @@ const handler = async (req: Request): Promise<Response> => {
         appointments:appointment_id (*)
       `)
       .eq('id', jobOfferId)
-      .single();
+      .eq('shop_id', shop.id)
+      .maybeSingle();
 
-    if (offerError || !jobOffer) {
-      throw new Error(`Job offer not found: ${offerError?.message}`);
+    if (offerError) {
+      console.error('Job offer query error:', offerError);
+      return new Response(
+        JSON.stringify({ error: 'Database error fetching job offer' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (!jobOffer) {
+      console.log(`Job offer not found or access denied for offer ${jobOfferId} and shop ${shop.id}`);
+      return new Response(
+        JSON.stringify({ error: 'Job offer not found or access denied' }),
+        { 
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     if (jobOffer.status !== 'offered') {
@@ -87,38 +201,38 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Get current shop stats
-    const { data: shop, error: shopError } = await supabase
+    const { data: shopDetails, error: shopDetailsError } = await supabase
       .from('shops')
       .select('*')
       .eq('id', jobOffer.shop_id)
       .single();
 
-    if (shopError) {
-      throw new Error(`Shop not found: ${shopError.message}`);
+    if (shopDetailsError) {
+      throw new Error(`Shop not found: ${shopDetailsError.message}`);
     }
 
     // Update shop performance metrics
     const newAcceptedCount = response === 'accept' 
-      ? (shop.jobs_accepted_count || 0) + 1 
-      : (shop.jobs_accepted_count || 0);
+      ? (shopDetails.jobs_accepted_count || 0) + 1 
+      : (shopDetails.jobs_accepted_count || 0);
     
     const newDeclinedCount = response === 'decline' 
-      ? (shop.jobs_declined_count || 0) + 1 
-      : (shop.jobs_declined_count || 0);
+      ? (shopDetails.jobs_declined_count || 0) + 1 
+      : (shopDetails.jobs_declined_count || 0);
 
     const totalResponses = newAcceptedCount + newDeclinedCount;
     const newAcceptanceRate = totalResponses > 0 ? (newAcceptedCount / totalResponses) * 100 : 0;
 
     // Calculate new average response time
-    const currentResponseTime = shop.response_time_minutes || 0;
-    const totalOffers = shop.jobs_offered_count || 1;
+    const currentResponseTime = shopDetails.response_time_minutes || 0;
+    const totalOffers = shopDetails.jobs_offered_count || 1;
     const newAvgResponseTime = ((currentResponseTime * (totalOffers - 1)) + responseTime) / totalOffers;
 
     // Determine new performance tier based on metrics
     let newPerformanceTier = 'standard';
-    if (newAcceptanceRate >= 90 && newAvgResponseTime <= 15 && (shop.quality_score || 0) >= 4.5) {
+    if (newAcceptanceRate >= 90 && newAvgResponseTime <= 15 && (shopDetails.quality_score || 0) >= 4.5) {
       newPerformanceTier = 'premium';
-    } else if (newAcceptanceRate >= 80 && newAvgResponseTime <= 30 && (shop.quality_score || 0) >= 4.0) {
+    } else if (newAcceptanceRate >= 80 && newAvgResponseTime <= 30 && (shopDetails.quality_score || 0) >= 4.0) {
       newPerformanceTier = 'gold';
     }
 
@@ -150,13 +264,14 @@ const handler = async (req: Request): Promise<Response> => {
         console.error('Failed to cancel other offers:', cancelError);
       }
 
-      // Update appointment with selected shop
+      // Update appointment with selected shop and job_status
       const { error: appointmentUpdateError } = await supabase
         .from('appointments')
         .update({
           shop_id: jobOffer.shop_id,
-          shop_name: shop.name,
+          shop_name: shopDetails.name,
           status: 'confirmed',
+          job_status: 'scheduled', // Keep as scheduled until work starts
           total_cost: counterOffer || jobOffer.offered_price
         })
         .eq('id', jobOffer.appointment_id);
@@ -164,10 +279,115 @@ const handler = async (req: Request): Promise<Response> => {
       if (appointmentUpdateError) {
         console.error('Failed to update appointment:', appointmentUpdateError);
       }
+      
+      // Add audit entry for the acceptance
+      await supabase
+        .from('job_status_audit')
+        .insert({
+          appointment_id: jobOffer.appointment_id,
+          job_offer_id: jobOfferId,
+          old_status: 'scheduled',
+          new_status: 'scheduled',
+          changed_by_shop_id: jobOffer.shop_id,
+          notes: `Job accepted by ${shopDetails.name} for €${counterOffer || jobOffer.offered_price}`,
+          metadata: {
+            action: 'job_accepted',
+            shop_name: shopDetails.name,
+            offered_price: counterOffer || jobOffer.offered_price
+          }
+        });
 
-      console.log(`Job accepted by ${shop.name} for €${counterOffer || jobOffer.offered_price}`);
+      console.log(`Job accepted by ${shopDetails.name} for €${counterOffer || jobOffer.offered_price}`);
     } else {
-      console.log(`Job declined by ${shop.name}. Reason: ${declineReason || 'Not specified'}`);
+      console.log(`Job declined by ${shopDetails.name}. Reason: ${declineReason || 'Not specified'}`);
+      
+      // Check if there are other pending offers for this appointment
+      const { data: otherOffers, error: otherOffersError } = await supabase
+        .from('job_offers')
+        .select('id')
+        .eq('appointment_id', jobOffer.appointment_id)
+        .eq('status', 'offered')
+        .neq('id', jobOfferId);
+
+      const hasOtherOffers = otherOffers && otherOffers.length > 0;
+      
+      // If no other pending offers, update appointment status to cancelled
+      if (!hasOtherOffers) {
+        const { error: appointmentUpdateError } = await supabase
+          .from('appointments')
+          .update({
+            status: 'cancelled',
+            job_status: 'cancelled',
+            notes: `Declined by ${shopDetails.name}. Reason: ${declineReason || 'No reason provided'}`
+          })
+          .eq('id', jobOffer.appointment_id);
+
+        if (appointmentUpdateError) {
+          console.error('Failed to update appointment status:', appointmentUpdateError);
+        } else {
+          console.log('Appointment marked as cancelled - no other pending offers');
+        }
+        
+        // Add audit entry for the decline/cancellation
+        await supabase
+          .from('job_status_audit')
+          .insert({
+            appointment_id: jobOffer.appointment_id,
+            job_offer_id: jobOfferId,
+            old_status: 'scheduled',
+            new_status: 'cancelled',
+            changed_by_shop_id: jobOffer.shop_id,
+            notes: `Job declined by ${shopDetails.name}. Reason: ${declineReason || 'No reason provided'}`,
+            metadata: {
+              action: 'job_declined',
+              shop_name: shopDetails.name,
+              decline_reason: declineReason
+            }
+          });
+      }
+      
+      // Send decline notification email
+      try {
+        const appointment = jobOffer.appointments as any;
+        const emailResponse = await resend.emails.send({
+          from: "DriveX <onboarding@resend.dev>",
+          to: [appointment.customer_email],
+          subject: `Job Offer Declined - ${shopDetails.name}`,
+          html: `
+            <h1>Job Offer Update</h1>
+            <p>Dear ${appointment.customer_name},</p>
+            <p>We wanted to inform you that <strong>${shopDetails.name}</strong> has declined the job offer for your ${appointment.service_type} service scheduled on ${new Date(appointment.appointment_date).toLocaleDateString()}.</p>
+            
+            <h2>Decline Reason:</h2>
+            <p>${declineReason || 'No reason provided'}</p>
+            
+            ${notes ? `
+            <h2>Additional Notes:</h2>
+            <p>${notes}</p>
+            ` : ''}
+            
+            <h2>Job Details:</h2>
+            <ul>
+              <li><strong>Service Type:</strong> ${appointment.service_type}</li>
+              <li><strong>Date:</strong> ${new Date(appointment.appointment_date).toLocaleDateString()}</li>
+              <li><strong>Time:</strong> ${appointment.appointment_time}</li>
+              ${appointment.damage_type ? `<li><strong>Damage Type:</strong> ${appointment.damage_type}</li>` : ''}
+            </ul>
+            
+            ${hasOtherOffers 
+              ? `<p>Don't worry! We're working on finding another qualified shop for your appointment. You will receive another notification once a shop accepts your job offer.</p>` 
+              : `<p>Unfortunately, no other shops are currently available for this appointment. Please create a new booking to find an available shop.</p>`
+            }
+            
+            <p>Best regards,<br>The DriveX Team</p>
+          `,
+        });
+        
+        console.log("Decline notification email sent successfully:", emailResponse);
+      } catch (emailError) {
+        console.error("Failed to send decline notification email:", emailError);
+        // Don't throw - email failure shouldn't fail the entire operation
+      }
     }
 
     // Send notification about response

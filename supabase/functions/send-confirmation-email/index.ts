@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -11,6 +12,7 @@ const corsHeaders = {
 
 interface ConfirmationEmailRequest {
   appointmentId: string;
+  jobCode?: string;
   customerName: string;
   customerEmail: string;
   shopName: string;
@@ -20,6 +22,19 @@ interface ConfirmationEmailRequest {
   totalCost?: number;
 }
 
+// Input validation schema
+const ConfirmationEmailSchema = z.object({
+  appointmentId: z.string().uuid(),
+  jobCode: z.string().optional(),
+  customerName: z.string().min(1).max(200),
+  customerEmail: z.string().email().max(255),
+  shopName: z.string().min(1).max(200),
+  appointmentDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  appointmentTime: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+  serviceType: z.string().max(100),
+  totalCost: z.number().positive().max(999999).optional(),
+});
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -27,8 +42,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Validate input
+    const rawInput = await req.json();
+    const validatedInput = ConfirmationEmailSchema.parse(rawInput);
+    
     const {
       appointmentId,
+      jobCode,
       customerName,
       customerEmail,
       shopName,
@@ -36,7 +56,7 @@ const handler = async (req: Request): Promise<Response> => {
       appointmentTime,
       serviceType,
       totalCost,
-    }: ConfirmationEmailRequest = await req.json();
+    }: ConfirmationEmailRequest = validatedInput;
 
     console.log("Sending confirmation email for appointment:", appointmentId);
 
@@ -47,6 +67,8 @@ const handler = async (req: Request): Promise<Response> => {
       month: 'long',
       day: 'numeric'
     });
+
+    const displayJobCode = jobCode || appointmentId.slice(0, 8).toUpperCase();
 
     const emailResponse = await resend.emails.send({
       from: "DriveX <noreply@resend.dev>",
@@ -73,12 +95,23 @@ const handler = async (req: Request): Promise<Response> => {
                 <strong>Date:</strong> <span>${formattedDate}</span>
                 <strong>Time:</strong> <span>${appointmentTime}</span>
                 ${totalCost ? `<strong>Total Cost:</strong> <span>€${totalCost.toFixed(2)}</span>` : ''}
-                <strong>Reference:</strong> <span>${appointmentId.slice(0, 8).toUpperCase()}</span>
+                <strong>Job ID:</strong> <span style="font-family: monospace; font-weight: bold; color: #667eea;">${displayJobCode}</span>
               </div>
             </div>
             
             <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h4 style="color: #1976d2; margin-top: 0;">What to expect:</h4>
+              <h4 style="color: #1976d2; margin-top: 0;">Track Your Job:</h4>
+              <p style="margin: 10px 0;">Use your Job ID to track your repair status in real-time:</p>
+              <div style="text-align: center; margin: 15px 0;">
+                <a href="https://88284c8a-502c-486d-8904-4b118b55e5dd.lovableproject.com/track/${displayJobCode}" 
+                   style="display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                  Track My Job
+                </a>
+              </div>
+            </div>
+            
+            <div style="background: #fff3e0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h4 style="color: #f57c00; margin-top: 0;">What to expect:</h4>
               <ul style="margin: 0; padding-left: 20px;">
                 <li>You'll receive a reminder 24 hours before your appointment</li>
                 <li>Please arrive 10 minutes early</li>

@@ -384,7 +384,7 @@ const ShopDashboard = () => {
                                 <p className="text-sm font-medium">
                                   {new Date(offer.appointments?.appointment_date || '').toLocaleDateString()}
                                 </p>
-                                <p className="text-sm">{offer.appointments?.appointment_time}</p>
+                                <p className="text-sm">{offer.appointments?.appointment_time?.substring(0, 5)}</p>
                               </div>
                             </div>
                             
@@ -482,7 +482,7 @@ const ShopDashboard = () => {
                             <p className="font-medium">
                               {format(new Date(job.appointments.appointment_date), 'MMM d, yyyy')}
                             </p>
-                            <p className="text-muted-foreground">{job.appointments.appointment_time}</p>
+                            <p className="text-muted-foreground">{job.appointments.appointment_time?.substring(0, 5)}</p>
                           </div>
                           <div>
                             <span className="text-muted-foreground">Damage:</span>

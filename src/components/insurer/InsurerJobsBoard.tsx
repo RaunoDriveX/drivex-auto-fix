@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { 
   Clock, 
   PlayCircle, 
@@ -11,13 +13,16 @@ import {
   Search,
   Filter,
   RefreshCw,
-  Eye
+  Eye,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { JobStatusTracker } from '@/components/realtime/JobStatusTracker';
 import { CompletionDocumentsViewer } from '@/components/insurer/CompletionDocumentsViewer';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
 import {
   Select,
   SelectContent,
@@ -32,6 +37,7 @@ interface Job {
   customer_email: string;
   service_type: string;
   job_status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  status: string;
   appointment_date: string;
   appointment_time: string;
   shop_name: string;
@@ -41,6 +47,8 @@ interface Job {
   job_completed_at?: string;
   created_at: string;
   updated_at: string;
+  short_code?: string;
+  notes?: string;
 }
 
 const statusConfig = {
@@ -106,6 +114,7 @@ export const InsurerJobsBoard: React.FC = () => {
           customer_email,
           service_type,
           job_status,
+          status,
           appointment_date,
           appointment_time,
           shop_name,
@@ -114,7 +123,9 @@ export const InsurerJobsBoard: React.FC = () => {
           job_started_at,
           job_completed_at,
           created_at,
-          updated_at
+          updated_at,
+          short_code,
+          notes
         `)
         .eq('insurer_name', insurerProfile.insurer_name)
         .order('created_at', { ascending: false });
@@ -233,6 +244,39 @@ export const InsurerJobsBoard: React.FC = () => {
     };
   };
 
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('id', jobId);
+
+      if (error) throw error;
+
+      setJobs(prev => prev.filter(j => j.id !== jobId));
+      toast({
+        title: "Job Removed",
+        description: "The job has been removed from your dashboard."
+      });
+    } catch (error: any) {
+      console.error('Error deleting job:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove job. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const getCancellationInfo = (job: Job): { reason: string } | null => {
+    if (job.job_status !== 'cancelled' && job.status !== 'cancelled') return null;
+    
+    if (job.notes) {
+      return { reason: job.notes };
+    }
+    return { reason: 'No reason provided' };
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -333,7 +377,10 @@ export const InsurerJobsBoard: React.FC = () => {
           const StatusIcon = config.icon;
           
           return (
-            <Card key={job.id} className="hover:shadow-md transition-shadow">
+            <Card key={job.id} className={cn(
+              "hover:shadow-md transition-shadow",
+              (job.job_status === 'cancelled' || job.status === 'cancelled') && "border-red-200 bg-red-50/30"
+            )}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
@@ -351,11 +398,27 @@ export const InsurerJobsBoard: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
+                {/* Cancellation Alert */}
+                {getCancellationInfo(job) && (
+                  <Alert variant="destructive" className="py-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      {getCancellationInfo(job)?.reason}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {job.short_code && (
+                  <div className="text-xs">
+                    <span className="text-muted-foreground">Tracking Code:</span>
+                    <span className="ml-2 font-mono font-bold text-primary">{job.short_code}</span>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">Scheduled:</span>
                     <p className="font-medium">
-                      {format(new Date(job.appointment_date), 'MMM d')} at {job.appointment_time}
+                      {format(new Date(job.appointment_date), 'MMM d')} at {job.appointment_time?.substring(0, 5)}
                     </p>
                   </div>
                   <div>
@@ -382,15 +445,42 @@ export const InsurerJobsBoard: React.FC = () => {
                   </div>
                 )}
                 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => setSelectedJob(selectedJob === job.id ? null : job.id)}
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  {selectedJob === job.id ? 'Hide Details' : 'View Details'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setSelectedJob(selectedJob === job.id ? null : job.id)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    {selectedJob === job.id ? 'Hide Details' : 'View Details'}
+                  </Button>
+                  
+                  {/* Delete button for cancelled jobs */}
+                  {(job.job_status === 'cancelled' || job.status === 'cancelled') && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Remove Job</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to remove this cancelled job from your dashboard? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteJob(job.id)}>
+                            Remove Job
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
                 
                 {selectedJob === job.id && (
                   <div className="mt-4 space-y-4">

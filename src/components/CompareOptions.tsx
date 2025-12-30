@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Wrench, Truck, Store, ShoppingCart, Factory, Clock, MapPin, BadgeCheck, Leaf, Banknote, ShieldCheck } from "lucide-react";
 import { StarRating } from "@/components/ui/star-rating";
 import DIYResinKit from "@/components/DIYResinKit";
+import { supabase } from "@/integrations/supabase/client";
 
 export type CompareOptionsProps = {
   decision: "repair" | "replacement";
@@ -18,6 +20,9 @@ export type CompareOptionsProps = {
 
 export default function CompareOptions({ decision, postalCode, showReplacement = true, onRequestReplacement, onBookSlot, chipSize = 3.0, damageType = "chip" }: CompareOptionsProps) {
   const isRepairRecommended = decision === "repair";
+  const [repairShops, setRepairShops] = useState<Shop[]>([]);
+  const [replacementShops, setReplacementShops] = useState<Shop[]>([]);
+  const [loading, setLoading] = useState(true);
 
   type Shop = {
     id: string;
@@ -36,33 +41,94 @@ export default function CompareOptions({ decision, postalCode, showReplacement =
   const euro = (n: number) => `€${n.toFixed(0)}`;
   const total = (s: Shop) => s.labor + s.materials + s.tax;
 
-  const repairShops: Shop[] = [
-    { id: "rgm", name: "RapidGlass Mobile", type: "Mobile", labor: 55, materials: 24, tax: 10, nextSlot: "Today 16:30", rating: 4.6, reviews: 128, color: "primary/10" },
-    { id: "cgc", name: "CityGlass Center", type: "Stationary", distanceKm: 2.1, labor: 49, materials: 20, tax: 10, nextSlot: "Tomorrow 09:00", rating: 4.8, reviews: 201, color: "accent/10" },
-    { id: "glx", name: "GlassXperts", type: "Stationary", distanceKm: 3.4, labor: 45, materials: 22, tax: 10, nextSlot: "Today 18:00", rating: 4.4, reviews: 76, color: "secondary/15" },
-  ];
+  useEffect(() => {
+    const fetchShops = async () => {
+      try {
+        // Fetch repair shops
+        const { data: repairData } = await supabase
+          .from('shops')
+          .select('*')
+          .in('service_capability', ['repair_only', 'both'])
+          .eq('insurance_approved', true);
 
-  const replacementShops: Shop[] = [
-    { id: "dxc", name: "DriveX OEM Center", type: "Stationary", distanceKm: 4.8, labor: 120, materials: 220, tax: 68, nextSlot: "In 2 days", rating: 4.7, reviews: 93, color: "primary/10" },
-    { id: "ps1", name: "Partner Shop A", type: "Stationary", distanceKm: 2.9, labor: 110, materials: 180, tax: 58, nextSlot: "Tomorrow 13:00", rating: 4.5, reviews: 141, color: "accent/10" },
-    { id: "ps2", name: "Partner Shop B", type: "Mobile", labor: 115, materials: 175, tax: 57, nextSlot: "Tomorrow 08:30", rating: 4.3, reviews: 67, color: "secondary/15" },
-  ];
+        // Fetch replacement shops
+        const { data: replacementData } = await supabase
+          .from('shops')
+          .select('*')
+          .in('service_capability', ['replacement_only', 'both'])
+          .eq('insurance_approved', true);
 
-  const byBestPrice = (shops: Shop[]) => shops.reduce((a, b) => (total(a) <= total(b) ? a : b));
+        // Transform repair shops
+        if (repairData) {
+          const transformedRepair = repairData.map((shop, idx) => ({
+            id: shop.id,
+            name: shop.name,
+            type: shop.is_mobile_service ? "Mobile" : "Stationary" as "Mobile" | "Stationary",
+            distanceKm: shop.is_mobile_service ? undefined : 2.1 + idx * 0.5,
+            labor: 45 + idx * 5,
+            materials: 20 + idx * 2,
+            tax: 10,
+            nextSlot: idx === 0 ? "Today 16:30" : idx === 1 ? "Tomorrow 09:00" : "Today 18:00",
+            rating: shop.rating || 4.5,
+            reviews: shop.total_reviews || 0,
+            color: idx === 0 ? "primary/10" : idx === 1 ? "accent/10" : "secondary/15"
+          }));
+          setRepairShops(transformedRepair);
+        }
+
+        // Transform replacement shops
+        if (replacementData) {
+          const transformedReplacement = replacementData.map((shop, idx) => ({
+            id: shop.id,
+            name: shop.name,
+            type: shop.is_mobile_service ? "Mobile" : "Stationary" as "Mobile" | "Stationary",
+            distanceKm: shop.is_mobile_service ? undefined : 2.9 + idx * 1.5,
+            labor: 110 + idx * 5,
+            materials: 180 + idx * 20,
+            tax: 57 + idx,
+            nextSlot: idx === 0 ? "In 2 days" : idx === 1 ? "Tomorrow 13:00" : "Tomorrow 08:30",
+            rating: shop.rating || 4.5,
+            reviews: shop.total_reviews || 0,
+            color: idx === 0 ? "primary/10" : idx === 1 ? "accent/10" : "secondary/15"
+          }));
+          setReplacementShops(transformedReplacement);
+        }
+      } catch (error) {
+        console.error('Error fetching shops:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchShops();
+  }, []);
+
+  const byBestPrice = (shops: Shop[]) => shops.length > 0 ? shops.reduce((a, b) => (total(a) <= total(b) ? a : b)) : null;
   const bySoonest = (shops: Shop[]) => {
+    if (shops.length === 0) return null;
     // very simple scoring: Today < Tomorrow < In N days
     const score = (slot: string) => (slot.startsWith("Today") ? 0 : slot.startsWith("Tomorrow") ? 1 : 2);
     return shops.reduce((a, b) => (score(a.nextSlot) <= score(b.nextSlot) ? a : b));
   };
-  const byTopRated = (shops: Shop[]) => shops.reduce((a, b) => (a.rating >= b.rating ? a : b));
+  const byTopRated = (shops: Shop[]) => shops.length > 0 ? shops.reduce((a, b) => (a.rating >= b.rating ? a : b)) : null;
 
-  const repairBestPrice = byBestPrice(repairShops).id;
-  const repairSoonest = bySoonest(repairShops).id;
-  const repairTopRated = byTopRated(repairShops).id;
+  const repairBestPrice = byBestPrice(repairShops)?.id;
+  const repairSoonest = bySoonest(repairShops)?.id;
+  const repairTopRated = byTopRated(repairShops)?.id;
 
-  const replBestPrice = byBestPrice(replacementShops).id;
-  const replSoonest = bySoonest(replacementShops).id;
-  const replTopRated = byTopRated(replacementShops).id;
+  const replBestPrice = byBestPrice(replacementShops)?.id;
+  const replSoonest = bySoonest(replacementShops)?.id;
+  const replTopRated = byTopRated(replacementShops)?.id;
+
+  if (loading) {
+    return (
+      <section aria-labelledby="compare-options-heading" className="mt-10">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Loading available shops...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section aria-labelledby="compare-options-heading" className="mt-10">
