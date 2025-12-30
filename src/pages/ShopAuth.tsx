@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Wrench } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const DEMO_MODE = import.meta.env.VITE_ENABLE_DEMO_MODE === "true";
 const DEMO_EMAILS = ["demo.shop@autofix.com", "demo@shop.com"];
@@ -195,6 +196,9 @@ const ShopAuth = () => {
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
+            <div className="flex justify-end mb-2">
+              <LanguageSwitcher />
+            </div>
             <div className="flex items-center justify-center gap-2 mb-2">
               <Wrench className="h-6 w-6 text-primary" />
               <CardTitle className="text-2xl">Shop Portal</CardTitle>

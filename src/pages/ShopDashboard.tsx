@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { LogOut, Settings, MapPin, DollarSign, Clock, Wrench, Plus, Users, Phone } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import type { User } from "@supabase/supabase-js";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 // Import components for each tab
 import ShopLocationSettings from "@/components/shop/ShopLocationSettings";
@@ -210,6 +211,7 @@ const ShopDashboard = () => {
                     {shopData.performance_tier} Partner
                   </Badge>
                 )}
+                <LanguageSwitcher />
                 <Button variant="ghost" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out

@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const DEMO_MODE = import.meta.env.VITE_ENABLE_DEMO_MODE === "true";
 const DEMO_EMAILS = ["demo.insurer@allstate.com", "demo@insurer.com"];
@@ -114,6 +115,9 @@ export default function InsurerAuth() {
 
           <Card>
             <CardHeader>
+              <div className="flex justify-end mb-2">
+                <LanguageSwitcher />
+              </div>
               <CardTitle>Sign In</CardTitle>
               <CardDescription>
                 Enter your insurer credentials to access the DriveX platform
