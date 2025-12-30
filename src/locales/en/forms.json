@@ -1,0 +1,49 @@
+{
+  "appointment": {
+    "title": "Book Appointment",
+    "select_date": "Select Date",
+    "select_time": "Select Time",
+    "vehicle_info": "Vehicle Information",
+    "contact_info": "Contact Information",
+    "damage_description": "Damage Description",
+    "upload_photos": "Upload Photos"
+  },
+  "job_response": {
+    "title": "Job Response",
+    "accept": "Accept Job",
+    "decline": "Decline Job",
+    "counter_offer": "Counter Offer",
+    "decline_reason": "Decline Reason",
+    "notes": "Notes",
+    "offered_price": "Offered Price",
+    "response_submitted": "Response Submitted"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalid_email": "Invalid email address",
+    "invalid_phone": "Invalid phone number",
+    "min_length": "Minimum length is {{count}} characters",
+    "max_length": "Maximum length is {{count}} characters",
+    "invalid_format": "Invalid format"
+  },
+  "placeholders": {
+    "enter_text": "Enter text...",
+    "select_option": "Select an option...",
+    "search": "Search...",
+    "enter_email": "Enter email address",
+    "enter_phone": "Enter phone number",
+    "enter_notes": "Enter notes..."
+  },
+  "labels": {
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "address": "Address",
+    "city": "City",
+    "postal_code": "Postal Code",
+    "country": "Country",
+    "company_name": "Company Name",
+    "contact_person": "Contact Person"
+  }
+}

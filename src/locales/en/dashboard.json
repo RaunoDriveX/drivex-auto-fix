@@ -1,0 +1,67 @@
+{
+  "shop": {
+    "title": "Shop Dashboard",
+    "welcome": "Welcome",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "jobs": "Jobs",
+      "calendar": "Calendar",
+      "profile": "Profile"
+    },
+    "performance": {
+      "title": "Performance Metrics",
+      "acceptance_rate": "Acceptance Rate",
+      "response_time": "Response Time",
+      "quality_score": "Quality Score",
+      "jobs_completed": "Jobs Completed"
+    },
+    "jobs": {
+      "title": "Available Jobs",
+      "no_jobs": "No jobs available",
+      "accept": "Accept Job",
+      "decline": "Decline Job",
+      "view_details": "View Details"
+    }
+  },
+  "insurer": {
+    "title": "Insurer Dashboard",
+    "tabs": {
+      "jobs": "Live Jobs",
+      "network": "Shop Network",
+      "users": "User Management"
+    },
+    "jobs": {
+      "title": "Live Jobs Board",
+      "no_jobs": "No active jobs",
+      "create_job": "Create New Job",
+      "job_status": "Job Status",
+      "shop_assigned": "Shop Assigned",
+      "total_cost": "Total Cost"
+    },
+    "network": {
+      "title": "Shop Network",
+      "total_shops": "Total Shops",
+      "active_shops": "Active Shops",
+      "performance_tier": "Performance Tier"
+    },
+    "user_management": {
+      "title": "User Management",
+      "add_user": "Add User",
+      "users_list": "Users List",
+      "role": "Role",
+      "admin": "Admin",
+      "claims_user": "Claims User"
+    }
+  },
+  "common": {
+    "status": "Status",
+    "date": "Date",
+    "time": "Time",
+    "location": "Location",
+    "details": "Details",
+    "actions": "Actions",
+    "filters": "Filters",
+    "search": "Search",
+    "refresh": "Refresh"
+  }
+}

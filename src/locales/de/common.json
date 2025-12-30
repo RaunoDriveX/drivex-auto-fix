@@ -1,0 +1,45 @@
+{
+  "app_name": "DriveX",
+  "buttons": {
+    "sign_in": "[TO TRANSLATE] Sign In",
+    "sign_up": "[TO TRANSLATE] Sign Up",
+    "sign_out": "[TO TRANSLATE] Sign Out",
+    "submit": "[TO TRANSLATE] Submit",
+    "cancel": "[TO TRANSLATE] Cancel",
+    "save": "[TO TRANSLATE] Save",
+    "delete": "[TO TRANSLATE] Delete",
+    "edit": "[TO TRANSLATE] Edit",
+    "back": "[TO TRANSLATE] Back",
+    "next": "[TO TRANSLATE] Next",
+    "close": "[TO TRANSLATE] Close",
+    "confirm": "[TO TRANSLATE] Confirm",
+    "back_to_home": "[TO TRANSLATE] Back to Home"
+  },
+  "status": {
+    "loading": "[TO TRANSLATE] Loading...",
+    "saving": "[TO TRANSLATE] Saving...",
+    "success": "[TO TRANSLATE] Success",
+    "error": "[TO TRANSLATE] Error",
+    "pending": "[TO TRANSLATE] Pending",
+    "confirmed": "[TO TRANSLATE] Confirmed",
+    "completed": "[TO TRANSLATE] Completed",
+    "cancelled": "[TO TRANSLATE] Cancelled"
+  },
+  "messages": {
+    "loading_dashboard": "[TO TRANSLATE] Loading dashboard...",
+    "no_data": "[TO TRANSLATE] No data available",
+    "error_occurred": "[TO TRANSLATE] An error occurred",
+    "success_saved": "[TO TRANSLATE] Successfully saved",
+    "confirm_delete": "[TO TRANSLATE] Are you sure you want to delete this?"
+  },
+  "demo": {
+    "badge": "[TO TRANSLATE] Demo Mode",
+    "active": "[TO TRANSLATE] Demo mode is currently enabled"
+  },
+  "navigation": {
+    "dashboard": "[TO TRANSLATE] Dashboard",
+    "jobs": "[TO TRANSLATE] Jobs",
+    "profile": "[TO TRANSLATE] Profile",
+    "settings": "[TO TRANSLATE] Settings"
+  }
+}

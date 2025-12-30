@@ -3,7 +3,7 @@ import { Menu, X, Phone, Mail, Search } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CallCenterToolbarWidget from "@/components/call-center/CallCenterToolbarWidget";
-import glassifyLogo from "@/assets/glassify-logo.svg";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -79,6 +79,7 @@ const Header = () => {
           {/* Contact Info & Call Center */}
           <div className="hidden lg:flex items-center gap-6 flex-shrink-0">
             {showCallCenter && <CallCenterToolbarWidget />}
+            <LanguageSwitcher />
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Phone className="h-4 w-4" />
               <span>+372 58528824</span>
@@ -150,6 +151,9 @@ const Header = () => {
                   <span>+372 58528824</span>
                 </div>
                 <div className="space-y-2">
+                  <div className="mb-3">
+                    <LanguageSwitcher />
+                  </div>
                   <Link to="/insurer-auth">
                     <Button variant="outline" size="sm" className="w-full">
                       Insurer Login

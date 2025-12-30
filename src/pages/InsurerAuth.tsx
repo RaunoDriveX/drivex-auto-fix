@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface InsurerProfileData {
   insurerName: string;
@@ -380,7 +381,10 @@ export default function InsurerAuth() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Insurer Portal</CardTitle>
+              <div className="flex justify-end mb-2">
+                <LanguageSwitcher />
+              </div>
+              <CardTitle>Sign In</CardTitle>
               <CardDescription>
                 {needsProfileSetup 
                   ? "Complete your insurer profile" 

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useInsurerAuth } from '@/hooks/useInsurerAuth';
 import { LogOut, Building2 } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export default function InsurerDashboard() {
   const [isDemoMode, setIsDemoMode] = useState(false);
@@ -105,14 +106,17 @@ export default function InsurerDashboard() {
                   {checkIsAdmin() && <TabsTrigger value="users">User Management</TabsTrigger>}
                 </TabsList>
               </div>
-              <Button
-                variant="outline"
-                onClick={handleSignOut}
-                className="flex items-center gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
+              <div className="flex items-center gap-3">
+                <LanguageSwitcher />
+                <Button
+                  variant="outline"
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
             </div>
           </div>
         </div>

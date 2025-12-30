@@ -1,0 +1,45 @@
+{
+  "app_name": "DriveX",
+  "buttons": {
+    "sign_in": "Sign In",
+    "sign_up": "Sign Up",
+    "sign_out": "Sign Out",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back_to_home": "Back to Home"
+  },
+  "status": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "success": "Success",
+    "error": "Error",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "messages": {
+    "loading_dashboard": "Loading dashboard...",
+    "no_data": "No data available",
+    "error_occurred": "An error occurred",
+    "success_saved": "Successfully saved",
+    "confirm_delete": "Are you sure you want to delete this?"
+  },
+  "demo": {
+    "badge": "Demo Mode",
+    "active": "Demo mode is currently enabled"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "jobs": "Jobs",
+    "profile": "Profile",
+    "settings": "Settings"
+  }
+}

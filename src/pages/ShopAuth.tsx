@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Wrench, ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface ShopProfileData {
   name: string;
@@ -331,42 +332,19 @@ const ShopAuth = () => {
       </Helmet>
       
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-4">
-          <Card>
-            <CardHeader className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Wrench className="h-6 w-6 text-primary" />
-                <CardTitle className="text-2xl">Shop Portal</CardTitle>
-              </div>
-              <CardDescription>
-                {needsProfileSetup 
-                  ? "Complete your shop profile" 
-                  : "Access your repair shop dashboard"
-                }
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              {needsProfileSetup ? (
-                <ShopProfileForm />
-              ) : (
-                <Tabs defaultValue="signin" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="signin">Sign In</TabsTrigger>
-                    <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="signin" className="mt-6">
-                    <AuthForm isSignUp={false} />
-                  </TabsContent>
-                  
-                  <TabsContent value="signup" className="mt-6">
-                    <AuthForm isSignUp={true} />
-                  </TabsContent>
-                </Tabs>
-              )}
-            </CardContent>
-          </Card>
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-end mb-2">
+              <LanguageSwitcher />
+            </div>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Wrench className="h-6 w-6 text-primary" />
+              <CardTitle className="text-2xl">Shop Portal</CardTitle>
+            </div>
+            <CardDescription>
+              Access your repair shop dashboard
+            </CardDescription>
+          </CardHeader>
           
           <div className="flex justify-center">
             <Button variant="ghost" asChild className="gap-2">
