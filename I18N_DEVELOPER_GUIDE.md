@@ -182,10 +182,10 @@ function LanguageSwitcher() {
         English
       </Button>
       <Button
-        variant={i18n.language === 'es' ? 'default' : 'outline'}
-        onClick={() => changeLanguage('es')}
+        variant={i18n.language === 'de' ? 'default' : 'outline'}
+        onClick={() => changeLanguage('de')}
       >
-        Español
+        Deutsch
       </Button>
     </div>
   );
@@ -196,7 +196,7 @@ function LanguageSwitcher() {
 
 ```typescript
 const { i18n } = useTranslation();
-const currentLanguage = i18n.language; // 'en', 'es', etc.
+const currentLanguage = i18n.language; // 'en', 'de', etc.
 ```
 
 ## Adding New Translation Keys
@@ -224,7 +224,7 @@ Edit `src/locales/en/[namespace].json`:
 
 ### Step 3: Add to Other Languages
 
-Edit `src/locales/es/[namespace].json`:
+Edit `src/locales/de/[namespace].json`:
 
 ```json
 {
@@ -316,7 +316,7 @@ Main configuration file that:
 ### Translation Files (`src/locales/[lang]/[namespace].json`)
 
 JSON files containing translations organized by:
-- **Language code**: `en`, `es`, etc.
+- **Language code**: `en`, `de`, etc.
 - **Namespace**: `common`, `auth`, `dashboard`, `forms`
 
 ## Troubleshooting
@@ -332,7 +332,7 @@ If you see the translation key instead of the text:
 ### Language Not Switching
 
 1. Check `i18n.changeLanguage()` is called
-2. Verify language code matches folder name (`en`, `es`)
+2. Verify language code matches folder name (`en`, `de`)
 3. Check browser console for errors
 
 ### Missing Translations in New Language
@@ -349,8 +349,8 @@ If you see the translation key instead of the text:
 // In browser console or component
 import i18n from '@/i18n/config';
 
-// Switch to Spanish
-i18n.changeLanguage('es');
+// Switch to German
+i18n.changeLanguage('de');
 
 // Switch to English
 i18n.changeLanguage('en');
@@ -362,7 +362,7 @@ In `src/i18n/config.ts`, temporarily change:
 ```typescript
 .init({
   // ... other config
-  lng: 'es', // Force Spanish
+  lng: 'de', // Force German
   // fallbackLng: 'en',
 });
 ```

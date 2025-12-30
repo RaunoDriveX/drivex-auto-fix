@@ -16,7 +16,7 @@ src/
       auth.json         # Authentication pages
       dashboard.json    # Dashboard pages
       forms.json        # Form labels, validation, placeholders
-    es/                 # Spanish (or your target language)
+    de/                 # German (or your target language)
       common.json       # Same structure as English files
       auth.json
       dashboard.json
@@ -40,11 +40,11 @@ Translation files for the target language are in: `src/locales/[language-code]/`
 
 Currently available:
 - `src/locales/en/` - English (reference/source)
-- `src/locales/es/` - Spanish (to be translated)
+- `src/locales/de/` - German (to be translated)
 
 ### Step 2: Open a Translation File
 
-Example: `src/locales/es/common.json`
+Example: `src/locales/de/common.json`
 
 You will see entries marked with `[TO TRANSLATE]`:
 
@@ -65,9 +65,9 @@ Remove the `[TO TRANSLATE]` prefix and replace with the translated text:
 ```json
 {
   "buttons": {
-    "sign_in": "Iniciar Sesión",
-    "sign_up": "Registrarse",
-    "sign_out": "Cerrar Sesión"
+    "sign_in": "Anmelden",
+    "sign_up": "Registrieren",
+    "sign_out": "Abmelden"
   }
 }
 ```
@@ -87,7 +87,7 @@ Remove the `[TO TRANSLATE]` prefix and replace with the translated text:
 ```
 Keep `{{count}}` unchanged:
 ```json
-"min_length": "La longitud mínima es {{count}} caracteres"
+"min_length": "Mindestlänge ist {{count}} Zeichen"
 ```
 
 **HTML tags** (if any):
@@ -96,7 +96,7 @@ Keep `{{count}}` unchanged:
 ```
 Keep tags unchanged:
 ```json
-"message": "Haz clic <strong>aquí</strong> para continuar"
+"message": "Klicken Sie <strong>hier</strong> um fortzufahren"
 ```
 
 #### 3. **Brand Names**
@@ -135,7 +135,7 @@ For each language, translate all 4 files:
 
 ## Example: Complete Translation
 
-**Before (English in es/common.json):**
+**Before (English in de/common.json):**
 ```json
 {
   "buttons": {
@@ -150,17 +150,17 @@ For each language, translate all 4 files:
 }
 ```
 
-**After (Spanish translation):**
+**After (German translation):**
 ```json
 {
   "buttons": {
-    "sign_in": "Iniciar Sesión",
-    "cancel": "Cancelar",
-    "save": "Guardar"
+    "sign_in": "Anmelden",
+    "cancel": "Abbrechen",
+    "save": "Speichern"
   },
   "status": {
-    "loading": "Cargando...",
-    "success": "Éxito"
+    "loading": "Laden...",
+    "success": "Erfolg"
   }
 }
 ```
@@ -183,7 +183,7 @@ import frForms from '@/locales/fr/forms.json';
 
 const resources = {
   en: { ... },
-  es: { ... },
+  de: { ... },
   fr: {  // Add French
     common: frCommon,
     auth: frAuth,

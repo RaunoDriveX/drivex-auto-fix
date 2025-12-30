@@ -8,11 +8,11 @@ import enAuth from '@/locales/en/auth.json';
 import enDashboard from '@/locales/en/dashboard.json';
 import enForms from '@/locales/en/forms.json';
 
-// Import second language translations (placeholder - to be filled by translators)
-import esCommon from '@/locales/es/common.json';
-import esAuth from '@/locales/es/auth.json';
-import esDashboard from '@/locales/es/dashboard.json';
-import esForms from '@/locales/es/forms.json';
+// Import German translations (placeholder - to be filled by translators)
+import deCommon from '@/locales/de/common.json';
+import deAuth from '@/locales/de/auth.json';
+import deDashboard from '@/locales/de/dashboard.json';
+import deForms from '@/locales/de/forms.json';
 
 const resources = {
   en: {
@@ -21,11 +21,11 @@ const resources = {
     dashboard: enDashboard,
     forms: enForms,
   },
-  es: {
-    common: esCommon,
-    auth: esAuth,
-    dashboard: esDashboard,
-    forms: esForms,
+  de: {
+    common: deCommon,
+    auth: deAuth,
+    dashboard: deDashboard,
+    forms: deForms,
   }
 };
 
