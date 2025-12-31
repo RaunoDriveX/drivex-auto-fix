@@ -346,6 +346,28 @@ const ShopAuth = () => {
             </CardDescription>
           </CardHeader>
           
+          
+          <CardContent>
+            {needsProfileSetup ? (
+              <ShopProfileForm />
+            ) : (
+              <Tabs defaultValue="signin" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="signin">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="signin">
+                  <AuthForm isSignUp={false} />
+                </TabsContent>
+                
+                <TabsContent value="signup">
+                  <AuthForm isSignUp={true} />
+                </TabsContent>
+              </Tabs>
+            )}
+          </CardContent>
+          
           <div className="flex justify-center pb-6">
             <Button variant="ghost" asChild className="gap-2">
               <Link to="/" onClick={() => window.scrollTo(0, 0)}>
