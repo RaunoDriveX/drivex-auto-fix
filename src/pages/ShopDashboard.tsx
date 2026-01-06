@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ interface ShopData {
 }
 
 const ShopDashboard = () => {
+  const { t } = useTranslation('shop');
   const [user, setUser] = useState<User | null>(null);
   const [shopData, setShopData] = useState<ShopData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -125,8 +127,8 @@ const ShopDashboard = () => {
 
       if (!shop) {
         toast({
-          title: "Error",
-          description: "No shop profile found. Please contact support.",
+          title: t('error', { ns: 'common' }),
+          description: t('error_no_profile'),
           variant: "destructive"
         });
         navigate('/shop-auth');
@@ -137,8 +139,8 @@ const ShopDashboard = () => {
     } catch (error: any) {
       console.error('Error fetching shop data:', error);
       toast({
-        title: "Error",
-        description: "Failed to load shop data",
+        title: t('error', { ns: 'common' }),
+        description: t('error_load_data'),
         variant: "destructive"
       });
     } finally {
@@ -160,8 +162,8 @@ const ShopDashboard = () => {
       } catch (error) {
         console.error('Error signing out:', error);
         toast({
-          title: "Error",
-          description: "Failed to sign out",
+          title: t('error', { ns: 'common' }),
+          description: t('error_sign_out'),
           variant: "destructive"
         });
       }
@@ -173,7 +175,7 @@ const ShopDashboard = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading dashboard...</p>
+          <p className="mt-2 text-muted-foreground">{t('loading')}</p>
         </div>
       </div>
     );
@@ -182,8 +184,8 @@ const ShopDashboard = () => {
   return (
     <>
       <Helmet>
-        <title>Shop Dashboard - DriveX</title>
-        <meta name="description" content="Manage your repair shop settings, availability, pricing, and job offers." />
+        <title>{t('page_title')}</title>
+        <meta name="description" content={t('page_description')} />
       </Helmet>
       
       <div className="min-h-screen bg-background">
@@ -196,7 +198,7 @@ const ShopDashboard = () => {
                   <Wrench className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold">Shop Dashboard</h1>
+                  <h1 className="text-2xl font-bold">{t('title')}</h1>
                   <p className="text-muted-foreground">
                     {shopData?.name || user?.email}
                   </p>
@@ -205,18 +207,18 @@ const ShopDashboard = () => {
               <div className="flex items-center gap-4">
                 {isDemoMode && (
                   <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">
-                    🧪 Demo Mode
+                    🧪 {t('demo_mode')}
                   </Badge>
                 )}
                 {shopData?.performance_tier && (
                   <Badge variant="secondary">
-                    {shopData.performance_tier} Partner
+                    {shopData.performance_tier} {t('partner')}
                   </Badge>
                 )}
                 <LanguageSwitcher />
                 <Button variant="ghost" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
+                  {t('sign_out')}
                 </Button>
               </div>
             </div>
@@ -237,70 +239,70 @@ const ShopDashboard = () => {
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
                         <DollarSign className="h-4 w-4" />
-                        Active Job Offers
+                        {t('tabs.offers')}
                       </TabsTrigger>
                       <TabsTrigger 
                         value="declined" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
                         <XCircle className="h-4 w-4" />
-                        Declined Jobs
+                        {t('tabs.declined')}
                       </TabsTrigger>
                       <TabsTrigger 
                         value="calendar" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
                         <Clock className="h-4 w-4" />
-                        Calendar
+                        {t('tabs.calendar')}
                       </TabsTrigger>
                       <TabsTrigger 
                         value="location" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
                         <MapPin className="h-4 w-4" />
-                        Location
+                        {t('tabs.location')}
                       </TabsTrigger>
                       <TabsTrigger 
                         value="availability" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
                         <Clock className="h-4 w-4" />
-                        Availability
+                        {t('tabs.availability')}
                       </TabsTrigger>
                       <TabsTrigger 
                         value="pricing" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
                         <DollarSign className="h-4 w-4" />
-                        Pricing
+                        {t('tabs.pricing')}
                       </TabsTrigger>
                       <TabsTrigger 
                         value="services" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
                         <Settings className="h-4 w-4" />
-                        Services
+                        {t('tabs.services')}
                       </TabsTrigger>
                       <TabsTrigger 
                         value="upsells" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
                         <Plus className="h-4 w-4" />
-                        Upsell Services
+                        {t('tabs.upsells')}
                       </TabsTrigger>
                       <TabsTrigger 
                         value="technicians" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
                         <Users className="h-4 w-4" />
-                        Technicians
+                        {t('tabs.technicians')}
                       </TabsTrigger>
                       <TabsTrigger 
                         value="call-center" 
                         className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
                         <Phone className="h-4 w-4" />
-                        Call Center
+                        {t('tabs.call_center')}
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>
@@ -318,9 +320,9 @@ const ShopDashboard = () => {
                           <DollarSign className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <h2 className="text-xl font-semibold leading-none tracking-tight">Active Job Offers</h2>
+                          <h2 className="text-xl font-semibold leading-none tracking-tight">{t('offers.title')}</h2>
                           <p className="text-sm text-muted-foreground">
-                            New repair requests requiring your response
+                            {t('offers.description')}
                           </p>
                         </div>
                       </div>
@@ -337,9 +339,9 @@ const ShopDashboard = () => {
                           <XCircle className="h-5 w-5 text-red-600" />
                         </div>
                         <div>
-                          <h2 className="text-xl font-semibold leading-none tracking-tight">Declined Jobs</h2>
+                          <h2 className="text-xl font-semibold leading-none tracking-tight">{t('declined.title')}</h2>
                           <p className="text-sm text-muted-foreground">
-                            Review your declined job history
+                            {t('declined.description')}
                           </p>
                         </div>
                       </div>
@@ -387,14 +389,14 @@ const ShopDashboard = () => {
             <div className="space-y-6">
               <div className="bg-background">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-semibold leading-none tracking-tight">Complete Your Shop Profile</h2>
+                  <h2 className="text-2xl font-semibold leading-none tracking-tight">{t('no_profile_title')}</h2>
                   <p className="text-sm text-muted-foreground">
-                    Set up your shop information to start receiving job offers
+                    {t('no_profile_description')}
                   </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground mb-4">
-                    Complete the setup below to activate your shop profile and start managing jobs.
+                    {t('no_profile_message')}
                   </p>
                 </div>
               </div>
@@ -411,28 +413,28 @@ const ShopDashboard = () => {
                           className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                         >
                           <MapPin className="h-4 w-4" />
-                          Location
+                          {t('tabs.location')}
                         </TabsTrigger>
                         <TabsTrigger 
                           value="availability" 
                           className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                         >
                           <Clock className="h-4 w-4" />
-                          Availability
+                          {t('tabs.availability')}
                         </TabsTrigger>
                         <TabsTrigger 
                           value="pricing" 
                           className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                         >
                           <DollarSign className="h-4 w-4" />
-                          Pricing
+                          {t('tabs.pricing')}
                         </TabsTrigger>
                         <TabsTrigger 
                           value="services" 
                           className="w-full justify-start gap-3 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                         >
                           <Settings className="h-4 w-4" />
-                          Services
+                          {t('tabs.services')}
                         </TabsTrigger>
                       </TabsList>
                     </Tabs>
