@@ -1,13 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, Phone, Mail, Search } from "lucide-react";
+import { Menu, X, Phone, Search } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import CallCenterToolbarWidget from "@/components/call-center/CallCenterToolbarWidget";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import glassifyLogo from "@/assets/glassify-logo.svg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { t } = useTranslation('marketing');
   
   // Safely check location to avoid white screen issues
   let showCallCenter = false;
@@ -19,11 +21,11 @@ const Header = () => {
   }
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "How it Works", href: "#workflow" },
-    { name: "About Us", href: "#about" },
-    { name: "Contact", href: "#contact" },
-    { name: "Shop Portal", href: "/shop-auth" }
+    { name: t('header.home'), href: "/" },
+    { name: t('header.how_it_works'), href: "#workflow" },
+    { name: t('header.about_us'), href: "#about" },
+    { name: t('header.contact'), href: "#contact" },
+    { name: t('header.shop_portal'), href: "/shop-auth" }
   ];
 
   return (
@@ -45,7 +47,7 @@ const Header = () => {
               <Link to="/track">
                 <Button variant="outline" className="flex items-center gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 py-3 text-base font-semibold">
                   <Search className="h-5 w-5" />
-                  Track Your Job
+                  {t('header.track_job')}
                 </Button>
               </Link>
             </div>
@@ -87,11 +89,11 @@ const Header = () => {
             </div>
             <Link to="/insurer-auth">
               <Button variant="outline" size="sm">
-                Insurer Login
+                {t('header.insurer_login')}
               </Button>
             </Link>
             <Button size="sm">
-              Get Started
+              {t('header.get_started')}
             </Button>
           </div>
 
@@ -116,7 +118,7 @@ const Header = () => {
               <Link to="/track" onClick={() => setIsMenuOpen(false)}>
                 <Button className="w-full flex items-center justify-center gap-2">
                   <Search className="h-4 w-4" />
-                  Track Your Job
+                  {t('header.track_job')}
                 </Button>
               </Link>
             </div>
@@ -157,11 +159,11 @@ const Header = () => {
                   </div>
                   <Link to="/insurer-auth">
                     <Button variant="outline" size="sm" className="w-full">
-                      Insurer Login
+                      {t('header.insurer_login')}
                     </Button>
                   </Link>
                   <Button size="sm" className="w-full">
-                    Get Started
+                    {t('header.get_started')}
                   </Button>
                 </div>
               </div>

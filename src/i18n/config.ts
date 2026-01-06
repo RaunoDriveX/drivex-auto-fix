@@ -7,12 +7,14 @@ import enCommon from '@/locales/en/common.json';
 import enAuth from '@/locales/en/auth.json';
 import enDashboard from '@/locales/en/dashboard.json';
 import enForms from '@/locales/en/forms.json';
+import enMarketing from '@/locales/en/marketing.json';
 
-// Import German translations (placeholder - to be filled by translators)
+// Import German translations
 import deCommon from '@/locales/de/common.json';
 import deAuth from '@/locales/de/auth.json';
 import deDashboard from '@/locales/de/dashboard.json';
 import deForms from '@/locales/de/forms.json';
+import deMarketing from '@/locales/de/marketing.json';
 
 const resources = {
   en: {
@@ -20,12 +22,14 @@ const resources = {
     auth: enAuth,
     dashboard: enDashboard,
     forms: enForms,
+    marketing: enMarketing,
   },
   de: {
     common: deCommon,
     auth: deAuth,
     dashboard: deDashboard,
     forms: deForms,
+    marketing: deMarketing,
   }
 };
 
@@ -36,7 +40,7 @@ i18n
     resources,
     fallbackLng: 'en', // Use English if detected language is not available
     defaultNS: 'common', // Default namespace
-    ns: ['common', 'auth', 'dashboard', 'forms'], // Available namespaces
+    ns: ['common', 'auth', 'dashboard', 'forms', 'marketing'], // Available namespaces
 
     interpolation: {
       escapeValue: false // React already escapes values

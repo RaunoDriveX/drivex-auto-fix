@@ -1,0 +1,193 @@
+{
+  "hero": {
+    "title": "Fix your vehicle glass!",
+    "description": "Report your glass damage in minutes. Our AI triages repair vs. replacement and matches you with the best shop based on price, availability, and quality. Uninsured? Order a DIY resin kit.",
+    "license_plate": "License plate",
+    "phone_number": "Phone number",
+    "begin_assessment": "Begin damage assessment"
+  },
+  "header": {
+    "home": "Home",
+    "how_it_works": "How it Works",
+    "about_us": "About Us",
+    "contact": "Contact",
+    "shop_portal": "Shop Portal",
+    "track_job": "Track Your Job",
+    "insurer_login": "Insurer Login",
+    "get_started": "Get Started"
+  },
+  "why_choose_us": {
+    "badge": "Patent Pending Technology",
+    "title": "Fair pricing. Quality repairs.",
+    "title_highlight": "Powered by AI.",
+    "description": "300,000 assessments completed with 95% accuracy over 6 years. Glassify creates transparency in the auto glass repair market.",
+    "practices": {
+      "ai_powered": {
+        "title": "AI-Powered Assessment",
+        "description": "Patent-pending technology analyzes damage instantly with 95% accuracy.",
+        "benefit": "Get the right solution every time"
+      },
+      "transparent": {
+        "title": "Transparent Marketplace",
+        "description": "Compare real prices from vetted shops. Fair deals for everyone.",
+        "benefit": "Best value with full price visibility"
+      },
+      "mobile_first": {
+        "title": "Mobile-First Platform",
+        "description": "Complete assessment to booking in minutes on your phone.",
+        "benefit": "Maximum convenience and speed"
+      }
+    },
+    "team": {
+      "badge": "Our Team",
+      "title": "Trusted by drivers worldwide",
+      "description": "Our international team is already revolutionizing auto glass repair across multiple continents. From our headquarters to our partner networks, we're building the future of automotive maintenance.",
+      "europe": "Europe",
+      "europe_desc": "- Germany, Netherlands, and expanding",
+      "north_america": "North America",
+      "north_america_desc": "- United States operations",
+      "latin_america": "Latin America",
+      "latin_america_desc": "- Brazil market launch",
+      "africa": "Africa",
+      "africa_desc": "- Emerging market partnerships",
+      "proven_track": "Proven Track Record",
+      "proven_desc": "Over 300,000 assessments completed in 6 years of operation, with 97% customer satisfaction rate.",
+      "continents": "Continents"
+    },
+    "segments": {
+      "individual_title": "For Individual Drivers",
+      "individual_desc": "Fast, affordable, and hassle-free glass repair for your personal vehicle.",
+      "fleet_title": "For Fleet Owners",
+      "fleet_desc": "Streamline maintenance across your entire fleet with enterprise-grade tools.",
+      "avg_repair_time": "Average time to repair: 30 minutes",
+      "same_day": "Most repairs completed same-day",
+      "cost_savings": "Average cost savings: 25-40%",
+      "vs_traditional": "Compared to traditional repair channels"
+    },
+    "individual_benefits": {
+      "fair_pricing": "Get fair pricing from multiple shops instantly",
+      "mobile_repair": "Book mobile repair at your location",
+      "diy_option": "DIY option for budget-conscious drivers",
+      "real_time": "Real-time tracking and reminders",
+      "insurance_assist": "Insurance claim assistance"
+    },
+    "fleet_benefits": {
+      "centralized": "Centralized dashboard for all vehicles",
+      "volume_discounts": "Volume discounts from our partner network",
+      "priority": "Priority scheduling for business vehicles",
+      "reporting": "Detailed reporting and cost analytics",
+      "support": "Dedicated fleet support team"
+    }
+  },
+  "workflow": {
+    "title": "How Glassify works",
+    "description": "From damage report to repair completion in 6 simple steps. Fast, transparent, and designed for your convenience.",
+    "virtual_tech_title": "Meet your virtual technician",
+    "virtual_tech_desc": "Our AI assistant guides your photos, explains results in simple terms, and helps you choose the perfect repair shop for your needs.",
+    "steps": {
+      "vehicle_info": {
+        "title": "Vehicle info & contact",
+        "desc": "Quick vehicle details and your phone number to get started."
+      },
+      "inspection": {
+        "title": "Easy self-inspection",
+        "desc": "Follow guided photo steps - we'll help you capture the right angles."
+      },
+      "ai_triage": {
+        "title": "AI triage",
+        "desc": "Our AI instantly analyzes damage and decides: repair or replace?"
+      },
+      "matching": {
+        "title": "Smart matching & prices",
+        "desc": "See transparent pricing from mobile and stationary repair shops near you."
+      },
+      "book": {
+        "title": "Book & track",
+        "desc": "Choose your slot, get reminders, and track progress in real-time."
+      },
+      "diy": {
+        "title": "DIY repair option",
+        "desc": "Uninsured or budget-conscious? Order professional resin and fix yourself."
+      }
+    }
+  },
+  "testimonials": {
+    "title": "What our customers say",
+    "description": "Over 300,000 drivers already trust Glassify for their auto glass repair needs",
+    "cta_text": "Join thousands of drivers who chose the smart way to repair their auto glass",
+    "start_assessment": "Start Your Assessment",
+    "contact_fleet": "Contact Fleet Sales",
+    "reviews": {
+      "anna": {
+        "name": "Anna Schmidt",
+        "location": "Berlin",
+        "text": "Glassify helped me save over €150 by comparing prices from different shops. Before, I would just go to the first repair shop I found. Now I know I'm paying a fair price.",
+        "benefit": "Saving Money"
+      },
+      "thomas": {
+        "name": "Thomas Müller",
+        "location": "Düsseldorf",
+        "text": "In 20 minutes I had my appointment scheduled and the technician came to my office. I didn't waste time searching for shops or waiting in lines. Incredible service.",
+        "benefit": "Saving Time"
+      },
+      "sophie": {
+        "name": "Sophie Weber",
+        "location": "Munich",
+        "text": "Finally someone who defends my interests and not the repair shop's. Glassify explained everything clearly and helped me make the best decision for my wallet.",
+        "benefit": "Peace of Mind"
+      }
+    }
+  },
+  "footer": {
+    "tagline": "Patent-pending AI technology for transparent auto glass repair. Your advocate in the marketplace.",
+    "services": "Services",
+    "ai_assessment": "AI Damage Assessment",
+    "shop_matching": "Repair Shop Matching",
+    "mobile_repair": "Mobile Glass Repair",
+    "fleet_solutions": "Fleet Solutions",
+    "diy_kits": "DIY Repair Kits",
+    "insurance_claims": "Insurance Claims",
+    "company": "Company",
+    "about_us": "About Us",
+    "our_team": "Our Team",
+    "careers": "Careers",
+    "news_press": "News & Press",
+    "partner_network": "Partner Network",
+    "contact_us": "Contact Us",
+    "legal_support": "Legal & Support",
+    "privacy_policy": "Privacy Policy",
+    "terms_of_service": "Terms of Service",
+    "cookie_policy": "Cookie Policy",
+    "help_center": "Help Center",
+    "support": "Support",
+    "warranty": "Warranty",
+    "copyright": "© {{year}} Glassify. All rights reserved. Patent pending technology.",
+    "follow_us": "Follow us:",
+    "operating_regions": "Operating in Europe, North America, Latin America, and Africa. Over 300,000 assessments completed with 95% accuracy."
+  },
+  "lead_form": {
+    "full_name": "Full name",
+    "email": "Email",
+    "phone": "Phone number",
+    "insurance_question": "Is this an insurance claim?",
+    "yes_insurance": "Yes, insurance claim",
+    "no_paying_self": "No, paying myself",
+    "insurance_company": "Insurance company",
+    "select_insurance": "Select your insurance company",
+    "other_not_listed": "Other / Not listed",
+    "select_date_time": "Select date & time",
+    "estimated_duration": "Estimated duration:",
+    "select_date": "Select a date",
+    "select_time": "Select a time slot",
+    "book_appointment": "Book Appointment",
+    "booking_confirmed": "Booking Confirmed!",
+    "appointment_scheduled": "Your appointment has been successfully scheduled",
+    "shop": "Shop:",
+    "date": "Date:",
+    "time": "Time:",
+    "tracking_code": "Tracking Code:",
+    "tracking_code_help": "Use this code at Track Your Job to check your repair status.",
+    "confirmation_email": "A confirmation email with all the details has been sent to your email address.",
+    "back_to_home": "Back to Home"
+  }
+}
