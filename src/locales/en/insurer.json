@@ -79,7 +79,9 @@
     "error_remove": "Error",
     "error_remove_description": "Failed to remove job. Please try again.",
     "no_jobs": "No jobs found",
-    "no_jobs_description": "There are no jobs matching your current filters."
+    "no_jobs_description": "There are no jobs matching your current filters.",
+    "declined_by": "Declined by {{shop}}. Reason: {{reason}}",
+    "no_reason_provided": "No reason provided"
   },
   "jobs": {
     "title": "Live Jobs Board",
