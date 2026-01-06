@@ -1,67 +1,67 @@
 {
   "shop": {
-    "title": "[TO TRANSLATE] Shop Dashboard",
-    "welcome": "[TO TRANSLATE] Welcome",
+    "title": "Partner Dashboard",
+    "welcome": "Willkommen",
     "tabs": {
-      "dashboard": "[TO TRANSLATE] Dashboard",
-      "jobs": "[TO TRANSLATE] Jobs",
-      "calendar": "[TO TRANSLATE] Calendar",
-      "profile": "[TO TRANSLATE] Profile"
+      "dashboard": "Dashboard",
+      "jobs": "Aufträge",
+      "calendar": "Kalender",
+      "profile": "Profil"
     },
     "performance": {
-      "title": "[TO TRANSLATE] Performance Metrics",
-      "acceptance_rate": "[TO TRANSLATE] Acceptance Rate",
-      "response_time": "[TO TRANSLATE] Response Time",
-      "quality_score": "[TO TRANSLATE] Quality Score",
-      "jobs_completed": "[TO TRANSLATE] Jobs Completed"
+      "title": "Leistungskennzahlen",
+      "acceptance_rate": "Annahmequote",
+      "response_time": "Reaktionszeit",
+      "quality_score": "Qualitätsbewertung",
+      "jobs_completed": "Abgeschlossene Aufträge"
     },
     "jobs": {
-      "title": "[TO TRANSLATE] Available Jobs",
-      "no_jobs": "[TO TRANSLATE] No jobs available",
-      "accept": "[TO TRANSLATE] Accept Job",
-      "decline": "[TO TRANSLATE] Decline Job",
-      "view_details": "[TO TRANSLATE] View Details"
+      "title": "Verfügbare Aufträge",
+      "no_jobs": "Keine Aufträge verfügbar",
+      "accept": "Auftrag annehmen",
+      "decline": "Auftrag ablehnen",
+      "view_details": "Details anzeigen"
     }
   },
   "insurer": {
-    "title": "[TO TRANSLATE] Insurer Dashboard",
+    "title": "Versicherer-Dashboard",
     "tabs": {
-      "jobs": "[TO TRANSLATE] Live Jobs",
-      "network": "[TO TRANSLATE] Shop Network",
-      "users": "[TO TRANSLATE] User Management"
+      "jobs": "Offene Aufträge",
+      "network": "Partner Netzwerk",
+      "users": "Benutzerverwaltung"
     },
     "jobs": {
-      "title": "[TO TRANSLATE] Live Jobs Board",
-      "no_jobs": "[TO TRANSLATE] No active jobs",
-      "create_job": "[TO TRANSLATE] Create New Job",
-      "job_status": "[TO TRANSLATE] Job Status",
-      "shop_assigned": "[TO TRANSLATE] Shop Assigned",
-      "total_cost": "[TO TRANSLATE] Total Cost"
+      "title": "Übersicht offene Aufträge",
+      "no_jobs": "Keine offenen Aufträge",
+      "create_job": "Einen Auftrag anlegen",
+      "job_status": "Auftragsstatus",
+      "shop_assigned": "zugewiesene Werkstatt",
+      "total_cost": "Gesamtkosten"
     },
     "network": {
-      "title": "[TO TRANSLATE] Shop Network",
-      "total_shops": "[TO TRANSLATE] Total Shops",
-      "active_shops": "[TO TRANSLATE] Active Shops",
-      "performance_tier": "[TO TRANSLATE] Performance Tier"
+      "title": "Partner Netzwerk",
+      "total_shops": "Alle Partner",
+      "active_shops": "Aktive Partner",
+      "performance_tier": "Leistungsstufe"
     },
     "user_management": {
-      "title": "[TO TRANSLATE] User Management",
-      "add_user": "[TO TRANSLATE] Add User",
-      "users_list": "[TO TRANSLATE] Users List",
-      "role": "[TO TRANSLATE] Role",
-      "admin": "[TO TRANSLATE] Admin",
-      "claims_user": "[TO TRANSLATE] Claims User"
+      "title": "Benutzerverwaltung",
+      "add_user": "Benutzer hinzufügen",
+      "users_list": "Benutzerliste",
+      "role": "Rolle",
+      "admin": "Admin",
+      "claims_user": "Nutzer Beschwerden"
     }
   },
   "common": {
-    "status": "[TO TRANSLATE] Status",
-    "date": "[TO TRANSLATE] Date",
-    "time": "[TO TRANSLATE] Time",
-    "location": "[TO TRANSLATE] Location",
-    "details": "[TO TRANSLATE] Details",
-    "actions": "[TO TRANSLATE] Actions",
-    "filters": "[TO TRANSLATE] Filters",
-    "search": "[TO TRANSLATE] Search",
-    "refresh": "[TO TRANSLATE] Refresh"
+    "status": "Status",
+    "date": "Datum",
+    "time": "Zeit",
+    "location": "Standort",
+    "details": "Details",
+    "actions": "Aktionen",
+    "filters": "Filter",
+    "search": "Suchen",
+    "refresh": "Aktualisieren"
   }
 }
