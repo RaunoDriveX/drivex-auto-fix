@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { InsurerDashboard as InsurerDashboardComponent } from '@/components/insurer/InsurerDashboard';
 import { InsurerJobsBoard } from '@/components/insurer/InsurerJobsBoard';
 import { UserManagement } from '@/components/insurer/UserManagement';
@@ -8,8 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { useInsurerAuth } from '@/hooks/useInsurerAuth';
 import { LogOut, Building2 } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
-
 export default function InsurerDashboard() {
+  const { t } = useTranslation('insurer');
   const [isDemoMode, setIsDemoMode] = useState(false);
 
   // Check if in demo mode - only allow in development
@@ -68,7 +69,7 @@ export default function InsurerDashboard() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading dashboard...</p>
+          <p className="mt-2 text-muted-foreground">{t('loading')}</p>
         </div>
       </div>
     );
@@ -91,19 +92,19 @@ export default function InsurerDashboard() {
                   <div>
                     <h1 className="text-lg font-semibold">{displayProfile?.insurer_name}</h1>
                     <p className="text-sm text-muted-foreground">
-                      {displayUserRole ? `${displayUserRole.full_name} • ${displayUserRole.role === 'admin' ? 'Admin' : 'Claims User'}` : displayProfile?.contact_person}
+                      {displayUserRole ? `${displayUserRole.full_name} • ${displayUserRole.role === 'admin' ? t('user_management.admin') : t('user_management.claims_user')}` : displayProfile?.contact_person}
                     </p>
                   </div>
                 </div>
                 {isDemoMode && (
                   <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">
-                    🧪 Demo Mode
+                    🧪 {t('demo_mode', { ns: 'shop' })}
                   </Badge>
                 )}
                 <TabsList className="grid grid-cols-3">
-                  <TabsTrigger value="jobs">Live Jobs</TabsTrigger>
-                  <TabsTrigger value="network">Shop Network</TabsTrigger>
-                  {checkIsAdmin() && <TabsTrigger value="users">User Management</TabsTrigger>}
+                  <TabsTrigger value="jobs">{t('tabs.jobs')}</TabsTrigger>
+                  <TabsTrigger value="network">{t('tabs.network')}</TabsTrigger>
+                  {checkIsAdmin() && <TabsTrigger value="users">{t('tabs.users')}</TabsTrigger>}
                 </TabsList>
               </div>
               <div className="flex items-center gap-3">
@@ -114,7 +115,7 @@ export default function InsurerDashboard() {
                   className="flex items-center gap-2"
                 >
                   <LogOut className="h-4 w-4" />
-                  Sign Out
+                  {t('sign_out', { ns: 'shop' })}
                 </Button>
               </div>
             </div>
