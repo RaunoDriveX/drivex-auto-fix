@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +9,7 @@ import CallCenterCTA from "@/components/CallCenterCTA";
 const Hero = () => {
   console.log("Hero component rendering...");
   const navigate = useNavigate();
+  const { t } = useTranslation('marketing');
   const [licensePlate, setLicensePlate] = useState("");
   const [phone, setPhone] = useState("");
 
@@ -25,6 +27,7 @@ const Hero = () => {
     const token = generateToken();
     navigate(`/inspection/${token}`);
   };
+  
   return (
     <section className="relative bg-background overflow-hidden">
       {/* Background banner image */}
@@ -50,17 +53,15 @@ const Hero = () => {
       <div className="relative z-10 container mx-auto py-24 lg:py-32">
         <div className="max-w-2xl">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
-            Fix your vehicle glass!
+            {t('hero.title')}
           </h1>
           <p className="mt-6 text-lg lg:text-xl text-white/90">
-            Report your glass damage in minutes. Our AI triages repair vs. replacement and
-            matches you with the best shop based on price, availability, and quality. Uninsured?
-            Order a DIY resin kit.
+            {t('hero.description')}
           </p>
           
           <form onSubmit={handleStart} className="mt-8 grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
             <div className="grid gap-2">
-              <Label htmlFor="hero-license" className="text-white">License plate</Label>
+              <Label htmlFor="hero-license" className="text-white">{t('hero.license_plate')}</Label>
               <Input 
                 id="hero-license" 
                 name="licensePlate" 
@@ -72,7 +73,7 @@ const Hero = () => {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="hero-phone" className="text-white">Phone number</Label>
+              <Label htmlFor="hero-phone" className="text-white">{t('hero.phone_number')}</Label>
               <Input 
                 id="hero-phone" 
                 name="phone" 
@@ -85,7 +86,7 @@ const Hero = () => {
               />
             </div>
             <Button size="lg" type="submit" className="bg-brand hover:bg-brand/90 text-brand-foreground">
-              Begin damage assessment
+              {t('hero.begin_assessment')}
             </Button>
           </form>
 

@@ -1,43 +1,30 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Users, Building2, Zap, Shield, DollarSign, Clock, Smartphone, TrendingUp } from "lucide-react";
 
 const WhyChooseUs = () => {
+  const { t } = useTranslation('marketing');
+
   const practices = [
     {
       icon: Zap,
-      title: "AI-Powered Assessment",
-      description: "Patent-pending technology analyzes damage instantly with 95% accuracy.",
-      benefit: "Get the right solution every time"
+      title: t('why_choose_us.practices.ai_powered.title'),
+      description: t('why_choose_us.practices.ai_powered.description'),
+      benefit: t('why_choose_us.practices.ai_powered.benefit')
     },
     {
       icon: DollarSign,
-      title: "Transparent Marketplace",
-      description: "Compare real prices from vetted shops. Fair deals for everyone.",
-      benefit: "Best value with full price visibility"
+      title: t('why_choose_us.practices.transparent.title'),
+      description: t('why_choose_us.practices.transparent.description'),
+      benefit: t('why_choose_us.practices.transparent.benefit')
     },
     {
       icon: Smartphone,
-      title: "Mobile-First Platform",
-      description: "Complete assessment to booking in minutes on your phone.",
-      benefit: "Maximum convenience and speed"
+      title: t('why_choose_us.practices.mobile_first.title'),
+      description: t('why_choose_us.practices.mobile_first.description'),
+      benefit: t('why_choose_us.practices.mobile_first.benefit')
     }
-  ];
-
-  const individualBenefits = [
-    "Get fair pricing from multiple shops instantly",
-    "Book mobile repair at your location",
-    "DIY option for budget-conscious drivers",
-    "Real-time tracking and reminders",
-    "Insurance claim assistance"
-  ];
-
-  const fleetBenefits = [
-    "Centralized dashboard for all vehicles",
-    "Volume discounts from our partner network",
-    "Priority scheduling for business vehicles",
-    "Detailed reporting and cost analytics",
-    "Dedicated fleet support team"
   ];
 
   return (
@@ -47,15 +34,14 @@ const WhyChooseUs = () => {
         {/* Main header */}
         <div className="text-center mb-20">
           <Badge variant="secondary" className="mb-6 px-6 py-3 text-sm font-medium">
-            Patent Pending Technology
+            {t('why_choose_us.badge')}
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8 leading-tight">
-            Fair pricing. Quality repairs.<br/>
-            <span className="text-primary">Powered by AI.</span>
+            {t('why_choose_us.title')}<br/>
+            <span className="text-primary">{t('why_choose_us.title_highlight')}</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            300,000 assessments completed with <span className="font-semibold text-foreground">95% accuracy</span> over 6 years. 
-            Glassify creates transparency in the auto glass repair market.
+            {t('why_choose_us.description')}
           </p>
         </div>
 
@@ -81,47 +67,45 @@ const WhyChooseUs = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <Badge variant="secondary" className="mb-4 px-4 py-2">
-                Our Team
+                {t('why_choose_us.team.badge')}
               </Badge>
               <h3 className="text-3xl font-bold text-foreground mb-6">
-                Trusted by drivers worldwide
+                {t('why_choose_us.team.title')}
               </h3>
               <p className="text-lg text-muted-foreground mb-6">
-                Our international team is already revolutionizing auto glass repair across multiple continents. 
-                From our headquarters to our partner networks, we're building the future of automotive maintenance.
+                {t('why_choose_us.team.description')}
               </p>
               
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <span className="font-medium">Europe</span>
-                  <span className="text-muted-foreground">- Germany, Netherlands, and expanding</span>
+                  <span className="font-medium">{t('why_choose_us.team.europe')}</span>
+                  <span className="text-muted-foreground">{t('why_choose_us.team.europe_desc')}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <span className="font-medium">North America</span>
-                  <span className="text-muted-foreground">- United States operations</span>
+                  <span className="font-medium">{t('why_choose_us.team.north_america')}</span>
+                  <span className="text-muted-foreground">{t('why_choose_us.team.north_america_desc')}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="font-medium">Latin America</span>
-                  <span className="text-muted-foreground">- Brazil market launch</span>
+                  <span className="font-medium">{t('why_choose_us.team.latin_america')}</span>
+                  <span className="text-muted-foreground">{t('why_choose_us.team.latin_america_desc')}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                  <span className="font-medium">Africa</span>
-                  <span className="text-muted-foreground">- Emerging market partnerships</span>
+                  <span className="font-medium">{t('why_choose_us.team.africa')}</span>
+                  <span className="text-muted-foreground">{t('why_choose_us.team.africa_desc')}</span>
                 </div>
               </div>
 
               <div className="mt-8 p-6 bg-primary/5 rounded-lg border border-primary/10">
                 <div className="flex items-center gap-2 text-primary font-semibold mb-2">
                   <TrendingUp className="h-5 w-5" />
-                  Proven Track Record
+                  {t('why_choose_us.team.proven_track')}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Over 300,000 assessments completed in 6 years of operation, 
-                  with 97% customer satisfaction rate.
+                  {t('why_choose_us.team.proven_desc')}
                 </p>
               </div>
             </div>
@@ -136,7 +120,7 @@ const WhyChooseUs = () => {
               <div className="absolute -bottom-4 -right-4 bg-white dark:bg-gray-900 p-4 rounded-lg shadow-lg border">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">4</div>
-                  <div className="text-sm text-muted-foreground">Continents</div>
+                  <div className="text-sm text-muted-foreground">{t('why_choose_us.team.continents')}</div>
                 </div>
               </div>
             </div>
@@ -150,20 +134,22 @@ const WhyChooseUs = () => {
 
 // Separate component for customer segments
 export const CustomerSegments = () => {
+  const { t } = useTranslation('marketing');
+
   const individualBenefits = [
-    "Get fair pricing from multiple shops instantly",
-    "Book mobile repair at your location",
-    "DIY option for budget-conscious drivers",
-    "Real-time tracking and reminders",
-    "Insurance claim assistance"
+    t('why_choose_us.individual_benefits.fair_pricing'),
+    t('why_choose_us.individual_benefits.mobile_repair'),
+    t('why_choose_us.individual_benefits.diy_option'),
+    t('why_choose_us.individual_benefits.real_time'),
+    t('why_choose_us.individual_benefits.insurance_assist')
   ];
 
   const fleetBenefits = [
-    "Centralized dashboard for all vehicles",
-    "Volume discounts from our partner network",
-    "Priority scheduling for business vehicles",
-    "Detailed reporting and cost analytics",
-    "Dedicated fleet support team"
+    t('why_choose_us.fleet_benefits.centralized'),
+    t('why_choose_us.fleet_benefits.volume_discounts'),
+    t('why_choose_us.fleet_benefits.priority'),
+    t('why_choose_us.fleet_benefits.reporting'),
+    t('why_choose_us.fleet_benefits.support')
   ];
 
   return (
@@ -178,9 +164,9 @@ export const CustomerSegments = () => {
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/10 flex items-center justify-center">
                 <Users className="h-8 w-8 text-blue-600" />
               </div>
-              <CardTitle className="text-2xl mb-3">For Individual Drivers</CardTitle>
+              <CardTitle className="text-2xl mb-3">{t('why_choose_us.segments.individual_title')}</CardTitle>
               <p className="text-muted-foreground">
-                Fast, affordable, and hassle-free glass repair for your personal vehicle.
+                {t('why_choose_us.segments.individual_desc')}
               </p>
             </CardHeader>
             <CardContent>
@@ -195,9 +181,9 @@ export const CustomerSegments = () => {
               <div className="mt-6 p-4 bg-blue-500/5 rounded-lg">
                 <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-semibold mb-1">
                   <Clock className="h-4 w-4" />
-                  Average time to repair: 30 minutes
+                  {t('why_choose_us.segments.avg_repair_time')}
                 </div>
-                <p className="text-sm text-muted-foreground">Most repairs completed same-day</p>
+                <p className="text-sm text-muted-foreground">{t('why_choose_us.segments.same_day')}</p>
               </div>
             </CardContent>
           </Card>
@@ -208,9 +194,9 @@ export const CustomerSegments = () => {
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-500/10 flex items-center justify-center">
                 <Building2 className="h-8 w-8 text-orange-600" />
               </div>
-              <CardTitle className="text-2xl mb-3">For Fleet Owners</CardTitle>
+              <CardTitle className="text-2xl mb-3">{t('why_choose_us.segments.fleet_title')}</CardTitle>
               <p className="text-muted-foreground">
-                Streamline maintenance across your entire fleet with enterprise-grade tools.
+                {t('why_choose_us.segments.fleet_desc')}
               </p>
             </CardHeader>
             <CardContent>
@@ -225,9 +211,9 @@ export const CustomerSegments = () => {
               <div className="mt-6 p-4 bg-orange-500/5 rounded-lg">
                 <div className="flex items-center gap-2 text-orange-700 dark:text-orange-300 font-semibold mb-1">
                   <TrendingUp className="h-4 w-4" />
-                  Average cost savings: 25-40%
+                  {t('why_choose_us.segments.cost_savings')}
                 </div>
-                <p className="text-sm text-muted-foreground">Compared to traditional repair channels</p>
+                <p className="text-sm text-muted-foreground">{t('why_choose_us.segments.vs_traditional')}</p>
               </div>
             </CardContent>
           </Card>
