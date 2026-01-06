@@ -1,49 +1,49 @@
 {
   "appointment": {
-    "title": "[TO TRANSLATE] Book Appointment",
-    "select_date": "[TO TRANSLATE] Select Date",
-    "select_time": "[TO TRANSLATE] Select Time",
-    "vehicle_info": "[TO TRANSLATE] Vehicle Information",
-    "contact_info": "[TO TRANSLATE] Contact Information",
-    "damage_description": "[TO TRANSLATE] Damage Description",
-    "upload_photos": "[TO TRANSLATE] Upload Photos"
+    "title": "Termin buchen",
+    "select_date": "Datum auswählen",
+    "select_time": "Zeit auswählen",
+    "vehicle_info": "Fahrzeuginformationen",
+    "contact_info": "Kontaktinformationen",
+    "damage_description": "Schadensbeschreibung",
+    "upload_photos": "Fotos hochladen"
   },
   "job_response": {
-    "title": "[TO TRANSLATE] Job Response",
-    "accept": "[TO TRANSLATE] Accept Job",
-    "decline": "[TO TRANSLATE] Decline Job",
-    "counter_offer": "[TO TRANSLATE] Counter Offer",
-    "decline_reason": "[TO TRANSLATE] Decline Reason",
-    "notes": "[TO TRANSLATE] Notes",
-    "offered_price": "[TO TRANSLATE] Offered Price",
-    "response_submitted": "[TO TRANSLATE] Response Submitted"
+    "title": "Antwort Auftrag",
+    "accept": "Auftrag annehmen",
+    "decline": "Auftrag ablehnen",
+    "counter_offer": "Gegenangebot",
+    "decline_reason": "Ablehnungsgrund",
+    "notes": "Notizen",
+    "offered_price": "Angebotspreis",
+    "response_submitted": "Antwort übermittelt"
   },
   "validation": {
-    "required": "[TO TRANSLATE] This field is required",
-    "invalid_email": "[TO TRANSLATE] Invalid email address",
-    "invalid_phone": "[TO TRANSLATE] Invalid phone number",
-    "min_length": "[TO TRANSLATE] Minimum length is {{count}} characters",
-    "max_length": "[TO TRANSLATE] Maximum length is {{count}} characters",
-    "invalid_format": "[TO TRANSLATE] Invalid format"
+    "required": "Dieses Feld ist erforderlich",
+    "invalid_email": "Ungültige E-Mail-Adresse",
+    "invalid_phone": "Ungültige Telefonnummer",
+    "min_length": "Die Mindestlänge beträgt {{count}} Zeichen.",
+    "max_length": "Die maximale Länge beträgt {{count}} Zeichen.",
+    "invalid_format": "Ungültiges Format"
   },
   "placeholders": {
-    "enter_text": "[TO TRANSLATE] Enter text...",
-    "select_option": "[TO TRANSLATE] Select an option...",
-    "search": "[TO TRANSLATE] Search...",
-    "enter_email": "[TO TRANSLATE] Enter email address",
-    "enter_phone": "[TO TRANSLATE] Enter phone number",
-    "enter_notes": "[TO TRANSLATE] Enter notes..."
+    "enter_text": "Text eingeben...",
+    "select_option": "Wählen Sie eine Option aus...",
+    "search": "Suchen...",
+    "enter_email": "E-Mail-Adresse eingeben",
+    "enter_phone": "Geben Sie Ihre Telefonnummer ein.",
+    "enter_notes": "Notizen eingeben..."
   },
   "labels": {
-    "first_name": "[TO TRANSLATE] First Name",
-    "last_name": "[TO TRANSLATE] Last Name",
-    "email": "[TO TRANSLATE] Email",
-    "phone": "[TO TRANSLATE] Phone Number",
-    "address": "[TO TRANSLATE] Address",
-    "city": "[TO TRANSLATE] City",
-    "postal_code": "[TO TRANSLATE] Postal Code",
-    "country": "[TO TRANSLATE] Country",
-    "company_name": "[TO TRANSLATE] Company Name",
-    "contact_person": "[TO TRANSLATE] Contact Person"
+    "first_name": "Vorname",
+    "last_name": "Nachname",
+    "email": "E-Mail",
+    "phone": "Telefonnummer",
+    "address": "Adresse",
+    "city": "Stadt",
+    "postal_code": "Postleitzahl",
+    "country": "Land",
+    "company_name": "Name der Firma",
+    "contact_person": "Ansprechpartner"
   }
 }
