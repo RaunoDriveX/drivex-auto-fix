@@ -272,13 +272,13 @@ export const InsurerJobsBoard: React.FC = () => {
     }
   };
 
-  const getCancellationInfo = (job: Job): { reason: string } | null => {
+  const getCancellationInfo = (job: Job): { reason: string; shop: string } | null => {
     if (job.job_status !== 'cancelled' && job.status !== 'cancelled') return null;
     
-    if (job.notes) {
-      return { reason: job.notes };
-    }
-    return { reason: 'No reason provided' };
+    return { 
+      reason: job.notes || t('jobs_board.no_reason_provided'),
+      shop: job.shop_name
+    };
   };
 
   if (loading) {
@@ -407,7 +407,10 @@ export const InsurerJobsBoard: React.FC = () => {
                   <Alert variant="destructive" className="py-2">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription className="text-xs">
-                      {getCancellationInfo(job)?.reason}
+                      {t('jobs_board.declined_by', { 
+                        shop: getCancellationInfo(job)?.shop, 
+                        reason: getCancellationInfo(job)?.reason 
+                      })}
                     </AlertDescription>
                   </Alert>
                 )}

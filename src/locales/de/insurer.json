@@ -79,7 +79,9 @@
     "error_remove": "Fehler",
     "error_remove_description": "Fehler beim Entfernen des Auftrags. Bitte versuchen Sie es erneut.",
     "no_jobs": "Keine Aufträge gefunden",
-    "no_jobs_description": "Es gibt keine Aufträge, die Ihren aktuellen Filtern entsprechen."
+    "no_jobs_description": "Es gibt keine Aufträge, die Ihren aktuellen Filtern entsprechen.",
+    "declined_by": "Abgelehnt von {{shop}}. Grund: {{reason}}",
+    "no_reason_provided": "Kein Grund angegeben"
   },
   "jobs": {
     "title": "Übersicht offene Aufträge",
