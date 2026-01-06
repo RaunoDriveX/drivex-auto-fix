@@ -1,19 +1,87 @@
 {
   "shop": {
     "title": "Shop Dashboard",
+    "page_title": "Shop Dashboard - DriveX",
+    "page_description": "Manage your repair shop settings, availability, pricing, and job offers.",
     "welcome": "Welcome",
+    "loading": "Loading dashboard...",
+    "demo_mode": "Demo Mode",
+    "partner": "Partner",
+    "sign_out": "Sign Out",
+    "no_profile_title": "Complete Your Shop Profile",
+    "no_profile_description": "Set up your shop information to start receiving job offers",
+    "no_profile_message": "Complete the setup below to activate your shop profile and start managing jobs.",
+    "error_no_profile": "No shop profile found. Please contact support.",
+    "error_load_data": "Failed to load shop data",
+    "error_sign_out": "Failed to sign out",
     "tabs": {
+      "offers": "Active Job Offers",
+      "declined": "Declined Jobs",
+      "calendar": "Calendar",
+      "location": "Location",
+      "availability": "Availability",
+      "pricing": "Pricing",
+      "services": "Services",
+      "upsells": "Upsell Services",
+      "technicians": "Technicians",
+      "call_center": "Call Center",
       "dashboard": "Dashboard",
       "jobs": "Jobs",
-      "calendar": "Calendar",
       "profile": "Profile"
+    },
+    "offers": {
+      "title": "Active Job Offers",
+      "description": "New repair requests requiring your response",
+      "no_offers": "No active job offers at the moment.",
+      "no_offers_hint": "New jobs will appear here when they match your capabilities.",
+      "pending_title": "Pending Job Offers",
+      "service": "Service",
+      "customer": "Customer",
+      "remaining": "remaining",
+      "expired": "Expired",
+      "date_time": "Date & Time",
+      "service_type": "Service Type",
+      "estimated": "Est.",
+      "damage_type": "Damage Type",
+      "to_be_assessed": "To be assessed",
+      "offered": "Offered",
+      "accept_job": "Accept Job",
+      "decline": "Decline",
+      "processing": "Processing...",
+      "job_response_sent": "Job Response Sent",
+      "job_accepted": "Job accepted successfully!",
+      "job_declined": "Job declined successfully!",
+      "response_error": "Failed to respond to job offer"
+    },
+    "declined": {
+      "title": "Declined Jobs",
+      "description": "Review your declined job history"
+    },
+    "active_jobs": {
+      "title": "Active Jobs",
+      "no_jobs": "No Active Jobs",
+      "no_jobs_hint": "Accept job offers to start tracking their progress here.",
+      "job_details": "Job Details"
     },
     "performance": {
       "title": "Performance Metrics",
       "acceptance_rate": "Acceptance Rate",
       "response_time": "Response Time",
+      "avg_response_time": "Avg Response Time",
       "quality_score": "Quality Score",
-      "jobs_completed": "Jobs Completed"
+      "jobs_completed": "Jobs Completed",
+      "tier": "Tier"
+    },
+    "profile_setup": {
+      "title": "Complete your shop profile to access the dashboard",
+      "account_created": "Account created!",
+      "complete_profile": "Please complete your shop profile to continue.",
+      "verify_email": "Verify your email",
+      "check_email": "Please check your email and click the verification link to complete signup.",
+      "profile_created": "Shop profile created!",
+      "welcome_network": "Welcome to the DriveX network.",
+      "error_create": "Failed to create shop profile. Please try again.",
+      "error_already_exists": "An account with this email already exists. Please use the Sign In tab instead."
     },
     "jobs": {
       "title": "Available Jobs",
@@ -25,10 +93,58 @@
   },
   "insurer": {
     "title": "Insurer Dashboard",
+    "page_title": "Insurer Dashboard",
+    "loading": "Loading insurer dashboard...",
+    "network_description": "Manage your preferred shop network for",
+    "profile_not_found_title": "Insurer Profile Not Found",
+    "profile_not_found_description": "Your insurer profile is not set up. Please contact support to get started.",
+    "error_no_profile": "No insurer profile found",
+    "error_no_profile_hint": "Please contact support to set up your insurer profile.",
+    "error_load_data": "Failed to load insurer dashboard data",
     "tabs": {
       "jobs": "Live Jobs",
       "network": "Shop Network",
       "users": "User Management"
+    },
+    "preferred_shops": {
+      "title": "Preferred Shop Network",
+      "description": "Manage your network of preferred repair shops. Jobs will be routed to these shops first.",
+      "add_shop": "Add Shop",
+      "add_dialog_title": "Add Preferred Shop",
+      "add_dialog_description": "Select a shop to add to your preferred network",
+      "shop_label": "Shop",
+      "select_shop": "Select a shop",
+      "priority_label": "Priority Level",
+      "priority_1": "1 - Highest Priority",
+      "priority_2": "2 - High Priority",
+      "priority_3": "3 - Medium Priority",
+      "priority_4": "4 - Low Priority",
+      "priority_5": "5 - Lowest Priority",
+      "add_button": "Add to Preferred Network",
+      "adding": "Adding...",
+      "no_shops": "No preferred shops configured yet",
+      "no_shops_hint": "Add shops to your network to ensure jobs are routed to them first",
+      "priority": "Priority",
+      "reviews": "reviews",
+      "shop_added": "Shop added",
+      "shop_added_description": "Preferred shop has been added successfully",
+      "shop_removed": "Shop removed",
+      "shop_removed_description": "Preferred shop has been removed",
+      "error_add": "Error adding shop",
+      "error_add_description": "Failed to add preferred shop",
+      "error_remove": "Error removing shop",
+      "error_remove_description": "Failed to remove preferred shop"
+    },
+    "profile_setup": {
+      "title": "Complete your insurer profile to access the dashboard",
+      "account_created": "Account created!",
+      "account_created_description": "Your insurer account has been created successfully.",
+      "verify_email": "Verify your email",
+      "check_email": "Please check your email and click the verification link to complete signup.",
+      "profile_created": "Insurer profile created!",
+      "welcome_network": "Welcome to the DriveX network.",
+      "error_create": "Failed to create insurer profile. Please try again.",
+      "error_already_exists": "An account with this email already exists. Please use the Sign In tab instead."
     },
     "jobs": {
       "title": "Live Jobs Board",
@@ -62,6 +178,7 @@
     "actions": "Actions",
     "filters": "Filters",
     "search": "Search",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "error": "Error"
   }
 }
