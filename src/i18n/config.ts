@@ -5,31 +5,35 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 // Import English translations
 import enCommon from '@/locales/en/common.json';
 import enAuth from '@/locales/en/auth.json';
-import enDashboard from '@/locales/en/dashboard.json';
 import enForms from '@/locales/en/forms.json';
 import enMarketing from '@/locales/en/marketing.json';
+import enShop from '@/locales/en/shop.json';
+import enInsurer from '@/locales/en/insurer.json';
 
 // Import German translations
 import deCommon from '@/locales/de/common.json';
 import deAuth from '@/locales/de/auth.json';
-import deDashboard from '@/locales/de/dashboard.json';
 import deForms from '@/locales/de/forms.json';
 import deMarketing from '@/locales/de/marketing.json';
+import deShop from '@/locales/de/shop.json';
+import deInsurer from '@/locales/de/insurer.json';
 
 const resources = {
   en: {
     common: enCommon,
     auth: enAuth,
-    dashboard: enDashboard,
     forms: enForms,
     marketing: enMarketing,
+    shop: enShop,
+    insurer: enInsurer,
   },
   de: {
     common: deCommon,
     auth: deAuth,
-    dashboard: deDashboard,
     forms: deForms,
     marketing: deMarketing,
+    shop: deShop,
+    insurer: deInsurer,
   }
 };
 
@@ -40,7 +44,7 @@ i18n
     resources,
     fallbackLng: 'en', // Use English if detected language is not available
     defaultNS: 'common', // Default namespace
-    ns: ['common', 'auth', 'dashboard', 'forms', 'marketing'], // Available namespaces
+    ns: ['common', 'auth', 'forms', 'marketing', 'shop', 'insurer'], // Available namespaces
 
     interpolation: {
       escapeValue: false // React already escapes values

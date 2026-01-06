@@ -1,0 +1,92 @@
+{
+  "title": "Partner Dashboard",
+  "page_title": "Partner Dashboard - Glassify",
+  "page_description": "Verwalten Sie Ihre Werkstatteinstellungen, Verfügbarkeit, Preise und Auftragsangebote.",
+  "welcome": "Willkommen",
+  "loading": "Dashboard wird geladen...",
+  "demo_mode": "Demo-Modus",
+  "partner": "Partner",
+  "sign_out": "Abmelden",
+  "no_profile_title": "Vervollständigen Sie Ihr Werkstattprofil",
+  "no_profile_description": "Richten Sie Ihre Werkstattinformationen ein, um Auftragsangebote zu erhalten",
+  "no_profile_message": "Schließen Sie die unten stehende Einrichtung ab, um Ihr Werkstattprofil zu aktivieren und mit der Auftragsverwaltung zu beginnen.",
+  "error_no_profile": "Kein Werkstattprofil gefunden. Bitte kontaktieren Sie den Support.",
+  "error_load_data": "Werkstattdaten konnten nicht geladen werden",
+  "error_sign_out": "Abmelden fehlgeschlagen",
+  "tabs": {
+    "offers": "Aktive Auftragsangebote",
+    "declined": "Abgelehnte Aufträge",
+    "calendar": "Kalender",
+    "location": "Standort",
+    "availability": "Verfügbarkeit",
+    "pricing": "Preise",
+    "services": "Dienstleistungen",
+    "upsells": "Zusatzleistungen",
+    "technicians": "Techniker",
+    "call_center": "Callcenter",
+    "dashboard": "Dashboard",
+    "jobs": "Aufträge",
+    "profile": "Profil"
+  },
+  "offers": {
+    "title": "Aktive Auftragsangebote",
+    "description": "Neue Reparaturanfragen, die Ihre Antwort erfordern",
+    "no_offers": "Derzeit keine aktiven Auftragsangebote.",
+    "no_offers_hint": "Neue Aufträge werden hier angezeigt, wenn sie Ihren Fähigkeiten entsprechen.",
+    "pending_title": "Ausstehende Auftragsangebote",
+    "service": "Service",
+    "customer": "Kunde",
+    "remaining": "verbleibend",
+    "expired": "Abgelaufen",
+    "date_time": "Datum & Uhrzeit",
+    "service_type": "Serviceart",
+    "estimated": "Gesch.",
+    "damage_type": "Schadensart",
+    "to_be_assessed": "Wird noch bewertet",
+    "offered": "Angeboten",
+    "accept_job": "Auftrag annehmen",
+    "decline": "Ablehnen",
+    "processing": "Wird verarbeitet...",
+    "job_response_sent": "Auftragsantwort gesendet",
+    "job_accepted": "Auftrag erfolgreich angenommen!",
+    "job_declined": "Auftrag erfolgreich abgelehnt!",
+    "response_error": "Fehler bei der Auftragsantwort"
+  },
+  "declined": {
+    "title": "Abgelehnte Aufträge",
+    "description": "Überprüfen Sie Ihren Ablehnungsverlauf"
+  },
+  "active_jobs": {
+    "title": "Aktive Aufträge",
+    "no_jobs": "Keine aktiven Aufträge",
+    "no_jobs_hint": "Nehmen Sie Auftragsangebote an, um deren Fortschritt hier zu verfolgen.",
+    "job_details": "Auftragsdetails"
+  },
+  "performance": {
+    "title": "Leistungskennzahlen",
+    "acceptance_rate": "Annahmequote",
+    "response_time": "Reaktionszeit",
+    "avg_response_time": "Durchschn. Reaktionszeit",
+    "quality_score": "Qualitätsbewertung",
+    "jobs_completed": "Abgeschlossene Aufträge",
+    "tier": "Stufe"
+  },
+  "profile_setup": {
+    "title": "Vervollständigen Sie Ihr Werkstattprofil, um auf das Dashboard zuzugreifen",
+    "account_created": "Konto erstellt!",
+    "complete_profile": "Bitte vervollständigen Sie Ihr Werkstattprofil, um fortzufahren.",
+    "verify_email": "Bestätigen Sie Ihre E-Mail",
+    "check_email": "Bitte überprüfen Sie Ihre E-Mail und klicken Sie auf den Bestätigungslink, um die Registrierung abzuschließen.",
+    "profile_created": "Werkstattprofil erstellt!",
+    "welcome_network": "Willkommen im Glassify-Netzwerk.",
+    "error_create": "Fehler beim Erstellen des Werkstattprofils. Bitte versuchen Sie es erneut.",
+    "error_already_exists": "Ein Konto mit dieser E-Mail-Adresse existiert bereits. Bitte verwenden Sie stattdessen den Anmelden-Tab."
+  },
+  "jobs": {
+    "title": "Verfügbare Aufträge",
+    "no_jobs": "Keine Aufträge verfügbar",
+    "accept": "Auftrag annehmen",
+    "decline": "Auftrag ablehnen",
+    "view_details": "Details anzeigen"
+  }
+}

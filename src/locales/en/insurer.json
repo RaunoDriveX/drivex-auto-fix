@@ -1,0 +1,78 @@
+{
+  "title": "Insurer Dashboard",
+  "page_title": "Insurer Dashboard",
+  "loading": "Loading insurer dashboard...",
+  "network_description": "Manage your preferred shop network for",
+  "profile_not_found_title": "Insurer Profile Not Found",
+  "profile_not_found_description": "Your insurer profile is not set up. Please contact support to get started.",
+  "error_no_profile": "No insurer profile found",
+  "error_no_profile_hint": "Please contact support to set up your insurer profile.",
+  "error_load_data": "Failed to load insurer dashboard data",
+  "tabs": {
+    "jobs": "Live Jobs",
+    "network": "Shop Network",
+    "users": "User Management"
+  },
+  "preferred_shops": {
+    "title": "Preferred Shop Network",
+    "description": "Manage your network of preferred repair shops. Jobs will be routed to these shops first.",
+    "add_shop": "Add Shop",
+    "add_dialog_title": "Add Preferred Shop",
+    "add_dialog_description": "Select a shop to add to your preferred network",
+    "shop_label": "Shop",
+    "select_shop": "Select a shop",
+    "priority_label": "Priority Level",
+    "priority_1": "1 - Highest Priority",
+    "priority_2": "2 - High Priority",
+    "priority_3": "3 - Medium Priority",
+    "priority_4": "4 - Low Priority",
+    "priority_5": "5 - Lowest Priority",
+    "add_button": "Add to Preferred Network",
+    "adding": "Adding...",
+    "no_shops": "No preferred shops configured yet",
+    "no_shops_hint": "Add shops to your network to ensure jobs are routed to them first",
+    "priority": "Priority",
+    "reviews": "reviews",
+    "shop_added": "Shop added",
+    "shop_added_description": "Preferred shop has been added successfully",
+    "shop_removed": "Shop removed",
+    "shop_removed_description": "Preferred shop has been removed",
+    "error_add": "Error adding shop",
+    "error_add_description": "Failed to add preferred shop",
+    "error_remove": "Error removing shop",
+    "error_remove_description": "Failed to remove preferred shop"
+  },
+  "profile_setup": {
+    "title": "Complete your insurer profile to access the dashboard",
+    "account_created": "Account created!",
+    "account_created_description": "Your insurer account has been created successfully.",
+    "verify_email": "Verify your email",
+    "check_email": "Please check your email and click the verification link to complete signup.",
+    "profile_created": "Insurer profile created!",
+    "welcome_network": "Welcome to the DriveX network.",
+    "error_create": "Failed to create insurer profile. Please try again.",
+    "error_already_exists": "An account with this email already exists. Please use the Sign In tab instead."
+  },
+  "jobs": {
+    "title": "Live Jobs Board",
+    "no_jobs": "No active jobs",
+    "create_job": "Create New Job",
+    "job_status": "Job Status",
+    "shop_assigned": "Shop Assigned",
+    "total_cost": "Total Cost"
+  },
+  "network": {
+    "title": "Shop Network",
+    "total_shops": "Total Shops",
+    "active_shops": "Active Shops",
+    "performance_tier": "Performance Tier"
+  },
+  "user_management": {
+    "title": "User Management",
+    "add_user": "Add User",
+    "users_list": "Users List",
+    "role": "Role",
+    "admin": "Admin",
+    "claims_user": "Claims User"
+  }
+}
