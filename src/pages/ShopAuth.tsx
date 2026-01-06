@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ const ShopAuth = () => {
   const [authenticatedEmail, setAuthenticatedEmail] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation(['auth', 'common', 'forms']);
 
   const handleAuth = async (email: string, password: string, isSignUp: boolean) => {
     setIsLoading(true);
@@ -44,7 +46,6 @@ const ShopAuth = () => {
         });
 
         if (signUpError) {
-          // Handle "user already registered" error
           if (signUpError.message?.toLowerCase().includes('already registered') || 
               signUpError.message?.toLowerCase().includes('already exists')) {
             throw new Error("An account with this email already exists. Please use the Sign In tab instead.");
@@ -53,7 +54,6 @@ const ShopAuth = () => {
         }
 
         if (data.session) {
-          // Email confirmation disabled - prompt for shop profile setup
           setAuthenticatedEmail(email);
           setNeedsProfileSetup(true);
           toast({
@@ -68,7 +68,6 @@ const ShopAuth = () => {
           setError("Please check your email for a verification link to complete your registration.");
         }
       } else {
-        // Sign in existing shop user
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -76,7 +75,6 @@ const ShopAuth = () => {
 
         if (signInError) throw signInError;
 
-        // Check if shop profile exists
         const { data: shop, error: shopError } = await supabase
           .from('shops')
           .select('id')
@@ -84,26 +82,25 @@ const ShopAuth = () => {
           .single();
 
         if (shopError || !shop) {
-          // No shop profile - offer to create one
           setAuthenticatedEmail(email);
           setNeedsProfileSetup(true);
           toast({
-            title: "Welcome!",
+            title: t('auth:messages.welcome_back'),
             description: "Please complete your shop profile to continue.",
           });
           return;
         }
 
         toast({
-          title: "Welcome back!",
-          description: "Successfully signed in.",
+          title: t('auth:messages.welcome_back'),
+          description: t('auth:messages.shop_sign_in_success'),
         });
 
         navigate("/shop-dashboard");
       }
     } catch (error: any) {
       console.error('Authentication error:', error);
-      setError(error.message || "Authentication failed. Please try again.");
+      setError(error.message || t('auth:messages.invalid_credentials'));
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +113,6 @@ const ShopAuth = () => {
     setError(null);
 
     try {
-      // Generate a unique shop ID
       const shopId = `shop-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
       const { error: insertError } = await supabase
@@ -168,7 +164,7 @@ const ShopAuth = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="shopName">Shop Name *</Label>
+          <Label htmlFor="shopName">{t('forms:labels.company_name')} *</Label>
           <Input
             id="shopName"
             type="text"
@@ -180,7 +176,7 @@ const ShopAuth = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="address">Street Address *</Label>
+          <Label htmlFor="address">{t('forms:labels.address')} *</Label>
           <Input
             id="address"
             type="text"
@@ -193,7 +189,7 @@ const ShopAuth = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="city">City *</Label>
+            <Label htmlFor="city">{t('forms:labels.city')} *</Label>
             <Input
               id="city"
               type="text"
@@ -204,7 +200,7 @@ const ShopAuth = () => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="postalCode">Postal Code *</Label>
+            <Label htmlFor="postalCode">{t('forms:labels.postal_code')} *</Label>
             <Input
               id="postalCode"
               type="text"
@@ -217,7 +213,7 @@ const ShopAuth = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phone">{t('forms:labels.phone')}</Label>
           <Input
             id="phone"
             type="tel"
@@ -237,10 +233,10 @@ const ShopAuth = () => {
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating Profile...
+              {t('common:status.saving')}
             </>
           ) : (
-            "Complete Setup"
+            t('common:buttons.confirm')
           )}
         </Button>
       </form>
@@ -266,19 +262,19 @@ const ShopAuth = () => {
     return (
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t('auth:fields.email')}</Label>
           <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="your-shop@email.com"
+            placeholder={t('auth:fields.shop_email_placeholder')}
           />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t('auth:fields.password')}</Label>
           <Input
             id="password"
             type="password"
@@ -286,13 +282,13 @@ const ShopAuth = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
-            placeholder={isSignUp ? "At least 6 characters" : "Enter your password"}
+            placeholder={t('auth:fields.password_placeholder')}
           />
         </div>
         
         {isSignUp && (
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">{t('auth:fields.password')}</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -314,10 +310,10 @@ const ShopAuth = () => {
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
+              {isSignUp ? t('auth:actions.signing_up') : t('auth:actions.signing_in')}
             </>
           ) : (
-            isSignUp ? "Create Account" : "Sign In"
+            isSignUp ? t('auth:actions.sign_up') : t('auth:actions.sign_in')
           )}
         </Button>
       </form>
@@ -327,8 +323,8 @@ const ShopAuth = () => {
   return (
     <>
       <Helmet>
-        <title>Shop Portal - DriveX</title>
-        <meta name="description" content="Sign in to your repair shop portal to manage jobs, pricing, and availability." />
+        <title>{t('auth:shop.title')} - DriveX</title>
+        <meta name="description" content={t('auth:shop.subtitle')} />
       </Helmet>
       
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 flex items-center justify-center p-4">
@@ -339,13 +335,12 @@ const ShopAuth = () => {
             </div>
             <div className="flex items-center justify-center gap-2 mb-2">
               <Wrench className="h-6 w-6 text-primary" />
-              <CardTitle className="text-2xl">Shop Portal</CardTitle>
+              <CardTitle className="text-2xl">{t('auth:shop.title')}</CardTitle>
             </div>
             <CardDescription>
-              Access your repair shop dashboard
+              {t('auth:shop.subtitle')}
             </CardDescription>
           </CardHeader>
-          
           
           <CardContent>
             {needsProfileSetup ? (
@@ -353,8 +348,8 @@ const ShopAuth = () => {
             ) : (
               <Tabs defaultValue="signin" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-4">
-                  <TabsTrigger value="signin">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                  <TabsTrigger value="signin">{t('auth:shop.sign_in_title')}</TabsTrigger>
+                  <TabsTrigger value="signup">{t('auth:shop.sign_up_title')}</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="signin">
@@ -372,7 +367,7 @@ const ShopAuth = () => {
             <Button variant="ghost" asChild className="gap-2">
               <Link to="/" onClick={() => window.scrollTo(0, 0)}>
                 <ArrowLeft className="h-4 w-4" />
-                Back to Home
+                {t('common:buttons.back_to_home')}
               </Link>
             </Button>
           </div>
