@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,6 +48,7 @@ interface InsurerProfile {
 }
 
 export const InsurerDashboard: React.FC = () => {
+  const { t } = useTranslation('insurer');
   const [profile, setProfile] = useState<InsurerProfile | null>(null);
   const [preferredShops, setPreferredShops] = useState<PreferredShop[]>([]);
   const [availableShops, setAvailableShops] = useState<Shop[]>([]);
@@ -73,8 +75,8 @@ export const InsurerDashboard: React.FC = () => {
 
       if (!profileData) {
         toast({
-          title: "No insurer profile found",
-          description: "Please contact support to set up your insurer profile.",
+          title: t('error_no_profile'),
+          description: t('error_no_profile_hint'),
           variant: "destructive"
         });
         return;
@@ -106,8 +108,8 @@ export const InsurerDashboard: React.FC = () => {
     } catch (error) {
       console.error('Error fetching insurer data:', error);
       toast({
-        title: "Error loading data",
-        description: "Failed to load insurer dashboard data",
+        title: t('error_load_data'),
+        description: t('error_load_data'),
         variant: "destructive"
       });
     } finally {
@@ -132,8 +134,8 @@ export const InsurerDashboard: React.FC = () => {
       if (error) throw error;
 
       toast({
-        title: "Shop added",
-        description: "Preferred shop has been added successfully"
+        title: t('preferred_shops.shop_added'),
+        description: t('preferred_shops.shop_added_description')
       });
 
       fetchInsurerData();
@@ -143,8 +145,8 @@ export const InsurerDashboard: React.FC = () => {
     } catch (error) {
       console.error('Error adding preferred shop:', error);
       toast({
-        title: "Error adding shop",
-        description: "Failed to add preferred shop",
+        title: t('preferred_shops.error_add'),
+        description: t('preferred_shops.error_add_description'),
         variant: "destructive"
       });
     } finally {
@@ -162,8 +164,8 @@ export const InsurerDashboard: React.FC = () => {
       if (error) throw error;
 
       toast({
-        title: "Shop removed",
-        description: "Preferred shop has been removed"
+        title: t('preferred_shops.shop_removed'),
+        description: t('preferred_shops.shop_removed_description')
       });
 
       fetchInsurerData();
@@ -171,15 +173,15 @@ export const InsurerDashboard: React.FC = () => {
     } catch (error) {
       console.error('Error removing preferred shop:', error);
       toast({
-        title: "Error removing shop",
-        description: "Failed to remove preferred shop",
+        title: t('preferred_shops.error_remove'),
+        description: t('preferred_shops.error_remove_description'),
         variant: "destructive"
       });
     }
   };
 
   if (loading) {
-    return <div className="p-6">Loading insurer dashboard...</div>;
+    return <div className="p-6">{t('loading')}</div>;
   }
 
   if (!profile) {
@@ -187,9 +189,9 @@ export const InsurerDashboard: React.FC = () => {
       <div className="p-6">
         <Card>
           <CardHeader>
-            <CardTitle>Insurer Profile Not Found</CardTitle>
+            <CardTitle>{t('profile_not_found_title')}</CardTitle>
             <CardDescription>
-              Your insurer profile is not set up. Please contact support to get started.
+              {t('profile_not_found_description')}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -205,9 +207,9 @@ export const InsurerDashboard: React.FC = () => {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Insurer Dashboard</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <p className="text-muted-foreground">
-          Manage your preferred shop network for {profile.insurer_name}
+          {t('network_description')} {profile.insurer_name}
         </p>
       </div>
 
@@ -215,53 +217,53 @@ export const InsurerDashboard: React.FC = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Preferred Shop Network</CardTitle>
+              <CardTitle>{t('preferred_shops.title')}</CardTitle>
               <CardDescription>
-                Manage your network of preferred repair shops. Jobs will be routed to these shops first.
+                {t('preferred_shops.description')}
               </CardDescription>
             </div>
             <Dialog>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Shop
+                  {t('preferred_shops.add_shop')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Add Preferred Shop</DialogTitle>
+                  <DialogTitle>{t('preferred_shops.add_dialog_title')}</DialogTitle>
                   <DialogDescription>
-                    Select a shop to add to your preferred network
+                    {t('preferred_shops.add_dialog_description')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
-                    <Label>Shop</Label>
+                    <Label>{t('preferred_shops.shop_label')}</Label>
                     <Select value={selectedShopId} onValueChange={setSelectedShopId}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a shop" />
+                        <SelectValue placeholder={t('preferred_shops.select_shop')} />
                       </SelectTrigger>
                       <SelectContent>
                         {availableForSelection.map((shop) => (
                           <SelectItem key={shop.id} value={shop.id}>
-                            {shop.name} - {shop.city} ({shop.rating}⭐ • {shop.total_reviews} reviews)
+                            {shop.name} - {shop.city} ({shop.rating}⭐ • {shop.total_reviews} {t('preferred_shops.reviews')})
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label>Priority Level</Label>
+                    <Label>{t('preferred_shops.priority_label')}</Label>
                     <Select value={selectedPriority} onValueChange={setSelectedPriority}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">1 - Highest Priority</SelectItem>
-                        <SelectItem value="2">2 - High Priority</SelectItem>
-                        <SelectItem value="3">3 - Medium Priority</SelectItem>
-                        <SelectItem value="4">4 - Low Priority</SelectItem>
-                        <SelectItem value="5">5 - Lowest Priority</SelectItem>
+                        <SelectItem value="1">{t('preferred_shops.priority_1')}</SelectItem>
+                        <SelectItem value="2">{t('preferred_shops.priority_2')}</SelectItem>
+                        <SelectItem value="3">{t('preferred_shops.priority_3')}</SelectItem>
+                        <SelectItem value="4">{t('preferred_shops.priority_4')}</SelectItem>
+                        <SelectItem value="5">{t('preferred_shops.priority_5')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -270,7 +272,7 @@ export const InsurerDashboard: React.FC = () => {
                     disabled={!selectedShopId || isAddingShop}
                     className="w-full"
                   >
-                    {isAddingShop ? "Adding..." : "Add to Preferred Network"}
+                    {isAddingShop ? t('preferred_shops.adding') : t('preferred_shops.add_button')}
                   </Button>
                 </div>
               </DialogContent>
@@ -281,8 +283,8 @@ export const InsurerDashboard: React.FC = () => {
           {preferredShops.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No preferred shops configured yet</p>
-              <p className="text-sm">Add shops to your network to ensure jobs are routed to them first</p>
+              <p>{t('preferred_shops.no_shops')}</p>
+              <p className="text-sm">{t('preferred_shops.no_shops_hint')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -295,11 +297,11 @@ export const InsurerDashboard: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <h3 className="font-medium">{preferredShop.shop.name}</h3>
                       <Badge variant="outline">
-                        Priority {preferredShop.priority_level}
+                        {t('preferred_shops.priority')} {preferredShop.priority_level}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {preferredShop.shop.city} • {preferredShop.shop.rating}⭐ ({preferredShop.shop.total_reviews} reviews)
+                      {preferredShop.shop.city} • {preferredShop.shop.rating}⭐ ({preferredShop.shop.total_reviews} {t('preferred_shops.reviews')})
                     </p>
                   </div>
                   <Button

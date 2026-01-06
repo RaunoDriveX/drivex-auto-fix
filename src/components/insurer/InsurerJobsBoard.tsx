@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -51,36 +52,39 @@ interface Job {
   notes?: string;
 }
 
-const statusConfig = {
+const getStatusConfig = (t: (key: string) => string) => ({
   scheduled: { 
     icon: Clock, 
     color: 'bg-blue-100 text-blue-800', 
-    label: 'Scheduled' 
+    label: t('jobs_board.scheduled')
   },
   in_progress: { 
     icon: PlayCircle, 
     color: 'bg-yellow-100 text-yellow-800', 
-    label: 'In Progress' 
+    label: t('jobs_board.in_progress')
   },
   completed: { 
     icon: CheckCircle, 
     color: 'bg-green-100 text-green-800', 
-    label: 'Completed' 
+    label: t('jobs_board.completed')
   },
   cancelled: { 
     icon: XCircle, 
     color: 'bg-red-100 text-red-800', 
-    label: 'Cancelled' 
+    label: t('jobs_board.cancelled')
   }
-};
+});
 
 export const InsurerJobsBoard: React.FC = () => {
+  const { t } = useTranslation('insurer');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  
+  const statusConfig = getStatusConfig(t);
 
   useEffect(() => {
     fetchJobs();
@@ -255,14 +259,14 @@ export const InsurerJobsBoard: React.FC = () => {
 
       setJobs(prev => prev.filter(j => j.id !== jobId));
       toast({
-        title: "Job Removed",
-        description: "The job has been removed from your dashboard."
+        title: t('jobs_board.job_removed'),
+        description: t('jobs_board.job_removed_description')
       });
     } catch (error: any) {
       console.error('Error deleting job:', error);
       toast({
-        title: "Error",
-        description: "Failed to remove job. Please try again.",
+        title: t('jobs_board.error_remove'),
+        description: t('jobs_board.error_remove_description'),
         variant: "destructive"
       });
     }
@@ -298,14 +302,14 @@ export const InsurerJobsBoard: React.FC = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Live Jobs Dashboard</h1>
+          <h1 className="text-2xl font-bold">{t('jobs_board.title')}</h1>
           <p className="text-muted-foreground">
-            Real-time tracking of all repair jobs
+            {t('jobs_board.description')}
           </p>
         </div>
         <Button onClick={fetchJobs} disabled={loading} variant="outline">
           <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
+          {t('jobs_board.refresh')}
         </Button>
       </div>
 
@@ -318,7 +322,7 @@ export const InsurerJobsBoard: React.FC = () => {
         >
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold">{statusCounts.all}</div>
-            <div className="text-sm text-muted-foreground">All Jobs</div>
+            <div className="text-sm text-muted-foreground">{t('jobs_board.all_jobs')}</div>
           </CardContent>
         </Card>
         
@@ -350,7 +354,7 @@ export const InsurerJobsBoard: React.FC = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by customer name, email, shop, or job ID..."
+            placeholder={t('jobs_board.search_placeholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -361,11 +365,11 @@ export const InsurerJobsBoard: React.FC = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="scheduled">Scheduled</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="all">{t('jobs_board.all_statuses')}</SelectItem>
+            <SelectItem value="scheduled">{t('jobs_board.scheduled')}</SelectItem>
+            <SelectItem value="in_progress">{t('jobs_board.in_progress')}</SelectItem>
+            <SelectItem value="completed">{t('jobs_board.completed')}</SelectItem>
+            <SelectItem value="cancelled">{t('jobs_board.cancelled')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -410,26 +414,26 @@ export const InsurerJobsBoard: React.FC = () => {
 
                 {job.short_code && (
                   <div className="text-xs">
-                    <span className="text-muted-foreground">Tracking Code:</span>
+                    <span className="text-muted-foreground">{t('jobs_board.tracking_code')}</span>
                     <span className="ml-2 font-mono font-bold text-primary">{job.short_code}</span>
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Scheduled:</span>
+                    <span className="text-muted-foreground">{t('jobs_board.scheduled_label')}</span>
                     <p className="font-medium">
                       {format(new Date(job.appointment_date), 'MMM d')} at {job.appointment_time?.substring(0, 5)}
                     </p>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Cost:</span>
+                    <span className="text-muted-foreground">{t('jobs_board.cost')}</span>
                     <p className="font-medium">€{job.total_cost}</p>
                   </div>
                 </div>
                 
                 {job.job_started_at && (
                   <div className="text-sm">
-                    <span className="text-muted-foreground">Started:</span>
+                    <span className="text-muted-foreground">{t('jobs_board.started')}</span>
                     <p className="font-medium">
                       {format(new Date(job.job_started_at), 'MMM d, HH:mm')}
                     </p>
@@ -438,7 +442,7 @@ export const InsurerJobsBoard: React.FC = () => {
                 
                 {job.job_completed_at && (
                   <div className="text-sm">
-                    <span className="text-muted-foreground">Completed:</span>
+                    <span className="text-muted-foreground">{t('jobs_board.completed_label')}</span>
                     <p className="font-medium">
                       {format(new Date(job.job_completed_at), 'MMM d, HH:mm')}
                     </p>
@@ -453,7 +457,7 @@ export const InsurerJobsBoard: React.FC = () => {
                     onClick={() => setSelectedJob(selectedJob === job.id ? null : job.id)}
                   >
                     <Eye className="h-4 w-4 mr-2" />
-                    {selectedJob === job.id ? 'Hide Details' : 'View Details'}
+                    {selectedJob === job.id ? t('jobs_board.hide_details') : t('jobs_board.view_details')}
                   </Button>
                   
                   {/* Delete button for cancelled jobs */}
@@ -466,15 +470,15 @@ export const InsurerJobsBoard: React.FC = () => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Remove Job</AlertDialogTitle>
+                          <AlertDialogTitle>{t('jobs_board.remove_job')}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to remove this cancelled job from your dashboard? This action cannot be undone.
+                            {t('jobs_board.remove_job_confirm')}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>{t('jobs_board.cancel')}</AlertDialogCancel>
                           <AlertDialogAction onClick={() => handleDeleteJob(job.id)}>
-                            Remove Job
+                            {t('jobs_board.remove_job')}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -498,12 +502,9 @@ export const InsurerJobsBoard: React.FC = () => {
         <Card>
           <CardContent className="text-center py-12">
             <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No jobs found</h3>
+            <h3 className="text-lg font-medium mb-2">{t('jobs_board.no_jobs')}</h3>
             <p className="text-muted-foreground">
-              {searchTerm || statusFilter !== 'all' 
-                ? 'Try adjusting your filters'
-                : 'No jobs have been created yet'
-              }
+              {t('jobs_board.no_jobs_description')}
             </p>
           </CardContent>
         </Card>
