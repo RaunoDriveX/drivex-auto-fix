@@ -1,0 +1,92 @@
+{
+  "title": "Shop Dashboard",
+  "page_title": "Shop Dashboard - DriveX",
+  "page_description": "Manage your repair shop settings, availability, pricing, and job offers.",
+  "welcome": "Welcome",
+  "loading": "Loading dashboard...",
+  "demo_mode": "Demo Mode",
+  "partner": "Partner",
+  "sign_out": "Sign Out",
+  "no_profile_title": "Complete Your Shop Profile",
+  "no_profile_description": "Set up your shop information to start receiving job offers",
+  "no_profile_message": "Complete the setup below to activate your shop profile and start managing jobs.",
+  "error_no_profile": "No shop profile found. Please contact support.",
+  "error_load_data": "Failed to load shop data",
+  "error_sign_out": "Failed to sign out",
+  "tabs": {
+    "offers": "Active Job Offers",
+    "declined": "Declined Jobs",
+    "calendar": "Calendar",
+    "location": "Location",
+    "availability": "Availability",
+    "pricing": "Pricing",
+    "services": "Services",
+    "upsells": "Upsell Services",
+    "technicians": "Technicians",
+    "call_center": "Call Center",
+    "dashboard": "Dashboard",
+    "jobs": "Jobs",
+    "profile": "Profile"
+  },
+  "offers": {
+    "title": "Active Job Offers",
+    "description": "New repair requests requiring your response",
+    "no_offers": "No active job offers at the moment.",
+    "no_offers_hint": "New jobs will appear here when they match your capabilities.",
+    "pending_title": "Pending Job Offers",
+    "service": "Service",
+    "customer": "Customer",
+    "remaining": "remaining",
+    "expired": "Expired",
+    "date_time": "Date & Time",
+    "service_type": "Service Type",
+    "estimated": "Est.",
+    "damage_type": "Damage Type",
+    "to_be_assessed": "To be assessed",
+    "offered": "Offered",
+    "accept_job": "Accept Job",
+    "decline": "Decline",
+    "processing": "Processing...",
+    "job_response_sent": "Job Response Sent",
+    "job_accepted": "Job accepted successfully!",
+    "job_declined": "Job declined successfully!",
+    "response_error": "Failed to respond to job offer"
+  },
+  "declined": {
+    "title": "Declined Jobs",
+    "description": "Review your declined job history"
+  },
+  "active_jobs": {
+    "title": "Active Jobs",
+    "no_jobs": "No Active Jobs",
+    "no_jobs_hint": "Accept job offers to start tracking their progress here.",
+    "job_details": "Job Details"
+  },
+  "performance": {
+    "title": "Performance Metrics",
+    "acceptance_rate": "Acceptance Rate",
+    "response_time": "Response Time",
+    "avg_response_time": "Avg Response Time",
+    "quality_score": "Quality Score",
+    "jobs_completed": "Jobs Completed",
+    "tier": "Tier"
+  },
+  "profile_setup": {
+    "title": "Complete your shop profile to access the dashboard",
+    "account_created": "Account created!",
+    "complete_profile": "Please complete your shop profile to continue.",
+    "verify_email": "Verify your email",
+    "check_email": "Please check your email and click the verification link to complete signup.",
+    "profile_created": "Shop profile created!",
+    "welcome_network": "Welcome to the DriveX network.",
+    "error_create": "Failed to create shop profile. Please try again.",
+    "error_already_exists": "An account with this email already exists. Please use the Sign In tab instead."
+  },
+  "jobs": {
+    "title": "Available Jobs",
+    "no_jobs": "No jobs available",
+    "accept": "Accept Job",
+    "decline": "Decline Job",
+    "view_details": "View Details"
+  }
+}
