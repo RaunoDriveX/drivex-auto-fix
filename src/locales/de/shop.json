@@ -34,6 +34,8 @@
     "no_offers": "Derzeit keine aktiven Auftragsangebote.",
     "no_offers_hint": "Neue Aufträge werden hier angezeigt, wenn sie Ihren Fähigkeiten entsprechen.",
     "pending_title": "Ausstehende Auftragsangebote",
+    "pending_offers": "Ausstehende Angebote",
+    "accepted_jobs": "Angenommene Aufträge",
     "service": "Service",
     "customer": "Kunde",
     "remaining": "verbleibend",
@@ -50,7 +52,32 @@
     "job_response_sent": "Auftragsantwort gesendet",
     "job_accepted": "Auftrag erfolgreich angenommen!",
     "job_declined": "Auftrag erfolgreich abgelehnt!",
-    "response_error": "Fehler bei der Auftragsantwort"
+    "response_error": "Fehler bei der Auftragsantwort",
+    "loading_offers": "Auftragsangebote werden geladen...",
+    "new_offers_hint": "Neue Angebote werden hier angezeigt, sobald sie verfügbar sind.",
+    "tracking_code": "Tracking-Code",
+    "license": "Kennzeichen",
+    "vin": "FIN",
+    "ai_assessment": "KI-Bewertung",
+    "confident": "sicher",
+    "safe_to_drive": "Fahrtüchtig",
+    "requires_attention": "Erfordert Aufmerksamkeit",
+    "recommended_repair": "Empfohlen",
+    "insurance_claim": "Versicherungsfall",
+    "direct_booking": "Direktbuchung",
+    "view_photos": "Fotos anzeigen",
+    "damage_photos": "Schadensfotos",
+    "no_photos": "Keine Fotos verfügbar",
+    "customer_notes": "Kundennotizen",
+    "decline_reason": "Grund für Ablehnung",
+    "decline_placeholder": "Bitte geben Sie einen Grund an...",
+    "confirm_decline": "Ablehnung bestätigen",
+    "job_accepted_title": "Auftrag angenommen",
+    "job_accepted_description": "Sie haben diesen Auftrag erfolgreich angenommen.",
+    "job_declined_title": "Auftrag abgelehnt",
+    "job_declined_description": "Sie haben diesen Auftrag abgelehnt.",
+    "error_title": "Fehler",
+    "error_load": "Auftragsangebote konnten nicht geladen werden"
   },
   "declined": {
     "title": "Abgelehnte Aufträge",
@@ -80,7 +107,8 @@
     "profile_created": "Werkstattprofil erstellt!",
     "welcome_network": "Willkommen im Glassify-Netzwerk.",
     "error_create": "Fehler beim Erstellen des Werkstattprofils. Bitte versuchen Sie es erneut.",
-    "error_already_exists": "Ein Konto mit dieser E-Mail-Adresse existiert bereits. Bitte verwenden Sie stattdessen den Anmelden-Tab."
+    "error_already_exists": "Ein Konto mit dieser E-Mail-Adresse existiert bereits. Bitte verwenden Sie stattdessen den Anmelden-Tab.",
+    "passwords_not_match": "Passwörter stimmen nicht überein"
   },
   "jobs": {
     "title": "Verfügbare Aufträge",
@@ -88,5 +116,124 @@
     "accept": "Auftrag annehmen",
     "decline": "Auftrag ablehnen",
     "view_details": "Details anzeigen"
+  },
+  "calendar": {
+    "title": "Werkstatt-Kalender",
+    "description": "Verwalten Sie Ihre Verfügbarkeit, Termine und Auftragsangebote im Kalenderformat",
+    "add_slot": "Slot hinzufügen",
+    "no_events": "Keine Ereignisse für diesen Tag",
+    "more_events": "+{{count}} weitere",
+    "legend": "Legende",
+    "status": {
+      "pending": "Ausstehend",
+      "offered": "Angeboten",
+      "accepted": "Angenommen",
+      "declined": "Abgelehnt",
+      "completed": "Abgeschlossen",
+      "available": "Verfügbar",
+      "unavailable": "Nicht verfügbar"
+    },
+    "availability_added": "Verfügbarkeit hinzugefügt",
+    "availability_added_desc": "Neuer Verfügbarkeitsslot wurde hinzugefügt",
+    "availability_updated": "Verfügbarkeit aktualisiert",
+    "availability_updated_desc": "Verfügbarkeitsstatus wurde geändert",
+    "appointment_confirmed": "Termin bestätigt",
+    "appointment_confirmed_desc": "Der Termin wurde bestätigt",
+    "error_title": "Fehler",
+    "error_load": "Kalenderdaten konnten nicht geladen werden",
+    "error_add_availability": "Verfügbarkeitsslot konnte nicht hinzugefügt werden",
+    "error_update_availability": "Verfügbarkeit konnte nicht aktualisiert werden",
+    "error_confirm": "Termin konnte nicht bestätigt werden",
+    "event_details": {
+      "customer": "Kunde",
+      "service": "Service",
+      "price": "Preis",
+      "vehicle": "Fahrzeug",
+      "toggle_availability": "Verfügbarkeit umschalten",
+      "confirm_appointment": "Termin bestätigen"
+    }
+  },
+  "status_controls": {
+    "title": "Auftragsstatus-Steuerung",
+    "description": "Aktualisieren Sie den Auftragsstatus und benachrichtigen Sie den Versicherer in Echtzeit",
+    "current_status": "Aktueller Status",
+    "no_actions": "Dieser Auftrag ist {{status}} - keine weiteren Aktionen verfügbar",
+    "actions": {
+      "start_job": "Auftrag starten",
+      "complete_job": "Auftrag abschließen",
+      "cancel_job": "Auftrag stornieren"
+    },
+    "descriptions": {
+      "start_job": "Diesen Auftrag als in Bearbeitung markieren",
+      "complete_job": "Diesen Auftrag als abgeschlossen markieren",
+      "cancel_job": "Diesen Auftrag stornieren"
+    },
+    "dialogs": {
+      "notes_label": "Notizen (optional)",
+      "notes_placeholder": "Fügen Sie Notizen zu dieser Statusänderung hinzu...",
+      "confirm": "{{action}} bestätigen",
+      "cancel_title": "Auftrag stornieren",
+      "cancel_description": "Sind Sie sicher, dass Sie diesen Auftrag stornieren möchten? Diese Aktion kann nicht rückgängig gemacht werden und der Versicherer wird sofort benachrichtigt.",
+      "cancel_reason_label": "Grund für Stornierung",
+      "cancel_reason_placeholder": "Bitte geben Sie einen Grund für die Stornierung an...",
+      "confirm_cancel": "Stornierung bestätigen",
+      "keep_job": "Auftrag behalten"
+    },
+    "toast": {
+      "updated_title": "Status aktualisiert",
+      "updated_description": "Auftragsstatus wurde auf {{status}} geändert",
+      "error_title": "Aktualisierung fehlgeschlagen",
+      "error_description": "Auftragsstatus konnte nicht aktualisiert werden"
+    },
+    "info": "Statusaktualisierungen werden innerhalb von 5 Sekunden an den Versicherer gesendet und protokolliert"
+  },
+  "documents": {
+    "upload_title": "Abschlussdokumente hochladen",
+    "upload_description": "Laden Sie die Rechnung (PDF) und das Fertigstellungsfoto hoch, bevor Sie den Auftrag als abgeschlossen markieren",
+    "before_complete": "Bitte laden Sie die Rechnung und das Fertigstellungsfoto hoch, bevor Sie den Auftrag als abgeschlossen markieren.",
+    "invoice_label": "Rechnung (PDF erforderlich)",
+    "invoice_hint": "Klicken Sie, um die Rechnung hochzuladen",
+    "invoice_max_size": "Maximale Dateigröße: 10MB",
+    "proof_label": "Fertigstellungsfoto",
+    "proof_hint": "Klicken Sie, um das Fertigstellungsfoto hochzuladen",
+    "proof_formats": "JPG, PNG oder andere Bildformate • Maximale Dateigröße: 5MB",
+    "upload_button": "Dokumente hochladen",
+    "uploading": "Dokumente werden hochgeladen...",
+    "both_required": "Sowohl Rechnung als auch Fertigstellungsfoto sind erforderlich",
+    "success_title": "Dokumente erfolgreich übermittelt",
+    "success_description": "Ihre Rechnung und Ihr Fertigstellungsfoto wurden hochgeladen und an den Versicherer gesendet.",
+    "toast": {
+      "uploaded_title": "Dokumente hochgeladen",
+      "uploaded_description": "Rechnung und Fertigstellungsfoto wurden erfolgreich übermittelt",
+      "error_title": "Hochladen fehlgeschlagen",
+      "error_description": "Dokumente konnten nicht hochgeladen werden"
+    },
+    "validation": {
+      "invalid_invoice_type": "Rechnung muss eine PDF-Datei sein",
+      "invoice_too_large": "Rechnungsdatei muss kleiner als 10MB sein",
+      "invalid_proof_type": "Fertigstellungsfoto muss eine Bilddatei sein (JPG, PNG, etc.)",
+      "proof_too_large": "Bilddatei muss kleiner als 5MB sein",
+      "missing_documents": "Bitte laden Sie sowohl Rechnung als auch Fertigstellungsfoto hoch"
+    },
+    "viewer": {
+      "title": "Abschlussdokumente",
+      "no_documents": "Es wurden noch keine Abschlussdokumente hochgeladen",
+      "uploaded_on": "Rechnung und Fertigstellungsfoto hochgeladen am {{date}}",
+      "delivery_status": "Lieferstatus",
+      "sent_via": "Gesendet via {{method}} am {{date}}",
+      "not_delivered": "Noch nicht zugestellt",
+      "invoice": "Rechnung",
+      "completion_proof": "Fertigstellungsfoto",
+      "completion_proof_photo": "Fertigstellungsfoto",
+      "photo_evidence": "Fotobeweis der abgeschlossenen Reparaturarbeiten",
+      "view": "Anzeigen",
+      "download": "Herunterladen",
+      "notes": "Notizen",
+      "status": {
+        "pending": "Ausstehend",
+        "sent": "Zugestellt",
+        "failed": "Fehlgeschlagen"
+      }
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,6 +61,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState("");
   const { toast } = useToast();
+  const { t } = useTranslation(['shop', 'common', 'forms']);
 
   useEffect(() => {
     fetchJobOffers();
@@ -314,10 +316,10 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       }
 
       toast({
-        title: response === 'accept' ? "Job Accepted" : "Job Declined",
+        title: response === 'accept' ? t('offers.job_accepted_title') : t('offers.job_declined_title'),
         description: response === 'accept' 
-          ? "You have successfully accepted this job offer." 
-          : "You have declined this job offer."
+          ? t('offers.job_accepted_description')
+          : t('offers.job_declined_description')
       });
 
       // Refresh job offers
@@ -326,8 +328,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
     } catch (error: any) {
       console.error('Error responding to job offer:', error);
       toast({
-        title: "Error",
-        description: "Failed to respond to job offer",
+        title: t('offers.error_title'),
+        description: t('offers.response_error'),
         variant: "destructive"
       });
     } finally {
@@ -368,7 +370,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         <CardContent className="py-6">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-muted-foreground">Loading job offers...</p>
+            <p className="mt-2 text-muted-foreground">{t('offers.loading_offers')}</p>
           </div>
         </CardContent>
       </Card>
@@ -380,13 +382,13 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       <Tabs defaultValue="pending" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="pending">
-            Pending Offers
+            {t('offers.pending_offers')}
             {jobOffers.length > 0 && (
               <Badge variant="secondary" className="ml-2">{jobOffers.length}</Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="accepted">
-            Accepted Jobs
+            {t('offers.accepted_jobs')}
             {acceptedJobs.length > 0 && (
               <Badge variant="default" className="ml-2">{acceptedJobs.length}</Badge>
             )}
@@ -398,8 +400,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             <Card>
               <CardContent className="py-6">
                 <div className="text-center text-muted-foreground">
-                  <p>No active job offers at the moment.</p>
-                  <p className="text-sm mt-2">New offers will appear here when available.</p>
+                  <p>{t('offers.no_offers')}</p>
+                  <p className="text-sm mt-2">{t('offers.new_offers_hint')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -423,7 +425,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                     {/* Tracking Code */}
                     {offer.appointments.short_code && (
                       <div className="text-xs mb-3">
-                        <span className="text-muted-foreground">Tracking Code:</span>
+                        <span className="text-muted-foreground">{t('offers.tracking_code')}:</span>
                         <span className="ml-2 font-mono font-bold text-primary">{offer.appointments.short_code}</span>
                       </div>
                     )}
@@ -441,11 +443,11 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         {(offer.appointments.vehicle_info.license_plate || offer.appointments.vehicle_info.vin) && (
                           <div className="text-sm text-muted-foreground ml-7">
                             {offer.appointments.vehicle_info.license_plate && (
-                              <span>License: {offer.appointments.vehicle_info.license_plate}</span>
+                              <span>{t('offers.license')}: {offer.appointments.vehicle_info.license_plate}</span>
                             )}
                             {offer.appointments.vehicle_info.license_plate && offer.appointments.vehicle_info.vin && " • "}
                             {offer.appointments.vehicle_info.vin && (
-                              <span>VIN: {offer.appointments.vehicle_info.vin}</span>
+                              <span>{t('offers.vin')}: {offer.appointments.vehicle_info.vin}</span>
                             )}
                           </div>
                         )}
@@ -458,9 +460,9 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <Brain className="h-4 w-4 text-blue-600" />
-                            <span className="font-semibold text-blue-900 text-sm">AI Assessment</span>
+                            <span className="font-semibold text-blue-900 text-sm">{t('offers.ai_assessment')}</span>
                             <Badge variant={offer.appointments.ai_confidence_score >= 0.9 ? "default" : "secondary"} className="text-xs">
-                              {Math.round(offer.appointments.ai_confidence_score * 100)}% confident
+                              {Math.round(offer.appointments.ai_confidence_score * 100)}% {t('offers.confident')}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-1">
@@ -496,7 +498,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                       {offer.appointments.is_insurance_claim && (
                         <Badge variant="secondary" className="flex items-center gap-1">
                           <CreditCard className="h-3 w-3" />
-                          Insurance Claim
+                          {t('offers.insurance_claim')}
                         </Badge>
                       )}
                        {offer.appointments.damage_type && (
@@ -507,7 +509,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                        )}
                        {offer.requires_adas_calibration && (
                          <Badge variant="destructive" className="text-xs">
-                           ADAS Required
+                           {t('offers.adas_required', { ns: 'insurer', defaultValue: 'ADAS Required' })}
                          </Badge>
                        )}
                     </div>
@@ -524,10 +526,10 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                   <div className="space-y-3">
                     <h4 className="font-semibold flex items-center gap-2">
                       <ImageIcon className="h-4 w-4" />
-                      Damage Photos ({offer.appointments.damage_photos.length})
+                      {t('offers.damage_photos')} ({offer.appointments.damage_photos.length})
                       <Badge variant="outline" className="text-xs ml-2">
                         <Target className="h-3 w-3 mr-1" />
-                        AI Detected
+                        {t('offers.ai_assessment')}
                       </Badge>
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -711,7 +713,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                     className="flex-1 text-lg py-6"
                     size="lg"
                   >
-                    {respondingTo === offer.id ? "Processing..." : "Accept Job"}
+                    {respondingTo === offer.id ? t('offers.processing') : t('offers.accept_job')}
                   </Button>
                   
                   <AlertDialog>
@@ -722,34 +724,34 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         className="flex-1 text-lg py-6"
                         size="lg"
                       >
-                        Decline
+                        {t('offers.decline')}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Decline Job Offer</AlertDialogTitle>
+                        <AlertDialogTitle>{t('offers.decline')} {t('offers.title', { defaultValue: 'Job Offer' })}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Please provide a reason for declining this job offer (optional).
+                          {t('offers.decline_placeholder')}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="decline-reason">Reason for declining</Label>
+                        <Label htmlFor="decline-reason">{t('offers.decline_reason')}</Label>
                         <Textarea
                           id="decline-reason"
                           value={declineReason}
                           onChange={(e) => setDeclineReason(e.target.value)}
-                          placeholder="e.g., Fully booked, outside service area, etc."
+                          placeholder={t('offers.decline_placeholder')}
                         />
                       </div>
                        
                        <AlertDialogFooter>
-                         <AlertDialogCancel>Cancel</AlertDialogCancel>
+                         <AlertDialogCancel>{t('cancel', { ns: 'common' })}</AlertDialogCancel>
                          <AlertDialogAction
                            onClick={() => handleJobResponse(offer.id, 'decline')}
                            disabled={respondingTo === offer.id}
                          >
-                           Decline Job
+                           {t('offers.confirm_decline')}
                          </AlertDialogAction>
                        </AlertDialogFooter>
                      </AlertDialogContent>
@@ -811,12 +813,12 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                           <div className="flex gap-2 mt-3">
                             <Badge variant="default" className="flex items-center gap-1">
                               <CheckCircle className="h-3 w-3" />
-                              Accepted
+                              {t('calendar.status.accepted')}
                             </Badge>
                             {offer.appointments.is_insurance_claim && (
                               <Badge variant="secondary" className="flex items-center gap-1">
                                 <CreditCard className="h-3 w-3" />
-                                Insurance Claim
+                                {t('offers.insurance_claim')}
                               </Badge>
                             )}
                           </div>
