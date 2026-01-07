@@ -275,8 +275,15 @@ export const InsurerJobsBoard: React.FC = () => {
   const getCancellationInfo = (job: Job): { reason: string; shop: string } | null => {
     if (job.job_status !== 'cancelled' && job.status !== 'cancelled') return null;
     
+    // Extract just the reason from notes if it contains the old English format
+    let reason = job.notes || '';
+    const reasonMatch = reason.match(/Reason:\s*(.+)$/i);
+    if (reasonMatch) {
+      reason = reasonMatch[1];
+    }
+    
     return { 
-      reason: job.notes || t('jobs_board.no_reason_provided'),
+      reason: reason || t('jobs_board.no_reason_provided'),
       shop: job.shop_name
     };
   };
