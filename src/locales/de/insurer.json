@@ -19,7 +19,7 @@
     "refresh": "Aktualisieren",
     "loading": "Aufträge werden geladen...",
     "all_jobs": "Alle Aufträge",
-    "all_statuses": "Alle Status",
+    "all_statuses": "Alle Stati",
     "scheduled": "Geplant",
     "in_progress": "In Bearbeitung",
     "completed": "Abgeschlossen",
@@ -32,10 +32,10 @@
     "view_details": "Details anzeigen",
     "hide_details": "Details ausblenden",
     "remove_job": "Auftrag entfernen",
-    "remove_job_confirm": "Sind Sie sicher, dass Sie diesen Auftrag vom Board entfernen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "remove_job_confirm": "Sind Sie sicher, dass Sie diesen Auftrag vom Dashboard entfernen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "cancel": "Abbrechen",
     "columns": {
-      "pending": "Wartend auf Zuweisung",
+      "pending": "Noch nicht zugewiesen",
       "in_progress": "In Bearbeitung",
       "completed": "Abgeschlossen",
       "cancelled": "Storniert/Abgelehnt"
@@ -66,12 +66,12 @@
       "out_of_network": "Außerhalb des Netzwerks",
       "adas_required": "ADAS-Kalibrierung erforderlich",
       "view_documents": "Dokumente anzeigen",
-      "remove_job": "Vom Board entfernen"
+      "remove_job": "Vom Dashboard entfernen"
     },
     "declined_by": "Abgelehnt von {{shop}}. Grund: {{reason}}",
     "no_reason_provided": "Kein Grund angegeben",
     "job_removed": "Auftrag entfernt",
-    "job_removed_description": "Der Auftrag wurde vom Board entfernt",
+    "job_removed_description": "Der Auftrag wurde vom Dashboard entfernt",
     "error_remove": "Fehler",
     "error_remove_description": "Fehler beim Entfernen des Auftrags. Bitte versuchen Sie es erneut.",
     "no_jobs": "Keine Aufträge gefunden",
@@ -83,7 +83,7 @@
   },
   "network": {
     "title": "Werkstattnetzwerk-Verwaltung",
-    "description": "Verwalten Sie Ihre bevorzugten Reparaturwerkstatt-Partner",
+    "description": "Verwalten Sie Ihre bevorzugten Partnerwerkstätten",
     "preferred_shops": "Bevorzugte Werkstätten",
     "all_shops": "Alle verfügbaren Werkstätten",
     "search_placeholder": "Werkstätten suchen...",
@@ -99,12 +99,12 @@
       "adas_capable": "ADAS-Kalibrierung verfügbar",
       "mobile_service": "Mobiler Service verfügbar",
       "certified": "Zertifiziert",
-      "insurance_approved": "Versicherungszugelassen"
+      "insurance_approved": "von der Versicherung geprüft und zugelassen"
     },
     "no_preferred": "Noch keine bevorzugten Werkstätten",
     "no_preferred_hint": "Fügen Sie Werkstätten aus der Liste unten hinzu, um Ihr bevorzugtes Netzwerk zu erstellen",
     "no_shops": "Keine Werkstätten gefunden",
-    "no_shops_hint": "Keine Werkstätten entsprechen Ihren Suchkriterien"
+    "no_shops_hint": "Keine Werkstatt entsprechend Ihrer Suchkriterien"
   },
   "documents": {
     "title": "Abschlussdokumente",
@@ -133,7 +133,7 @@
     "verify_email": "Bestätigen Sie Ihre E-Mail",
     "check_email": "Bitte überprüfen Sie Ihre E-Mail und klicken Sie auf den Bestätigungslink, um die Registrierung abzuschließen.",
     "profile_created": "Versichererprofil erstellt!",
-    "welcome_network": "Willkommen im DriveX-Netzwerk.",
+    "welcome_network": "Willkommen im Glassify-Netzwerk.",
     "error_create": "Fehler beim Erstellen des Versichererprofils. Bitte versuchen Sie es erneut.",
     "passwords_not_match": "Passwörter stimmen nicht überein"
   }
