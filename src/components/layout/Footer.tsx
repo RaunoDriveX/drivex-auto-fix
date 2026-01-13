@@ -72,6 +72,7 @@ const Footer = () => {
             <div className="text-sm text-muted-foreground">
               {t('footer.copyright', { year: currentYear })}
             </div>
+            <p className="text-xs text-muted-foreground mt-2">{t('footer.operating_regions')}</p>
           </div>
         </div>
       </div>
