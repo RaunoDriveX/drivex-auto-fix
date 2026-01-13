@@ -56,19 +56,6 @@ const Workflow = () => {
           </p>
         </div>
 
-        {/* Virtual technician callout */}
-        <div className="mb-12 animate-fade-in rounded-xl border bg-gradient-to-r from-primary/5 to-accent/5 p-6 md:p-8 flex items-center gap-6 max-w-4xl mx-auto">
-          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Phone className="h-8 w-8 text-primary" aria-hidden="true" />
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">{t('workflow.virtual_tech_title')}</h3>
-            <p className="text-muted-foreground">
-              {t('workflow.virtual_tech_desc')}
-            </p>
-          </div>
-        </div>
-
         {/* Process steps */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {steps.map(({ icon: Icon, title, desc, color }, i) => (
