@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 
 const Footer = () => {
   const { t } = useTranslation('marketing');
@@ -71,15 +71,6 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-muted-foreground">
               {t('footer.copyright', { year: currentYear })}
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">{t('footer.follow_us')}</span>
-              <div className="flex gap-3">
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors"><Facebook className="h-5 w-5" /></a>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors"><Twitter className="h-5 w-5" /></a>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors"><Linkedin className="h-5 w-5" /></a>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors"><Instagram className="h-5 w-5" /></a>
-              </div>
             </div>
           </div>
           <div className="mt-4 text-center">
