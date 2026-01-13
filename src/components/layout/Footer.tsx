@@ -37,7 +37,6 @@ const Footer = () => {
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.shop_matching')}</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.mobile_repair')}</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.fleet_solutions')}</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.diy_kits')}</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.insurance_claims')}</a></li>
             </ul>
           </div>
