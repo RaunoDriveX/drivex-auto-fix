@@ -46,7 +46,7 @@ const WhyChooseUs = () => {
         </div>
 
         {/* Our practices */}
-        <div className="grid md:grid-cols-3 gap-8 mb-24">
+        <div className="grid md:grid-cols-3 gap-8">
           {practices.map((practice, index) => (
             <div key={practice.title} className="text-center group animate-fade-in" style={{ animationDelay: `${index * 150}ms` }}>
               <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-brand/10 to-brand/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
