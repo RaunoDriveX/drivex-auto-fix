@@ -82,7 +82,6 @@ const Header = () => {
           {/* Contact Info & Call Center */}
           <div className="hidden lg:flex items-center gap-6 flex-shrink-0">
             {showCallCenter && <CallCenterToolbarWidget />}
-            <LanguageSwitcher />
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Phone className="h-4 w-4" />
               <span>+372 58528824</span>
@@ -95,6 +94,7 @@ const Header = () => {
             <Button size="sm">
               {t('header.get_started')}
             </Button>
+            <LanguageSwitcher />
           </div>
 
           {/* Mobile Menu Button */}
