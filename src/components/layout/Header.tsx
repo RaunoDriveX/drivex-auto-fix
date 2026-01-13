@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, Phone, Search } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -79,13 +79,9 @@ const Header = () => {
             })}
           </nav>
 
-          {/* Contact Info & Call Center */}
+          {/* Call Center & Actions */}
           <div className="hidden lg:flex items-center gap-6 flex-shrink-0">
             {showCallCenter && <CallCenterToolbarWidget />}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Phone className="h-4 w-4" />
-              <span>+372 58528824</span>
-            </div>
             <Link to="/insurer-auth">
               <Button variant="outline" size="sm">
                 {t('header.insurer_login')}
@@ -146,10 +142,6 @@ const Header = () => {
                 );
               })}
               <div className="pt-4 border-t border-border">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                  <Phone className="h-4 w-4" />
-                  <span>+372 58528824</span>
-                </div>
                 <div className="space-y-2">
                   <div className="mb-3">
                     <LanguageSwitcher />
