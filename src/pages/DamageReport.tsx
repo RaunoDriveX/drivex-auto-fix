@@ -9,7 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import glassifyLogo from "@/assets/glassify-logo.svg";
-import { Car, Square, CircleDot, Zap, AlertTriangle, Layers } from "lucide-react";
+import { Car, Square, CircleDot, Zap, Layers, ArrowLeft } from "lucide-react";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 type GlassLocation = "front" | "side" | "rear";
 type DamageType = "chip" | "crack" | "multiple";
@@ -108,8 +109,18 @@ const DamageReport = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-center">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('damage_report.back_home')}</span>
+          </Button>
           <img src={glassifyLogo} alt="Glassify" className="h-8" />
+          <LanguageSwitcher />
         </div>
       </header>
 
