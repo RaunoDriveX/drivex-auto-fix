@@ -19,6 +19,7 @@
   "damage_report": {
     "title": "Damage Report",
     "subtitle": "Tell us about your glass damage",
+    "back_home": "Back to Home",
     "glass_location": "Glass Location",
     "front_windshield": "Front Windshield",
     "side_window": "Side Window",

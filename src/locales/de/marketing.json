@@ -19,6 +19,7 @@
   "damage_report": {
     "title": "Schadensmeldung",
     "subtitle": "Erzählen Sie uns von Ihrem Glasschaden",
+    "back_home": "Zurück zur Startseite",
     "glass_location": "Glasposition",
     "front_windshield": "Frontscheibe",
     "side_window": "Seitenscheibe",
