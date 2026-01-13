@@ -74,7 +74,6 @@ export const CustomerSegments = () => {
   const individualBenefits = [
     t('why_choose_us.individual_benefits.fair_pricing'),
     t('why_choose_us.individual_benefits.mobile_repair'),
-    t('why_choose_us.individual_benefits.diy_option'),
     t('why_choose_us.individual_benefits.real_time'),
     t('why_choose_us.individual_benefits.insurance_assist')
   ];
