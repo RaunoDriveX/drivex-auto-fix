@@ -82,20 +82,12 @@ const Testimonials = () => {
           <p className="text-lg text-muted-foreground mb-6">
             {t('testimonials.cta_text')}
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link 
-              to="/report/eo3w_x1IBgPaUDj8gsUVkI2qL8rG0gSx" 
-              className="px-8 py-4 bg-brand text-brand-foreground font-semibold rounded-lg hover:bg-brand/90 transition-colors"
-            >
-              {t('testimonials.start_assessment')}
-            </Link>
-            <a 
-              href="mailto:fleet@glassify24.com"
-              className="px-8 py-4 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/5 transition-colors"
-            >
-              {t('testimonials.contact_fleet')}
-            </a>
-          </div>
+          <Link 
+            to="/report/eo3w_x1IBgPaUDj8gsUVkI2qL8rG0gSx" 
+            className="px-8 py-4 bg-brand text-brand-foreground font-semibold rounded-lg hover:bg-brand/90 transition-colors"
+          >
+            {t('testimonials.start_assessment')}
+          </Link>
         </div>
       </div>
     </section>
