@@ -91,9 +91,6 @@ const Header = () => {
                 {t('header.insurer_login')}
               </Button>
             </Link>
-            <Button size="sm">
-              {t('header.get_started')}
-            </Button>
             <LanguageSwitcher />
           </div>
 
@@ -162,9 +159,6 @@ const Header = () => {
                       {t('header.insurer_login')}
                     </Button>
                   </Link>
-                  <Button size="sm" className="w-full">
-                    {t('header.get_started')}
-                  </Button>
                 </div>
               </div>
             </nav>
