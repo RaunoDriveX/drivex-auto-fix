@@ -68,13 +68,10 @@ const Footer = () => {
         </div>
 
         <div className="mt-8 pt-8 border-t border-border">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-center">
             <div className="text-sm text-muted-foreground">
               {t('footer.copyright', { year: currentYear })}
             </div>
-          </div>
-          <div className="mt-4 text-center">
-            <p className="text-xs text-muted-foreground">{t('footer.operating_regions')}</p>
           </div>
         </div>
       </div>
