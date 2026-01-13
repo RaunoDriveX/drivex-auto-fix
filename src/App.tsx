@@ -15,6 +15,8 @@ import ShopAuth from "./pages/ShopAuth";
 import ShopDashboard from "./pages/ShopDashboard";
 import InsurerAuth from "./pages/InsurerAuth";
 import InsurerDashboard from "./pages/InsurerDashboard";
+import DamageReport from "./pages/DamageReport";
+import DamageReportConfirmation from "./pages/DamageReportConfirmation";
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -32,6 +34,8 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/damage-report/:token" element={<DamageReport />} />
+            <Route path="/damage-report/:token/confirmation" element={<DamageReportConfirmation />} />
             <Route path="/inspection/:token" element={<Inspection />} />
             <Route path="/results/:token" element={<InspectionResults />} />
             <Route path="/report/:token" element={<AIReport />} />

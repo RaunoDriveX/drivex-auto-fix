@@ -1,8 +1,5 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import CallCenterCTA from "@/components/CallCenterCTA";
 
@@ -10,8 +7,6 @@ const Hero = () => {
   console.log("Hero component rendering...");
   const navigate = useNavigate();
   const { t } = useTranslation('marketing');
-  const [licensePlate, setLicensePlate] = useState("");
-  const [phone, setPhone] = useState("");
 
   function generateToken(length = 24) {
     const bytes = new Uint8Array(length);
@@ -22,10 +17,9 @@ const Hero = () => {
       .replace(/=+$/, "");
   }
 
-  const handleStart = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleStart = () => {
     const token = generateToken();
-    navigate(`/inspection/${token}`);
+    navigate(`/damage-report/${token}`);
   };
   
   return (
@@ -59,36 +53,15 @@ const Hero = () => {
             {t('hero.description')}
           </p>
           
-          <form onSubmit={handleStart} className="mt-8 grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-            <div className="grid gap-2">
-              <Label htmlFor="hero-license" className="text-white">{t('hero.license_plate')}</Label>
-              <Input 
-                id="hero-license" 
-                name="licensePlate" 
-                placeholder="ABC-123" 
-                value={licensePlate}
-                onChange={(e) => setLicensePlate(e.target.value)}
-                required 
-                className="bg-white/95 border-white/20" 
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="hero-phone" className="text-white">{t('hero.phone_number')}</Label>
-              <Input 
-                id="hero-phone" 
-                name="phone" 
-                type="tel" 
-                placeholder="(555) 555-5555" 
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required 
-                className="bg-white/95 border-white/20" 
-              />
-            </div>
-            <Button size="lg" type="submit" className="bg-brand hover:bg-brand/90 text-brand-foreground">
+          <div className="mt-8">
+            <Button 
+              size="lg" 
+              onClick={handleStart} 
+              className="bg-brand hover:bg-brand/90 text-brand-foreground text-lg px-8 py-6"
+            >
               {t('hero.begin_assessment')}
             </Button>
-          </form>
+          </div>
 
           <div className="mt-6">
             <CallCenterCTA />
