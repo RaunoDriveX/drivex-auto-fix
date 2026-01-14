@@ -9,7 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import glassifyLogo from "@/assets/glassify-logo.svg";
-import { Car, RectangleHorizontal, CircleDot, Zap, Layers, ArrowLeft, Square } from "lucide-react";
+import windshieldFrontIcon from "@/assets/windshield-front.svg";
+import { RectangleHorizontal, CircleDot, Zap, Layers, ArrowLeft, Square } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 type GlassLocation = "front" | "side" | "rear";
@@ -147,8 +148,8 @@ const DamageReport = () => {
                 <Card className={`transition-all ${glassLocation === 'front' ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50'}`}>
                   <CardContent className="p-4 flex flex-col items-center gap-2">
                     <RadioGroupItem value="front" id="glass-front" className="sr-only" />
-                    <div className="w-16 h-16 flex items-center justify-center text-primary">
-                      <Car className="w-12 h-12" />
+                    <div className="w-16 h-16 flex items-center justify-center">
+                      <img src={windshieldFrontIcon} alt="Front windshield" className="w-12 h-12" />
                     </div>
                     <span className="text-sm font-medium text-center">{t('damage_report.front_windshield')}</span>
                   </CardContent>
