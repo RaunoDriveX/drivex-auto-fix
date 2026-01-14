@@ -11,7 +11,8 @@ import { toast } from "sonner";
 import glassifyLogo from "@/assets/glassify-logo.svg";
 import windshieldFrontIcon from "@/assets/windshield-front.svg";
 import windshieldRearIcon from "@/assets/windshield-rear.svg";
-import { CircleDot, Zap, Layers, ArrowLeft, Square } from "lucide-react";
+import windshieldSideIcon from "@/assets/windshield-side.svg";
+import { CircleDot, Zap, Layers, ArrowLeft } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 type GlassLocation = "front" | "side" | "rear";
@@ -161,8 +162,8 @@ const DamageReport = () => {
                 <Card className={`transition-all ${glassLocation === 'side' ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50'}`}>
                   <CardContent className="p-4 flex flex-col items-center gap-2">
                     <RadioGroupItem value="side" id="glass-side" className="sr-only" />
-                    <div className="w-16 h-16 flex items-center justify-center text-primary">
-                      <Square className="w-12 h-12" />
+                    <div className="w-16 h-16 flex items-center justify-center">
+                      <img src={windshieldSideIcon} alt="Side window" className="w-16 h-16" />
                     </div>
                     <span className="text-sm font-medium text-center">{t('damage_report.side_window')}</span>
                   </CardContent>
