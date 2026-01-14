@@ -47,6 +47,7 @@ export type Database = {
           job_started_at: string | null
           job_status: Database["public"]["Enums"]["job_status_type"] | null
           notes: string | null
+          preferred_contact_method: string | null
           reminder_email_sent: boolean | null
           requires_adas_calibration: boolean | null
           service_type: string
@@ -91,6 +92,7 @@ export type Database = {
           job_started_at?: string | null
           job_status?: Database["public"]["Enums"]["job_status_type"] | null
           notes?: string | null
+          preferred_contact_method?: string | null
           reminder_email_sent?: boolean | null
           requires_adas_calibration?: boolean | null
           service_type?: string
@@ -135,6 +137,7 @@ export type Database = {
           job_started_at?: string | null
           job_status?: Database["public"]["Enums"]["job_status_type"] | null
           notes?: string | null
+          preferred_contact_method?: string | null
           reminder_email_sent?: boolean | null
           requires_adas_calibration?: boolean | null
           service_type?: string
