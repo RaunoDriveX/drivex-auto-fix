@@ -149,7 +149,7 @@ const DamageReport = () => {
                   <CardContent className="p-4 flex flex-col items-center gap-2">
                     <RadioGroupItem value="front" id="glass-front" className="sr-only" />
                     <div className="w-16 h-16 flex items-center justify-center">
-                      <img src={windshieldFrontIcon} alt="Front windshield" className="w-12 h-12" />
+                      <img src={windshieldFrontIcon} alt="Front windshield" className="w-16 h-16" />
                     </div>
                     <span className="text-sm font-medium text-center">{t('damage_report.front_windshield')}</span>
                   </CardContent>
