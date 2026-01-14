@@ -11,7 +11,7 @@ import { RescheduleDialog } from "@/components/customer/RescheduleDialog";
 import { CancelAppointmentDialog } from "@/components/customer/CancelAppointmentDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { formatInsurerName, formatServiceType } from "@/lib/utils";
+import { formatInsurerName, formatServiceType, formatDamageType } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   Clock, 
@@ -277,7 +277,7 @@ export default function JobTracking() {
                 <p className="text-sm text-muted-foreground">Service Type</p>
                 <p className="font-medium">{formatServiceType(jobDetails.service_type)}</p>
                 {jobDetails.damage_type && (
-                  <p className="text-sm text-muted-foreground">{jobDetails.damage_type}</p>
+                  <p className="text-sm text-muted-foreground">{formatDamageType(jobDetails.damage_type)}</p>
                 )}
               </div>
               {jobDetails.insurer_name && (
