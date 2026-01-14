@@ -12,12 +12,18 @@ import glassifyLogo from "@/assets/glassify-logo.svg";
 import windshieldFrontIcon from "@/assets/windshield-front.svg";
 import windshieldRearIcon from "@/assets/windshield-rear.svg";
 import windshieldSideIcon from "@/assets/windshield-side.svg";
-import { CircleDot, Zap, Layers, ArrowLeft } from "lucide-react";
+import { CircleDot, Zap, Layers, ArrowLeft, CheckCircle, Mail, Phone, MessageCircle } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 type GlassLocation = "front" | "side" | "rear";
 type DamageType = "chip" | "crack" | "multiple";
 type VehicleType = "car" | "van";
+type ContactMethod = "email" | "phone" | "whatsapp";
+
+interface SubmissionData {
+  appointmentId: string;
+  shortCode: string;
+}
 
 const DamageReport = () => {
   const { token } = useParams<{ token: string }>();
@@ -30,6 +36,10 @@ const DamageReport = () => {
   const [licensePlate, setLicensePlate] = useState("");
   const [insuredName, setInsuredName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showContactSelection, setShowContactSelection] = useState(false);
+  const [submissionData, setSubmissionData] = useState<SubmissionData | null>(null);
+  const [contactMethod, setContactMethod] = useState<ContactMethod>("email");
+  const [contactValue, setContactValue] = useState("");
 
   const getServiceType = (location: GlassLocation) => {
     switch (location) {
@@ -89,23 +99,69 @@ const DamageReport = () => {
         return;
       }
 
-      // Navigate to confirmation page with the appointment data
-      navigate(`/damage-report/${token}/confirmation`, {
-        state: {
-          appointmentId: data.id,
-          shortCode: data.short_code,
-          glassLocation,
-          damageType,
-          vehicleType,
-          licensePlate: licensePlate.trim().toUpperCase(),
-          insuredName: insuredName.trim()
-        }
+      // Show contact selection instead of navigating directly
+      setSubmissionData({
+        appointmentId: data.id,
+        shortCode: data.short_code
       });
+      setShowContactSelection(true);
+      setIsSubmitting(false);
     } catch (error) {
       console.error('Error submitting damage report:', error);
       toast.error(t('damage_report.submit_error'));
       setIsSubmitting(false);
     }
+  };
+
+  const handleContactSubmit = async () => {
+    if (!submissionData) return;
+
+    // Update the appointment with contact preference
+    const updateData: Record<string, string> = {
+      preferred_contact_method: contactMethod
+    };
+
+    if (contactMethod === 'email') {
+      updateData.customer_email = contactValue;
+    } else if (contactMethod === 'phone' || contactMethod === 'whatsapp') {
+      updateData.customer_phone = contactValue;
+    }
+
+    const { error } = await supabase
+      .from('appointments')
+      .update(updateData)
+      .eq('id', submissionData.appointmentId);
+
+    if (error) {
+      console.error('Error updating contact info:', error);
+      toast.error(t('damage_report.contact_update_error'));
+      return;
+    }
+
+    // Navigate to confirmation page
+    navigate(`/damage-report/${token}/confirmation`, {
+      state: {
+        appointmentId: submissionData.appointmentId,
+        shortCode: submissionData.shortCode,
+        glassLocation,
+        damageType,
+        vehicleType,
+        licensePlate: licensePlate.trim().toUpperCase(),
+        insuredName: insuredName.trim()
+      }
+    });
+  };
+
+  const getContactPlaceholder = () => {
+    switch (contactMethod) {
+      case 'email': return 'email@example.com';
+      case 'phone': return '+49 123 456789';
+      case 'whatsapp': return '+49 123 456789';
+    }
+  };
+
+  const getContactInputType = () => {
+    return contactMethod === 'email' ? 'email' : 'tel';
   };
 
   return (
@@ -128,16 +184,107 @@ const DamageReport = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-            {t('damage_report.title')}
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {t('damage_report.subtitle')}
-          </p>
-        </div>
+        {showContactSelection ? (
+          // Contact Selection View
+          <div className="space-y-8">
+            <div className="text-center">
+              <div className="flex justify-center mb-4">
+                <CheckCircle className="w-16 h-16 text-green-500" />
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                {t('damage_report.thank_you_title')}
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                {t('damage_report.thank_you_subtitle')}
+              </p>
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Contact Method Selection */}
+            <Card className="border-2">
+              <CardContent className="p-6">
+                <Label className="text-base font-medium mb-4 block text-center">
+                  {t('damage_report.contact_question')}
+                </Label>
+                <RadioGroup
+                  value={contactMethod}
+                  onValueChange={(value) => {
+                    setContactMethod(value as ContactMethod);
+                    setContactValue("");
+                  }}
+                  className="grid grid-cols-3 gap-4 mb-6"
+                >
+                  <Label htmlFor="contact-email" className="cursor-pointer">
+                    <Card className={`transition-all ${contactMethod === 'email' ? 'border-primary ring-2 ring-primary bg-primary/5' : 'hover:border-primary/50'}`}>
+                      <CardContent className="p-4 flex flex-col items-center gap-2">
+                        <RadioGroupItem value="email" id="contact-email" className="sr-only" />
+                        <Mail className="w-8 h-8 text-primary" />
+                        <span className="text-sm font-medium">Email</span>
+                      </CardContent>
+                    </Card>
+                  </Label>
+
+                  <Label htmlFor="contact-phone" className="cursor-pointer">
+                    <Card className={`transition-all ${contactMethod === 'phone' ? 'border-primary ring-2 ring-primary bg-primary/5' : 'hover:border-primary/50'}`}>
+                      <CardContent className="p-4 flex flex-col items-center gap-2">
+                        <RadioGroupItem value="phone" id="contact-phone" className="sr-only" />
+                        <Phone className="w-8 h-8 text-primary" />
+                        <span className="text-sm font-medium">{t('damage_report.mobile_phone')}</span>
+                      </CardContent>
+                    </Card>
+                  </Label>
+
+                  <Label htmlFor="contact-whatsapp" className="cursor-pointer">
+                    <Card className={`transition-all ${contactMethod === 'whatsapp' ? 'border-primary ring-2 ring-primary bg-primary/5' : 'hover:border-primary/50'}`}>
+                      <CardContent className="p-4 flex flex-col items-center gap-2">
+                        <RadioGroupItem value="whatsapp" id="contact-whatsapp" className="sr-only" />
+                        <MessageCircle className="w-8 h-8 text-primary" />
+                        <span className="text-sm font-medium">WhatsApp</span>
+                      </CardContent>
+                    </Card>
+                  </Label>
+                </RadioGroup>
+
+                <Input
+                  type={getContactInputType()}
+                  value={contactValue}
+                  onChange={(e) => setContactValue(e.target.value)}
+                  placeholder={getContactPlaceholder()}
+                  className="text-lg h-12"
+                />
+              </CardContent>
+            </Card>
+
+            {/* Reference Number */}
+            {submissionData && (
+              <div className="text-center text-sm text-muted-foreground">
+                <p>
+                  {t('damage_report.reference_info')} <span className="font-mono font-bold text-foreground">{submissionData.shortCode}</span>
+                </p>
+              </div>
+            )}
+
+            <Button
+              size="lg"
+              className="w-full h-14 text-lg bg-brand hover:bg-brand/90"
+              onClick={handleContactSubmit}
+              disabled={!contactValue.trim()}
+            >
+              {t('damage_report.confirm_send')}
+            </Button>
+          </div>
+        ) : (
+          // Form View
+          <>
+            <div className="text-center mb-8">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                {t('damage_report.title')}
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                {t('damage_report.subtitle')}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-8">
           {/* Glass Location Selection */}
           <div className="space-y-4">
             <Label className="text-lg font-semibold">{t('damage_report.glass_location')}</Label>
@@ -284,16 +431,18 @@ const DamageReport = () => {
             </div>
           </div>
 
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full h-14 text-lg bg-brand hover:bg-brand/90"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? t('damage_report.submitting') : t('damage_report.submit')}
-          </Button>
-        </form>
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full h-14 text-lg bg-brand hover:bg-brand/90"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? t('damage_report.submitting') : t('damage_report.submit')}
+              </Button>
+            </form>
+          </>
+        )}
       </main>
     </div>
   );

@@ -37,7 +37,14 @@
     "submit": "Fertig",
     "submitting": "Wird gesendet...",
     "validation_error": "Bitte füllen Sie alle Pflichtfelder aus",
-    "submit_error": "Übermittlung fehlgeschlagen. Bitte versuchen Sie es erneut."
+    "submit_error": "Übermittlung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "thank_you_title": "Vielen Dank für Ihre Schadensmeldung!",
+    "thank_you_subtitle": "Ihre Schadensmeldung wird an Ihren Versicherer weitergeleitet.",
+    "contact_question": "Wie kommunizieren wir mit Ihnen?",
+    "mobile_phone": "Mobil Telefon",
+    "reference_info": "Sie erhalten unter dieser Vorgangsnummer alle weiteren Informationen",
+    "confirm_send": "Bestätigung wird automatisch versendet",
+    "contact_update_error": "Kontaktdaten konnten nicht gespeichert werden. Bitte erneut versuchen."
   },
   "confirmation": {
     "success_title": "Schadensmeldung erfolgreich eingereicht!",
