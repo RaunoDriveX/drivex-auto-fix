@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import glassifyLogo from "@/assets/glassify-logo.svg";
-import { Car, Square, CircleDot, Zap, Layers, ArrowLeft } from "lucide-react";
+import { Car, RectangleHorizontal, CircleDot, Zap, Layers, ArrowLeft, Square } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 type GlassLocation = "front" | "side" | "rear";
@@ -172,7 +172,7 @@ const DamageReport = () => {
                   <CardContent className="p-4 flex flex-col items-center gap-2">
                     <RadioGroupItem value="rear" id="glass-rear" className="sr-only" />
                     <div className="w-16 h-16 flex items-center justify-center text-primary">
-                      <Car className="w-12 h-12 rotate-180" />
+                      <RectangleHorizontal className="w-12 h-12" />
                     </div>
                     <span className="text-sm font-medium text-center">{t('damage_report.rear_windshield')}</span>
                   </CardContent>
