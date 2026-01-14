@@ -19,9 +19,10 @@ type LeadFormProps = {
   jobType?: "repair" | "replacement";
   shopId?: string;
   shopName?: string;
+  existingAppointmentId?: string;
 };
 
-const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "DriveX Service Center" }: LeadFormProps) => {
+const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "DriveX Service Center", existingAppointmentId }: LeadFormProps) => {
   const [loading, setLoading] = useState(false);
   const [isInsuranceClaim, setIsInsuranceClaim] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -178,41 +179,84 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
       // Extract time from slot (format: "09:00 - 09:30")
       const timeSlot = selectedTimeSlot.split(' - ')[0];
       const totalCost = jobType === "repair" ? 89 : 350;
-      const newAppointmentId = crypto.randomUUID();
       
-      // Create appointment (no select after insert to avoid RLS on SELECT)
-      const { error: appointmentError } = await supabase
-        .from('appointments')
-        .insert({
-          id: newAppointmentId,
-          customer_name: customerName,
-          customer_email: customerEmail,
-          customer_phone: customerPhone,
-          shop_id: shopId,
-          shop_name: shopName,
-          service_type: jobType,
-          appointment_date: format(selectedDate, 'yyyy-MM-dd'),
-          appointment_time: timeSlot,
-          is_insurance_claim: isInsurance,
-          insurer_name: isInsurance ? insurerName : null,
-          status: 'pending',
-          total_cost: totalCost
-        });
+      let appointmentId: string;
+      let trackingCode: string;
 
-      if (appointmentError) {
-        console.error('Error creating appointment:', appointmentError);
-        toast.error("Failed to create appointment. Please try again.");
-        return;
+      if (existingAppointmentId) {
+        // Update the existing appointment instead of creating a new one
+        appointmentId = existingAppointmentId;
+        
+        const { error: updateError } = await supabase
+          .from('appointments')
+          .update({
+            customer_name: customerName,
+            customer_email: customerEmail,
+            customer_phone: customerPhone,
+            shop_id: shopId,
+            shop_name: shopName,
+            service_type: jobType,
+            appointment_date: format(selectedDate, 'yyyy-MM-dd'),
+            appointment_time: timeSlot,
+            is_insurance_claim: isInsurance,
+            insurer_name: isInsurance ? insurerName : null,
+            status: 'pending',
+            total_cost: totalCost
+          })
+          .eq('id', existingAppointmentId);
+
+        if (updateError) {
+          console.error('Error updating appointment:', updateError);
+          toast.error("Failed to update appointment. Please try again.");
+          return;
+        }
+
+        // Fetch the existing short_code
+        const { data: appointmentData } = await supabase
+          .from('appointments')
+          .select('short_code')
+          .eq('id', existingAppointmentId)
+          .single();
+
+        trackingCode = appointmentData?.short_code || existingAppointmentId.slice(0, 8).toUpperCase();
+      } else {
+        // Create a new appointment
+        const newAppointmentId = crypto.randomUUID();
+        appointmentId = newAppointmentId;
+        
+        const { error: appointmentError } = await supabase
+          .from('appointments')
+          .insert({
+            id: newAppointmentId,
+            customer_name: customerName,
+            customer_email: customerEmail,
+            customer_phone: customerPhone,
+            shop_id: shopId,
+            shop_name: shopName,
+            service_type: jobType,
+            appointment_date: format(selectedDate, 'yyyy-MM-dd'),
+            appointment_time: timeSlot,
+            is_insurance_claim: isInsurance,
+            insurer_name: isInsurance ? insurerName : null,
+            status: 'pending',
+            total_cost: totalCost
+          });
+
+        if (appointmentError) {
+          console.error('Error creating appointment:', appointmentError);
+          toast.error("Failed to create appointment. Please try again.");
+          return;
+        }
+
+        // Fetch the generated short_code from the database
+        const { data: appointmentData } = await supabase
+          .from('appointments')
+          .select('short_code')
+          .eq('id', newAppointmentId)
+          .single();
+
+        trackingCode = appointmentData?.short_code || newAppointmentId.slice(0, 8).toUpperCase();
       }
-
-      // Fetch the generated short_code from the database
-      const { data: appointmentData } = await supabase
-        .from('appointments')
-        .select('short_code')
-        .eq('id', newAppointmentId)
-        .single();
-
-      const trackingCode = appointmentData?.short_code || newAppointmentId.slice(0, 8).toUpperCase();
 
       // Show success immediately
       toast.success("Booking confirmed! Check your email for confirmation details.");
@@ -232,7 +276,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
         // Send confirmation email
         supabase.functions.invoke('send-confirmation-email', {
           body: {
-            appointmentId: newAppointmentId,
+            appointmentId: appointmentId,
             jobCode: trackingCode,
             customerName,
             customerEmail,
@@ -250,7 +294,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
             supabase
               .from('appointments')
               .update({ confirmation_email_sent: true })
-              .eq('id', newAppointmentId);
+              .eq('id', appointmentId);
           }
         })
       ];
@@ -261,7 +305,7 @@ const LeadForm = ({ jobType = "repair", shopId = "default-shop", shopName = "Dri
         backgroundTasks.push(
           supabase.functions.invoke('allocate-job', {
             body: {
-              appointmentId: newAppointmentId,
+              appointmentId: appointmentId,
               serviceType: jobType,
               damageType: 'chip',
               vehicleInfo: {

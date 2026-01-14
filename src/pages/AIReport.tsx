@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import CompareOptions from "@/components/CompareOptions";
 import LeadForm from "@/components/marketing/LeadForm";
 import DIYResinKit from "@/components/DIYResinKit";
 import { ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 function analyzeFromToken(token: string) {
   let h = 0;
@@ -50,8 +51,28 @@ const AIReport = () => {
   const [partnersVisible, setPartnersVisible] = useState(false);
   const [showReplacement, setShowReplacement] = useState(false);
   const [selectedShop, setSelectedShop] = useState<{id: string, name: string} | null>(null);
+  const [existingAppointmentId, setExistingAppointmentId] = useState<string | null>(null);
   const offersRef = useRef<HTMLDivElement | null>(null);
   const bookingRef = useRef<HTMLDivElement | null>(null);
+
+  // Fetch existing appointment by tracking token
+  useEffect(() => {
+    const fetchAppointment = async () => {
+      if (!token) return;
+      
+      const { data } = await supabase
+        .from('appointments')
+        .select('id')
+        .eq('tracking_token', token)
+        .maybeSingle();
+      
+      if (data?.id) {
+        setExistingAppointmentId(data.id);
+      }
+    };
+    
+    fetchAppointment();
+  }, [token]);
   const reportUrl = "https://admin.drivex.ee/access/b54PrNNRWlX2xutBBJc1AvHW";
   const canonical = typeof window !== "undefined" ? window.location.href : "/report/mock";
   const jsonLd = {
@@ -231,6 +252,7 @@ const AIReport = () => {
                         jobType={result.decision} 
                         shopId={selectedShop.id}
                         shopName={selectedShop.name}
+                        existingAppointmentId={existingAppointmentId || undefined}
                       />
                     </div>
                   </section>
