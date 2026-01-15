@@ -36,12 +36,6 @@ const Workflow = () => {
       desc: t('workflow.steps.book.desc'),
       color: "bg-indigo-500/10 text-indigo-600"
     },
-    { 
-      icon: Wrench, 
-      title: t('workflow.steps.diy.title'), 
-      desc: t('workflow.steps.diy.desc'),
-      color: "bg-red-500/10 text-red-600"
-    },
   ];
 
   return (
