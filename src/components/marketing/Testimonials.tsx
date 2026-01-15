@@ -2,10 +2,25 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Quote } from "lucide-react";
 import { StarRating } from "@/components/ui/star-rating";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Testimonials = () => {
   const { t } = useTranslation('marketing');
+  const navigate = useNavigate();
+
+  function generateToken(length = 24) {
+    const bytes = new Uint8Array(length);
+    crypto.getRandomValues(bytes);
+    return btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+  }
+
+  const handleStart = () => {
+    const token = generateToken();
+    navigate(`/damage-report/${token}`);
+  };
 
   const testimonials = [
     {
@@ -82,12 +97,12 @@ const Testimonials = () => {
           <p className="text-lg text-muted-foreground mb-6">
             {t('testimonials.cta_text')}
           </p>
-          <Link 
-            to="/report/eo3w_x1IBgPaUDj8gsUVkI2qL8rG0gSx" 
+          <button 
+            onClick={handleStart}
             className="px-8 py-4 bg-brand text-brand-foreground font-semibold rounded-lg hover:bg-brand/90 transition-colors"
           >
             {t('testimonials.start_assessment')}
-          </Link>
+          </button>
         </div>
       </div>
     </section>
