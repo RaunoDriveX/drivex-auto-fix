@@ -27,8 +27,8 @@ const Hero = () => {
       {/* Background banner image */}
       <div className="absolute inset-0">
         <img
-          src="/lovable-uploads/55656e15-f7f7-4cf3-9e95-1f90feeb7a19.png"
-          alt="Glassify professional using mobile app for auto glass inspection"
+          src="/lovable-uploads/hero-background-clean.png"
+          alt="Professional using mobile app for auto glass inspection"
           className="w-full h-full object-cover"
           loading="eager"
           decoding="async"
