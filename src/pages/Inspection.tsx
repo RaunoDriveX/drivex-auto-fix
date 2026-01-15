@@ -1,16 +1,19 @@
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { Copy, MessageCircle, Smartphone, ExternalLink, Camera } from "lucide-react";
+import { Copy, MessageCircle, Smartphone, ExternalLink, Camera, Home } from "lucide-react";
 import { useState, useEffect } from "react";
 import smartscanQrCode from "@/assets/smartscan-qr-code.png";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const Inspection = () => {
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
+  const { t, i18n } = useTranslation('common');
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect if user is on mobile device
@@ -28,15 +31,15 @@ const Inspection = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Static smartscan URL
-  const smartscanUrl = "https://smartscan.drivex.ee/?urlId=FBLhLeT8gOim_Wb-g_SxybH_&lang=de";
+  // Static smartscan URL - use current language
+  const smartscanUrl = `https://smartscan.drivex.ee/?urlId=FBLhLeT8gOim_Wb-g_SxybH_&lang=${i18n.language}`;
   
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(smartscanUrl);
-      toast({ title: "Link copied!", description: "The inspection link has been copied to your clipboard." });
+      toast({ title: t('inspection.link_copied'), description: t('inspection.link_copied_desc') });
     } catch (err) {
-      toast({ title: "Copy failed", description: "Please copy the link manually.", variant: "destructive" });
+      toast({ title: t('inspection.copy_failed'), description: t('inspection.copy_failed_desc'), variant: "destructive" });
     }
   };
 
@@ -61,7 +64,7 @@ const Inspection = () => {
     window.location.href = urlWithCallback;
   };
 
-  const title = token ? "Vehicle Self-Inspection" : "Invalid link";
+  const title = token ? t('inspection.title') : t('inspection.invalid_link_title');
 
   return (
     <>
@@ -73,15 +76,26 @@ const Inspection = () => {
 
       <main className="bg-background py-10">
         <div className="container mx-auto max-w-2xl">
+          {/* Header with navigation */}
+          <div className="flex items-center justify-between mb-6">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/" className="flex items-center gap-2">
+                <Home className="h-4 w-4" />
+                {t('buttons.back_to_home')}
+              </Link>
+            </Button>
+            <LanguageSwitcher />
+          </div>
+
           {!token ? (
             <Card>
               <CardHeader>
-                <CardTitle>Invalid or expired link</CardTitle>
-                <CardDescription>Please request a new inspection link.</CardDescription>
+                <CardTitle>{t('inspection.invalid_link_title')}</CardTitle>
+                <CardDescription>{t('inspection.invalid_link_desc')}</CardDescription>
               </CardHeader>
               <CardFooter>
                 <Button asChild>
-                  <Link to="/">Back to home</Link>
+                  <Link to="/">{t('buttons.back_to_home')}</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -93,24 +107,24 @@ const Inspection = () => {
                   <CardHeader className="text-center">
                     <CardTitle className="flex items-center justify-center gap-2">
                       <Camera className="h-6 w-6 text-primary" />
-                      Ready to Inspect Your Vehicle
+                      {t('inspection.ready_title')}
                     </CardTitle>
                     <CardDescription>
-                      You're on your smartphone - perfect! Start photographing your windshield damage now.
+                      {t('inspection.subtitle_mobile')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="text-center space-y-4">
                     <div className="p-6 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl border">
                       <Camera className="h-16 w-16 mx-auto text-primary mb-4" />
                       <p className="text-muted-foreground mb-4">
-                        Tap the button below to start the guided photo capture process
+                        {t('inspection.tap_instruction')}
                       </p>
                       <Button 
                         onClick={startInspection}
                         size="lg"
                         className="w-full h-14 text-lg font-semibold"
                       >
-                        📸 Go Photograph Your Car Right Now
+                        {t('inspection.start_button')}
                       </Button>
                     </div>
                   </CardContent>
@@ -121,10 +135,10 @@ const Inspection = () => {
                   <CardHeader className="text-center">
                     <CardTitle className="flex items-center justify-center gap-2">
                       <Smartphone className="h-6 w-6 text-primary" />
-                      Vehicle Self-Inspection
+                      {t('inspection.title')}
                     </CardTitle>
                     <CardDescription>
-                      Scan the QR code below with your smartphone to start the inspection
+                      {t('inspection.subtitle_desktop')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex flex-col items-center space-y-4">
@@ -136,7 +150,7 @@ const Inspection = () => {
                       />
                     </div>
                     <p className="text-sm text-muted-foreground text-center max-w-md">
-                      Point your phone's camera at the QR code to automatically open the inspection interface
+                      {t('inspection.qr_instruction')}
                     </p>
                   </CardContent>
                 </Card>
@@ -145,7 +159,7 @@ const Inspection = () => {
               {/* Instructions */}
               <Card>
                 <CardHeader>
-                  <CardTitle>How it works</CardTitle>
+                  <CardTitle>{t('inspection.how_it_works')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {isMobile ? (
@@ -156,8 +170,8 @@ const Inspection = () => {
                           1
                         </div>
                         <div>
-                          <p className="font-medium">Start the camera</p>
-                          <p className="text-sm text-muted-foreground">Tap the button above to launch the inspection tool</p>
+                          <p className="font-medium">{t('inspection.step1_mobile_title')}</p>
+                          <p className="text-sm text-muted-foreground">{t('inspection.step1_mobile_desc')}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -165,8 +179,8 @@ const Inspection = () => {
                           2
                         </div>
                         <div>
-                          <p className="font-medium">Follow the guide</p>
-                          <p className="text-sm text-muted-foreground">Take photos of your windshield damage following the on-screen instructions</p>
+                          <p className="font-medium">{t('inspection.step2_mobile_title')}</p>
+                          <p className="text-sm text-muted-foreground">{t('inspection.step2_mobile_desc')}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -174,8 +188,8 @@ const Inspection = () => {
                           3
                         </div>
                         <div>
-                          <p className="font-medium">Get instant results</p>
-                          <p className="text-sm text-muted-foreground">AI assessment with repair recommendations and pricing</p>
+                          <p className="font-medium">{t('inspection.step3_mobile_title')}</p>
+                          <p className="text-sm text-muted-foreground">{t('inspection.step3_mobile_desc')}</p>
                         </div>
                       </div>
                     </>
@@ -187,8 +201,8 @@ const Inspection = () => {
                           1
                         </div>
                         <div>
-                          <p className="font-medium">Access on your phone</p>
-                          <p className="text-sm text-muted-foreground">Scan QR code or use SMS/WhatsApp to get the link</p>
+                          <p className="font-medium">{t('inspection.step1_desktop_title')}</p>
+                          <p className="text-sm text-muted-foreground">{t('inspection.step1_desktop_desc')}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -196,8 +210,8 @@ const Inspection = () => {
                           2
                         </div>
                         <div>
-                          <p className="font-medium">Take guided photos</p>
-                          <p className="text-sm text-muted-foreground">Follow instructions to capture your windshield damage</p>
+                          <p className="font-medium">{t('inspection.step2_desktop_title')}</p>
+                          <p className="text-sm text-muted-foreground">{t('inspection.step2_desktop_desc')}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -205,8 +219,8 @@ const Inspection = () => {
                           3
                         </div>
                         <div>
-                          <p className="font-medium">Get instant results</p>
-                          <p className="text-sm text-muted-foreground">AI assessment with repair recommendations and pricing</p>
+                          <p className="font-medium">{t('inspection.step3_desktop_title')}</p>
+                          <p className="text-sm text-muted-foreground">{t('inspection.step3_desktop_desc')}</p>
                         </div>
                       </div>
                     </>
@@ -218,9 +232,9 @@ const Inspection = () => {
               {!isMobile && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Can't scan the QR code?</CardTitle>
+                    <CardTitle>{t('inspection.cant_scan_title')}</CardTitle>
                     <CardDescription>
-                      Send the inspection link directly to your phone
+                      {t('inspection.cant_scan_desc')}
                     </CardDescription>
                   </CardHeader>
                 <CardContent className="space-y-4">
@@ -231,7 +245,7 @@ const Inspection = () => {
                       variant="outline"
                     >
                       <MessageCircle className="h-5 w-5" />
-                      Send via SMS
+                      {t('inspection.send_sms')}
                     </Button>
                     <Button 
                       onClick={sendViaWhatsApp} 
@@ -239,7 +253,7 @@ const Inspection = () => {
                       variant="outline"
                     >
                       <MessageCircle className="h-5 w-5" />
-                      Send via WhatsApp
+                      {t('inspection.send_whatsapp')}
                     </Button>
                   </div>
                   
@@ -250,7 +264,7 @@ const Inspection = () => {
                       className="flex items-center gap-2 flex-1"
                     >
                       <Copy className="h-4 w-4" />
-                      Copy Link
+                      {t('inspection.copy_link')}
                     </Button>
                     <Button 
                       onClick={openInNewTab} 
@@ -258,13 +272,13 @@ const Inspection = () => {
                       className="flex items-center gap-2 flex-1"
                     >
                       <ExternalLink className="h-4 w-4" />
-                      Open in Browser
+                      {t('inspection.open_browser')}
                     </Button>
                   </div>
                   
                   {/* Direct URL display */}
                   <div className="mt-4 p-3 bg-muted/30 rounded-md">
-                    <Label className="text-xs text-muted-foreground">Inspection Link:</Label>
+                    <Label className="text-xs text-muted-foreground">{t('inspection.inspection_link')}</Label>
                     <div className="flex items-center gap-2 mt-1">
                       <code className="text-xs bg-background px-2 py-1 rounded border flex-1 truncate">
                         {smartscanUrl}
@@ -282,10 +296,10 @@ const Inspection = () => {
               <Card>
                 <CardFooter className="flex gap-3">
                   <Button asChild variant="secondary" className="flex-1">
-                    <Link to="/">Return to homepage</Link>
+                    <Link to="/">{t('inspection.return_home')}</Link>
                   </Button>
                   <Button asChild className="flex-1">
-                    <Link to={`/report/${token}`}>Move to Results</Link>
+                    <Link to={`/report/${token}`}>{t('inspection.move_to_results')}</Link>
                   </Button>
                 </CardFooter>
               </Card>
