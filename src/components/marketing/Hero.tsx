@@ -63,9 +63,6 @@ const Hero = () => {
             </Button>
           </div>
 
-          <div className="mt-6">
-            <CallCenterCTA />
-          </div>
         </div>
       </div>
     </section>
