@@ -88,12 +88,11 @@ const Workflow = () => {
         </div>
         
         {/* Bottom row - 2 items centered */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-          <div className="hidden lg:block" /> {/* Spacer for centering on large screens */}
+        <div className="flex justify-center gap-8 mt-8">
           {steps.slice(3, 5).map(({ icon: Icon, title, desc, color }, i) => (
             <Card
               key={title}
-              className="relative hover-scale animate-fade-in border-0 shadow-lg bg-white/50 backdrop-blur-sm overflow-hidden group hover:shadow-xl transition-all duration-300"
+              className="relative hover-scale animate-fade-in border-0 shadow-lg bg-white/50 backdrop-blur-sm overflow-hidden group hover:shadow-xl transition-all duration-300 w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
               style={{ animationDelay: `${(i + 3) * 100}ms` }}
             >
               {/* Step number indicator */}
