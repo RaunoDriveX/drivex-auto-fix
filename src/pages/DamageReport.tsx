@@ -331,51 +331,53 @@ const DamageReport = () => {
             </RadioGroup>
           </div>
 
-          {/* Damage Type Selection */}
-          <div className="space-y-4">
-            <Label className="text-lg font-semibold">{t('damage_report.damage_type')}</Label>
-            <RadioGroup
-              value={damageType}
-              onValueChange={(value) => setDamageType(value as DamageType)}
-              className="grid grid-cols-3 gap-4"
-            >
-              <Label htmlFor="damage-chip" className="cursor-pointer">
-                <Card className={`transition-all ${damageType === 'chip' ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50'}`}>
-                  <CardContent className="p-4 flex flex-col items-center gap-2">
-                    <RadioGroupItem value="chip" id="damage-chip" className="sr-only" />
-                    <div className="w-16 h-16 flex items-center justify-center text-primary">
-                      <CircleDot className="w-12 h-12" />
-                    </div>
-                    <span className="text-sm font-medium text-center">{t('damage_report.stone_chip')}</span>
-                  </CardContent>
-                </Card>
-              </Label>
+          {/* Damage Type Selection - Only shown for front windshield */}
+          {glassLocation === 'front' && (
+            <div className="space-y-4">
+              <Label className="text-lg font-semibold">{t('damage_report.damage_type')}</Label>
+              <RadioGroup
+                value={damageType}
+                onValueChange={(value) => setDamageType(value as DamageType)}
+                className="grid grid-cols-3 gap-4"
+              >
+                <Label htmlFor="damage-chip" className="cursor-pointer">
+                  <Card className={`transition-all ${damageType === 'chip' ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50'}`}>
+                    <CardContent className="p-4 flex flex-col items-center gap-2">
+                      <RadioGroupItem value="chip" id="damage-chip" className="sr-only" />
+                      <div className="w-16 h-16 flex items-center justify-center text-primary">
+                        <CircleDot className="w-12 h-12" />
+                      </div>
+                      <span className="text-sm font-medium text-center">{t('damage_report.stone_chip')}</span>
+                    </CardContent>
+                  </Card>
+                </Label>
 
-              <Label htmlFor="damage-crack" className="cursor-pointer">
-                <Card className={`transition-all ${damageType === 'crack' ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50'}`}>
-                  <CardContent className="p-4 flex flex-col items-center gap-2">
-                    <RadioGroupItem value="crack" id="damage-crack" className="sr-only" />
-                    <div className="w-16 h-16 flex items-center justify-center text-primary">
-                      <Zap className="w-12 h-12" />
-                    </div>
-                    <span className="text-sm font-medium text-center">{t('damage_report.crack')}</span>
-                  </CardContent>
-                </Card>
-              </Label>
+                <Label htmlFor="damage-crack" className="cursor-pointer">
+                  <Card className={`transition-all ${damageType === 'crack' ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50'}`}>
+                    <CardContent className="p-4 flex flex-col items-center gap-2">
+                      <RadioGroupItem value="crack" id="damage-crack" className="sr-only" />
+                      <div className="w-16 h-16 flex items-center justify-center text-primary">
+                        <Zap className="w-12 h-12" />
+                      </div>
+                      <span className="text-sm font-medium text-center">{t('damage_report.crack')}</span>
+                    </CardContent>
+                  </Card>
+                </Label>
 
-              <Label htmlFor="damage-multiple" className="cursor-pointer">
-                <Card className={`transition-all ${damageType === 'multiple' ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50'}`}>
-                  <CardContent className="p-4 flex flex-col items-center gap-2">
-                    <RadioGroupItem value="multiple" id="damage-multiple" className="sr-only" />
-                    <div className="w-16 h-16 flex items-center justify-center text-primary">
-                      <Layers className="w-12 h-12" />
-                    </div>
-                    <span className="text-sm font-medium text-center">{t('damage_report.multiple_damages')}</span>
-                  </CardContent>
-                </Card>
-              </Label>
-            </RadioGroup>
-          </div>
+                <Label htmlFor="damage-multiple" className="cursor-pointer">
+                  <Card className={`transition-all ${damageType === 'multiple' ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50'}`}>
+                    <CardContent className="p-4 flex flex-col items-center gap-2">
+                      <RadioGroupItem value="multiple" id="damage-multiple" className="sr-only" />
+                      <div className="w-16 h-16 flex items-center justify-center text-primary">
+                        <Layers className="w-12 h-12" />
+                      </div>
+                      <span className="text-sm font-medium text-center">{t('damage_report.multiple_damages')}</span>
+                    </CardContent>
+                  </Card>
+                </Label>
+              </RadioGroup>
+            </div>
+          )}
 
           {/* Vehicle Type Selection */}
           <div className="space-y-4">
