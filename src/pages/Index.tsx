@@ -4,7 +4,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/marketing/Hero";
 import Workflow from "@/components/marketing/Workflow";
-import WhyChooseUs, { CustomerSegments } from "@/components/marketing/WhyChooseUs";
+import WhyChooseUs from "@/components/marketing/WhyChooseUs";
 import Testimonials from "@/components/marketing/Testimonials";
 
 const Index = () => {
@@ -43,7 +43,6 @@ const Index = () => {
         <Testimonials />
         <WhyChooseUs />
         <Workflow />
-        <CustomerSegments />
       </main>
 
       <Footer />
