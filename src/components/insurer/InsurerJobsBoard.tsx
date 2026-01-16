@@ -76,6 +76,7 @@ const parseVehicleInfo = (info: unknown): VehicleInfo | null => {
 // Helper to get display label for glass type (service_type)
 const getGlassLabel = (serviceType: string): string => {
   const glassMap: Record<string, string> = {
+    'windshield': 'Front Windshield',
     'windshield_replacement': 'Front Windshield',
     'windshield_repair': 'Front Windshield',
     'side_window': 'Side Window',
@@ -84,7 +85,9 @@ const getGlassLabel = (serviceType: string): string => {
     'side': 'Side Window',
     'rear': 'Rear Windshield'
   };
-  return glassMap[serviceType.toLowerCase()] || serviceType;
+  // Don't show generic "repair" - only show specific glass types
+  if (serviceType.toLowerCase() === 'repair') return '';
+  return glassMap[serviceType.toLowerCase()] || '';
 };
 
 // Helper to get display label for damage type
@@ -518,7 +521,8 @@ export const InsurerJobsBoard: React.FC = () => {
                 {/* Customer Selection Details */}
                 {(() => {
                   const vehicleInfo = parseVehicleInfo(job.vehicle_info);
-                  const hasSelectionDetails = vehicleInfo?.carType || job.service_type || job.damage_type;
+                  const glassLabel = job.service_type ? getGlassLabel(job.service_type) : '';
+                  const hasSelectionDetails = vehicleInfo?.carType || glassLabel || job.damage_type;
                   
                   if (!hasSelectionDetails) return null;
                   
@@ -529,9 +533,9 @@ export const InsurerJobsBoard: React.FC = () => {
                           {getCarTypeLabel(vehicleInfo.carType)}
                         </Badge>
                       )}
-                      {job.service_type && (
+                      {glassLabel && (
                         <Badge variant="secondary" className="text-xs">
-                          {getGlassLabel(job.service_type)}
+                          {glassLabel}
                         </Badge>
                       )}
                       {job.damage_type && (
