@@ -12,14 +12,21 @@
     "network": "Netzwerk",
     "users": "Benutzer"
   },
+  "workflow_stages": {
+    "new": "Neue Vorgänge",
+    "customer_handover": "An Kunden übergeben Fälle",
+    "damage_report": "Damage Report & Kostenvoranschlag",
+    "cost_approval": "Kostenfreigabe",
+    "completed": "erledigte Vorgänge"
+  },
   "jobs_board": {
     "title": "Live-Auftragsübersicht",
-    "description": "Echtzeit-Ansicht aller Versicherungsansprüche und Reparaturaufträge",
+    "description": "Echtzeit-Ansicht aller Versicherungsfälle und Reparaturaufträge",
     "search_placeholder": "Aufträge suchen...",
     "refresh": "Aktualisieren",
     "loading": "Aufträge werden geladen...",
     "all_jobs": "Alle Aufträge",
-    "all_statuses": "Alle Stati",
+    "all_statuses": "Alle Status",
     "scheduled": "Geplant",
     "in_progress": "In Bearbeitung",
     "completed": "Abgeschlossen",
@@ -29,11 +36,13 @@
     "started": "Gestartet",
     "completed_label": "Abgeschlossen",
     "cost": "Kosten",
-    "view_details": "Details anzeigen",
+    "view_details": "Detailanzeige",
     "hide_details": "Details ausblenden",
     "remove_job": "Auftrag entfernen",
     "remove_job_confirm": "Sind Sie sicher, dass Sie diesen Auftrag vom Dashboard entfernen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "cancel": "Abbrechen",
+    "created_on": "erstellt am",
+    "insurance_number": "Versicherungsnr.",
     "columns": {
       "pending": "Noch nicht zugewiesen",
       "in_progress": "In Bearbeitung",

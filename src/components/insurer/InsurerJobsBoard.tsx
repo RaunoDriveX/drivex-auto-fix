@@ -12,16 +12,20 @@ import {
   CheckCircle, 
   XCircle, 
   Search,
-  Filter,
   RefreshCw,
   Eye,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  FileText,
+  Users,
+  ClipboardCheck,
+  CreditCard
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { JobStatusTracker } from '@/components/realtime/JobStatusTracker';
 import { CompletionDocumentsViewer } from '@/components/insurer/CompletionDocumentsViewer';
 import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -50,41 +54,65 @@ interface Job {
   updated_at: string;
   short_code?: string;
   notes?: string;
+  insurer_name?: string;
 }
+
+type WorkflowStage = 'new' | 'customer_handover' | 'damage_report' | 'cost_approval' | 'completed';
+
+// Map job statuses to workflow stages
+const getWorkflowStage = (job: Job): WorkflowStage => {
+  if (job.job_status === 'completed') return 'completed';
+  if (job.job_status === 'in_progress') return 'cost_approval';
+  if (job.job_status === 'scheduled') return 'damage_report';
+  if (job.status === 'accepted') return 'customer_handover';
+  return 'new';
+};
+
+const workflowStageConfig: Record<WorkflowStage, { icon: React.ElementType }> = {
+  new: { icon: FileText },
+  customer_handover: { icon: Users },
+  damage_report: { icon: ClipboardCheck },
+  cost_approval: { icon: CreditCard },
+  completed: { icon: CheckCircle }
+};
 
 const getStatusConfig = (t: (key: string) => string) => ({
   scheduled: { 
     icon: Clock, 
-    color: 'bg-blue-100 text-blue-800', 
+    color: 'bg-blue-100 text-blue-800 border-blue-200', 
     label: t('jobs_board.scheduled')
   },
   in_progress: { 
     icon: PlayCircle, 
-    color: 'bg-yellow-100 text-yellow-800', 
+    color: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
     label: t('jobs_board.in_progress')
   },
   completed: { 
     icon: CheckCircle, 
-    color: 'bg-green-100 text-green-800', 
+    color: 'bg-green-100 text-green-800 border-green-200', 
     label: t('jobs_board.completed')
   },
   cancelled: { 
     icon: XCircle, 
-    color: 'bg-red-100 text-red-800', 
+    color: 'bg-red-100 text-red-800 border-red-200', 
     label: t('jobs_board.cancelled')
   }
 });
 
 export const InsurerJobsBoard: React.FC = () => {
-  const { t } = useTranslation('insurer');
+  const { t, i18n } = useTranslation('insurer');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [activeWorkflowStage, setActiveWorkflowStage] = useState<WorkflowStage | 'all'>('all');
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   
   const statusConfig = getStatusConfig(t);
+  const isGerman = i18n.language === 'de';
+
+  const workflowStages: WorkflowStage[] = ['new', 'customer_handover', 'damage_report', 'cost_approval', 'completed'];
 
   useEffect(() => {
     fetchJobs();
@@ -93,7 +121,7 @@ export const InsurerJobsBoard: React.FC = () => {
 
   useEffect(() => {
     filterJobs();
-  }, [jobs, searchTerm, statusFilter]);
+  }, [jobs, searchTerm, statusFilter, activeWorkflowStage]);
 
   const fetchJobs = async () => {
     try {
@@ -129,7 +157,8 @@ export const InsurerJobsBoard: React.FC = () => {
           created_at,
           updated_at,
           short_code,
-          notes
+          notes,
+          insurer_name
         `)
         .eq('insurer_name', insurerProfile.insurer_name)
         .order('created_at', { ascending: false });
@@ -148,7 +177,6 @@ export const InsurerJobsBoard: React.FC = () => {
   };
 
   const setupRealtimeSubscription = () => {
-    // Get current user's insurer profile first
     const getCurrentInsurerName = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) return null;
@@ -172,10 +200,7 @@ export const InsurerJobsBoard: React.FC = () => {
           table: 'appointments'
         },
         async (payload) => {
-          console.log('Real-time job update:', payload);
           const insurerName = await getCurrentInsurerName();
-
-          // Only update if this appointment belongs to this insurer
           if (insurerName && payload.new.insurer_name === insurerName) {
             setJobs(prevJobs =>
               prevJobs.map(job =>
@@ -193,18 +218,11 @@ export const InsurerJobsBoard: React.FC = () => {
           table: 'appointments'
         },
         async (payload) => {
-          console.log('New job created:', payload);
           const insurerName = await getCurrentInsurerName();
-
-          // Only add if this appointment belongs to this insurer AND doesn't already exist
           if (insurerName && payload.new.insurer_name === insurerName) {
             setJobs(prevJobs => {
-              // Check if job already exists to prevent duplicates
               const exists = prevJobs.some(job => job.id === payload.new.id);
-              if (exists) {
-                console.log('Job already exists, skipping duplicate:', payload.new.id);
-                return prevJobs;
-              }
+              if (exists) return prevJobs;
               return [payload.new as Job, ...prevJobs];
             });
           }
@@ -226,7 +244,8 @@ export const InsurerJobsBoard: React.FC = () => {
         job.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.customer_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.shop_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.id.toLowerCase().includes(searchTerm.toLowerCase())
+        job.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (job.short_code && job.short_code.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -235,17 +254,30 @@ export const InsurerJobsBoard: React.FC = () => {
       filtered = filtered.filter(job => job.job_status === statusFilter);
     }
 
+    // Filter by workflow stage
+    if (activeWorkflowStage !== 'all') {
+      filtered = filtered.filter(job => getWorkflowStage(job) === activeWorkflowStage);
+    }
+
     setFilteredJobs(filtered);
   };
 
-  const getStatusCounts = () => {
-    return {
+  const getWorkflowStageCounts = () => {
+    const counts: Record<WorkflowStage | 'all', number> = {
       all: jobs.length,
-      scheduled: jobs.filter(j => j.job_status === 'scheduled').length,
-      in_progress: jobs.filter(j => j.job_status === 'in_progress').length,
-      completed: jobs.filter(j => j.job_status === 'completed').length,
-      cancelled: jobs.filter(j => j.job_status === 'cancelled').length
+      new: 0,
+      customer_handover: 0,
+      damage_report: 0,
+      cost_approval: 0,
+      completed: 0
     };
+
+    jobs.forEach(job => {
+      const stage = getWorkflowStage(job);
+      counts[stage]++;
+    });
+
+    return counts;
   };
 
   const handleDeleteJob = async (jobId: string) => {
@@ -275,7 +307,6 @@ export const InsurerJobsBoard: React.FC = () => {
   const getCancellationInfo = (job: Job): { reason: string; shop: string } | null => {
     if (job.job_status !== 'cancelled' && job.status !== 'cancelled') return null;
     
-    // Extract just the reason from notes if it contains the old English format
     let reason = job.notes || '';
     const reasonMatch = reason.match(/Reason:\s*(.+)$/i);
     if (reasonMatch) {
@@ -293,9 +324,10 @@ export const InsurerJobsBoard: React.FC = () => {
       <div className="p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted rounded w-1/3"></div>
+          <div className="h-12 bg-muted rounded"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-40 bg-muted rounded"></div>
+              <div key={i} className="h-48 bg-muted rounded"></div>
             ))}
           </div>
         </div>
@@ -303,10 +335,11 @@ export const InsurerJobsBoard: React.FC = () => {
     );
   }
 
-  const statusCounts = getStatusCounts();
+  const workflowCounts = getWorkflowStageCounts();
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{t('jobs_board.title')}</h1>
@@ -314,44 +347,40 @@ export const InsurerJobsBoard: React.FC = () => {
             {t('jobs_board.description')}
           </p>
         </div>
-        <Button onClick={fetchJobs} disabled={loading} variant="outline">
+        <Button onClick={fetchJobs} disabled={loading} variant="outline" size="sm">
           <RefreshCw className="h-4 w-4 mr-2" />
           {t('jobs_board.refresh')}
         </Button>
       </div>
 
-      {/* Status Overview Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card 
-          className={cn("cursor-pointer transition-colors", 
-            statusFilter === 'all' && "ring-2 ring-primary")}
-          onClick={() => setStatusFilter('all')}
-        >
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold">{statusCounts.all}</div>
-            <div className="text-sm text-muted-foreground">{t('jobs_board.all_jobs')}</div>
-          </CardContent>
-        </Card>
-        
-        {Object.entries(statusConfig).map(([status, config]) => {
+      {/* Workflow Stage Tabs */}
+      <div className="flex flex-wrap gap-2">
+        {workflowStages.map((stage) => {
+          const config = workflowStageConfig[stage];
           const Icon = config.icon;
-          const count = statusCounts[status as keyof typeof statusCounts];
+          const count = workflowCounts[stage];
+          const isActive = activeWorkflowStage === stage;
           
           return (
-            <Card 
-              key={status}
-              className={cn("cursor-pointer transition-colors",
-                statusFilter === status && "ring-2 ring-primary")}
-              onClick={() => setStatusFilter(status)}
+            <button
+              key={stage}
+              onClick={() => setActiveWorkflowStage(isActive ? 'all' : stage)}
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap",
+                isActive 
+                  ? "bg-blue-600 text-white shadow-md" 
+                  : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200"
+              )}
             >
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Icon className="h-4 w-4" />
-                  <div className="text-2xl font-bold">{count}</div>
-                </div>
-                <div className="text-sm text-muted-foreground">{config.label}</div>
-              </CardContent>
-            </Card>
+              <Icon className="h-4 w-4" />
+              {t(`workflow_stages.${stage}`)}
+              <span className={cn(
+                "ml-1 px-2 py-0.5 rounded-full text-xs font-bold",
+                isActive ? "bg-white/20 text-white" : "bg-blue-100 text-blue-800"
+              )}>
+                {count}
+              </span>
+            </button>
           );
         })}
       </div>
@@ -381,85 +410,77 @@ export const InsurerJobsBoard: React.FC = () => {
         </Select>
       </div>
 
-      {/* Jobs Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Jobs Grid - Redesigned Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredJobs.map((job) => {
           const config = statusConfig[job.job_status];
-          const StatusIcon = config.icon;
+          const cancellationInfo = getCancellationInfo(job);
           
           return (
             <Card key={job.id} className={cn(
-              "hover:shadow-md transition-shadow",
-              (job.job_status === 'cancelled' || job.status === 'cancelled') && "border-red-200 bg-red-50/30"
+              "hover:shadow-lg transition-all border-l-4",
+              job.job_status === 'scheduled' && "border-l-blue-500",
+              job.job_status === 'in_progress' && "border-l-yellow-500",
+              job.job_status === 'completed' && "border-l-green-500",
+              (job.job_status === 'cancelled' || job.status === 'cancelled') && "border-l-red-500 bg-red-50/30"
             )}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{job.customer_name}</CardTitle>
-                    <CardDescription className="flex items-center gap-2 mt-1">
-                      <span>{job.service_type}</span>
-                      <span>•</span>
-                      <span>{job.shop_name}</span>
-                    </CardDescription>
-                  </div>
-                  <Badge className={config.color}>
-                    <StatusIcon className="h-3 w-3 mr-1" />
+              <CardContent className="p-4">
+                {/* Header with name and status */}
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="font-bold text-lg text-foreground">
+                    {job.customer_name}
+                  </h3>
+                  <Badge className={cn("text-xs", config.color)}>
                     {config.label}
                   </Badge>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
+
+                {/* Insurance company */}
+                <p className="text-sm text-muted-foreground mb-2">
+                  {job.insurer_name || 'Versicherung'}
+                </p>
+
+                {/* Details grid */}
+                <div className="space-y-2 text-sm">
+                  {/* Insurance number - using customer email as proxy */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">{t('jobs_board.insurance_number')}</span>
+                    <span className="font-medium">{job.customer_email.split('@')[0]}</span>
+                  </div>
+
+                  {/* Tracking code */}
+                  {job.short_code && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">{t('jobs_board.tracking_code')}</span>
+                      <span className="font-mono font-bold text-primary">{job.short_code}</span>
+                    </div>
+                  )}
+
+                  {/* Created date */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">{t('jobs_board.created_on')}</span>
+                    <span className="font-medium">
+                      {format(new Date(job.created_at), isGerman ? 'd. MMM yyyy' : 'MMM d, yyyy', 
+                        isGerman ? { locale: de } : undefined)}
+                    </span>
+                  </div>
+                </div>
+
                 {/* Cancellation Alert */}
-                {getCancellationInfo(job) && (
-                  <Alert variant="destructive" className="py-2">
+                {cancellationInfo && (
+                  <Alert variant="destructive" className="mt-3 py-2">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription className="text-xs">
                       {t('jobs_board.declined_by', { 
-                        shop: getCancellationInfo(job)?.shop, 
-                        reason: getCancellationInfo(job)?.reason 
+                        shop: cancellationInfo.shop, 
+                        reason: cancellationInfo.reason 
                       })}
                     </AlertDescription>
                   </Alert>
                 )}
 
-                {job.short_code && (
-                  <div className="text-xs">
-                    <span className="text-muted-foreground">{t('jobs_board.tracking_code')}</span>
-                    <span className="ml-2 font-mono font-bold text-primary">{job.short_code}</span>
-                  </div>
-                )}
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">{t('jobs_board.scheduled_label')}</span>
-                    <p className="font-medium">
-                      {format(new Date(job.appointment_date), 'MMM d')} at {job.appointment_time?.substring(0, 5)}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">{t('jobs_board.cost')}</span>
-                    <p className="font-medium">€{job.total_cost}</p>
-                  </div>
-                </div>
-                
-                {job.job_started_at && (
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">{t('jobs_board.started')}</span>
-                    <p className="font-medium">
-                      {format(new Date(job.job_started_at), 'MMM d, HH:mm')}
-                    </p>
-                  </div>
-                )}
-                
-                {job.job_completed_at && (
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">{t('jobs_board.completed_label')}</span>
-                    <p className="font-medium">
-                      {format(new Date(job.job_completed_at), 'MMM d, HH:mm')}
-                    </p>
-                  </div>
-                )}
-                
-                <div className="flex gap-2">
+                {/* Action buttons */}
+                <div className="flex gap-2 mt-4">
                   <Button
                     variant="outline"
                     size="sm"
@@ -495,9 +516,10 @@ export const InsurerJobsBoard: React.FC = () => {
                     </AlertDialog>
                   )}
                 </div>
-                
+
+                {/* Expanded details */}
                 {selectedJob === job.id && (
-                  <div className="mt-4 space-y-4">
+                  <div className="mt-4 pt-4 border-t space-y-4">
                     <JobStatusTracker appointmentId={job.id} />
                     <CompletionDocumentsViewer appointmentId={job.id} />
                   </div>
@@ -508,6 +530,7 @@ export const InsurerJobsBoard: React.FC = () => {
         })}
       </div>
 
+      {/* Empty state */}
       {filteredJobs.length === 0 && (
         <Card>
           <CardContent className="text-center py-12">
