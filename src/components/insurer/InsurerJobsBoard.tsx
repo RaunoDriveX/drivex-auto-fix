@@ -63,18 +63,24 @@ type WorkflowStage = 'new' | 'customer_handover' | 'damage_report' | 'cost_appro
 // Map job statuses to workflow stages
 // - 'new': Shop hasn't accepted yet (status is not 'accepted' or 'confirmed')
 // - 'customer_handover': Shop accepted, awaiting customer action
-// - 'damage_report': Has SmartScan AI assessment (ai_assessment_details present)
+// - 'damage_report': Has SmartScan AI assessment (ai_assessment_details present with actual data)
 // - 'cost_approval': Job in progress, awaiting cost approval
 // - 'completed': Job finished
+const hasAiAssessment = (details: unknown): boolean => {
+  if (!details) return false;
+  if (typeof details !== 'object') return false;
+  return Object.keys(details as object).length > 0;
+};
+
 const getWorkflowStage = (job: Job): WorkflowStage => {
   if (job.job_status === 'completed') return 'completed';
   if (job.job_status === 'cancelled') return 'completed'; // Show cancelled in completed tab
   if (job.job_status === 'in_progress') return 'cost_approval';
   
-  // If has AI assessment from SmartScan, show in damage_report stage
-  if (job.ai_assessment_details) return 'damage_report';
+  // If has AI assessment from SmartScan with actual data, show in damage_report stage
+  if (hasAiAssessment(job.ai_assessment_details)) return 'damage_report';
   
-  // If shop has accepted the job
+  // If shop has accepted the job, move to customer_handover
   if (job.status === 'accepted' || job.status === 'confirmed') return 'customer_handover';
   
   // Default: new incoming jobs (shop hasn't accepted yet)
