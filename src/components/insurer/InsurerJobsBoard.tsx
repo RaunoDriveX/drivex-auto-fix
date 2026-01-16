@@ -55,16 +55,29 @@ interface Job {
   short_code?: string;
   notes?: string;
   insurer_name?: string;
+  ai_assessment_details?: unknown;
 }
 
 type WorkflowStage = 'new' | 'customer_handover' | 'damage_report' | 'cost_approval' | 'completed';
 
 // Map job statuses to workflow stages
+// - 'new': Shop hasn't accepted yet (status is not 'accepted' or 'confirmed')
+// - 'customer_handover': Shop accepted, awaiting customer action
+// - 'damage_report': Has SmartScan AI assessment (ai_assessment_details present)
+// - 'cost_approval': Job in progress, awaiting cost approval
+// - 'completed': Job finished
 const getWorkflowStage = (job: Job): WorkflowStage => {
   if (job.job_status === 'completed') return 'completed';
+  if (job.job_status === 'cancelled') return 'completed'; // Show cancelled in completed tab
   if (job.job_status === 'in_progress') return 'cost_approval';
-  if (job.job_status === 'scheduled') return 'damage_report';
-  if (job.status === 'accepted') return 'customer_handover';
+  
+  // If has AI assessment from SmartScan, show in damage_report stage
+  if (job.ai_assessment_details) return 'damage_report';
+  
+  // If shop has accepted the job
+  if (job.status === 'accepted' || job.status === 'confirmed') return 'customer_handover';
+  
+  // Default: new incoming jobs (shop hasn't accepted yet)
   return 'new';
 };
 
@@ -158,7 +171,8 @@ export const InsurerJobsBoard: React.FC = () => {
           updated_at,
           short_code,
           notes,
-          insurer_name
+          insurer_name,
+          ai_assessment_details
         `)
         .eq('insurer_name', insurerProfile.insurer_name)
         .order('created_at', { ascending: false });
