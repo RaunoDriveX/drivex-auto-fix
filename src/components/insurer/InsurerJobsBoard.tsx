@@ -36,6 +36,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface VehicleInfo {
+  carType?: string;
+  make?: string;
+  model?: string;
+  year?: string;
+}
+
 interface Job {
   id: string;
   customer_name: string;
@@ -56,7 +63,51 @@ interface Job {
   notes?: string;
   insurer_name?: string;
   ai_assessment_details?: unknown;
+  damage_type?: string | null;
+  vehicle_info?: VehicleInfo | null;
 }
+
+// Helper to safely parse vehicle_info from JSON
+const parseVehicleInfo = (info: unknown): VehicleInfo | null => {
+  if (!info || typeof info !== 'object') return null;
+  return info as VehicleInfo;
+};
+
+// Helper to get display label for glass type (service_type)
+const getGlassLabel = (serviceType: string): string => {
+  const glassMap: Record<string, string> = {
+    'windshield_replacement': 'Front',
+    'windshield_repair': 'Front',
+    'side_window': 'Side',
+    'rear_window': 'Rear',
+    'front': 'Front',
+    'side': 'Side',
+    'rear': 'Rear'
+  };
+  return glassMap[serviceType.toLowerCase()] || serviceType;
+};
+
+// Helper to get display label for damage type
+const getDamageLabel = (damageType: string): string => {
+  const damageMap: Record<string, string> = {
+    'chip': 'Stone chip',
+    'stone_chip': 'Stone chip',
+    'crack': 'Crack',
+    'shattered': 'Shattered'
+  };
+  return damageMap[damageType.toLowerCase()] || damageType;
+};
+
+// Helper to get display label for car type
+const getCarTypeLabel = (carType: string): string => {
+  const carMap: Record<string, string> = {
+    'passenger': 'Passenger car',
+    'suv': 'SUV',
+    'van': 'Van',
+    'truck': 'Truck'
+  };
+  return carMap[carType.toLowerCase()] || carType;
+};
 
 type WorkflowStage = 'new' | 'customer_handover' | 'damage_report' | 'cost_approval' | 'completed';
 
@@ -178,7 +229,9 @@ export const InsurerJobsBoard: React.FC = () => {
           short_code,
           notes,
           insurer_name,
-          ai_assessment_details
+          ai_assessment_details,
+          damage_type,
+          vehicle_info
         `)
         .eq('insurer_name', insurerProfile.insurer_name)
         .order('created_at', { ascending: false });
@@ -188,7 +241,7 @@ export const InsurerJobsBoard: React.FC = () => {
         return;
       }
 
-      setJobs(data || []);
+      setJobs((data || []) as unknown as Job[]);
     } catch (error) {
       console.error('Error fetching jobs:', error);
     } finally {
@@ -459,6 +512,34 @@ export const InsurerJobsBoard: React.FC = () => {
                 <p className="text-sm text-muted-foreground mb-2">
                   {job.insurer_name || 'Versicherung'}
                 </p>
+
+                {/* Customer Selection Details */}
+                {(() => {
+                  const vehicleInfo = parseVehicleInfo(job.vehicle_info);
+                  const hasSelectionDetails = vehicleInfo?.carType || job.service_type || job.damage_type;
+                  
+                  if (!hasSelectionDetails) return null;
+                  
+                  return (
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {vehicleInfo?.carType && (
+                        <Badge variant="secondary" className="text-xs">
+                          {getCarTypeLabel(vehicleInfo.carType)}
+                        </Badge>
+                      )}
+                      {job.service_type && (
+                        <Badge variant="secondary" className="text-xs">
+                          {getGlassLabel(job.service_type)}
+                        </Badge>
+                      )}
+                      {job.damage_type && (
+                        <Badge variant="secondary" className="text-xs">
+                          {getDamageLabel(job.damage_type)}
+                        </Badge>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Details grid */}
                 <div className="space-y-2 text-sm">
