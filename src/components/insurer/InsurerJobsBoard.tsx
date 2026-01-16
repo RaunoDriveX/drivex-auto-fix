@@ -83,11 +83,11 @@ const getGlassLabel = (serviceType: string): string => {
     'rear_window': 'Rear Windshield',
     'front': 'Front Windshield',
     'side': 'Side Window',
-    'rear': 'Rear Windshield'
+    'rear': 'Rear Windshield',
+    // Legacy "repair" defaults to Front Windshield (most common case)
+    'repair': 'Front Windshield'
   };
-  // Don't show generic "repair" - only show specific glass types
-  if (serviceType.toLowerCase() === 'repair') return '';
-  return glassMap[serviceType.toLowerCase()] || '';
+  return glassMap[serviceType.toLowerCase()] || 'Front Windshield';
 };
 
 // Helper to get display label for damage type
