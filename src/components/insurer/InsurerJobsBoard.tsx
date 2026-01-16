@@ -488,6 +488,8 @@ export const InsurerJobsBoard: React.FC = () => {
         {filteredJobs.map((job) => {
           const config = statusConfig[job.job_status];
           const cancellationInfo = getCancellationInfo(job);
+          const workflowStage = getWorkflowStage(job);
+          const isNewCase = workflowStage === 'new';
           
           return (
             <Card key={job.id} className={cn(
@@ -513,10 +515,10 @@ export const InsurerJobsBoard: React.FC = () => {
                   {job.insurer_name || 'Versicherung'}
                 </p>
 
-                {/* Customer Selection Details */}
+                {/* Customer Selection Details - hide service_type for new cases */}
                 {(() => {
                   const vehicleInfo = parseVehicleInfo(job.vehicle_info);
-                  const hasSelectionDetails = vehicleInfo?.carType || job.service_type || job.damage_type;
+                  const hasSelectionDetails = vehicleInfo?.carType || (!isNewCase && job.service_type) || job.damage_type;
                   
                   if (!hasSelectionDetails) return null;
                   
@@ -527,7 +529,7 @@ export const InsurerJobsBoard: React.FC = () => {
                           {getCarTypeLabel(vehicleInfo.carType)}
                         </Badge>
                       )}
-                      {job.service_type && (
+                      {!isNewCase && job.service_type && (
                         <Badge variant="secondary" className="text-xs">
                           {getGlassLabel(job.service_type)}
                         </Badge>
