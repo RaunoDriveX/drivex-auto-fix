@@ -4,11 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
 import { CustomerJobTimeline } from "@/components/customer/CustomerJobTimeline";
 import { CustomerJobNotifications } from "@/components/customer/CustomerJobNotifications";
 import { RescheduleDialog } from "@/components/customer/RescheduleDialog";
 import { CancelAppointmentDialog } from "@/components/customer/CancelAppointmentDialog";
+import { ShopSelectionCard } from "@/components/customer/ShopSelectionCard";
+import { CostApprovalCard } from "@/components/customer/CostApprovalCard";
+import { useMockMode } from "@/hooks/useMockMode";
+import { mockJobStages, MockShopSelection, MockCostEstimate } from "@/lib/mockData";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { formatInsurerName, formatServiceType, formatDamageType } from "@/lib/utils";
@@ -53,6 +56,10 @@ interface JobDetails {
   shop_name: string;
   shop_id: string;
   insurer_name?: string;
+  workflow_stage?: string;
+  customer_shop_selection?: string;
+  customer_cost_approved?: boolean;
+  tracking_token?: string;
   shops?: {
     name: string;
     phone?: string;
@@ -65,22 +72,62 @@ interface JobDetails {
 
 export default function JobTracking() {
   const { appointmentId } = useParams<{ appointmentId: string }>();
+  const { isMockMode } = useMockMode();
+  
   const [jobDetails, setJobDetails] = useState<JobDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
+  
+  // Customer confirmation states
+  const [pendingShopSelections, setPendingShopSelections] = useState<MockShopSelection[] | null>(null);
+  const [pendingCostEstimate, setPendingCostEstimate] = useState<MockCostEstimate | null>(null);
+  const [confirmationLoading, setConfirmationLoading] = useState(false);
 
   useEffect(() => {
     if (appointmentId) {
       fetchJobDetails();
     }
-  }, [appointmentId]);
+  }, [appointmentId, isMockMode]);
 
   const fetchJobDetails = async () => {
     if (!appointmentId) return;
 
+    // Mock mode handling
+    if (isMockMode && appointmentId.startsWith('mock-')) {
+      const mockJob = mockJobStages[appointmentId];
+      if (mockJob) {
+        setJobDetails({
+          id: mockJob.id,
+          customer_name: mockJob.customer_name,
+          customer_email: mockJob.customer_email,
+          service_type: mockJob.service_type,
+          damage_type: mockJob.damage_type,
+          appointment_date: '2025-01-25',
+          appointment_time: '10:00',
+          job_status: 'scheduled',
+          shop_name: 'Mock Shop',
+          shop_id: 'mock-shop-1',
+          workflow_stage: mockJob.workflow_stage,
+          customer_shop_selection: mockJob.customer_shop_selection,
+          customer_cost_approved: mockJob.customer_cost_approved,
+          vehicle_info: mockJob.vehicle_info
+        });
+        
+        if (mockJob.workflow_stage === 'shop_selection' && mockJob.shop_selections) {
+          setPendingShopSelections(mockJob.shop_selections);
+        }
+        
+        if (mockJob.workflow_stage === 'cost_approval' && mockJob.cost_estimate) {
+          setPendingCostEstimate(mockJob.cost_estimate);
+        }
+        
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
-      // Use secure edge function instead of direct RLS query
       const isShortCode = appointmentId.length === 8;
       const { data, error } = await supabase.functions.invoke('get-job-tracking', {
         body: isShortCode ? { job_code: appointmentId } : { tracking_token: appointmentId }
@@ -93,6 +140,15 @@ export default function JobTracking() {
       }
 
       setJobDetails(data.appointment);
+      
+      // Set pending selections/estimates from API response
+      if (data.pendingShopSelections) {
+        setPendingShopSelections(data.pendingShopSelections);
+      }
+      
+      if (data.pendingCostEstimate) {
+        setPendingCostEstimate(data.pendingCostEstimate);
+      }
     } catch (error) {
       console.error('Error fetching job details:', error);
       toast({
@@ -102,6 +158,119 @@ export default function JobTracking() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleShopSelect = async (shopId: string) => {
+    if (!jobDetails?.tracking_token && !isMockMode) {
+      toast({
+        title: "Error",
+        description: "Unable to confirm selection. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setConfirmationLoading(true);
+    
+    try {
+      if (isMockMode) {
+        // Mock mode - just update local state
+        setPendingShopSelections(null);
+        if (jobDetails) {
+          setJobDetails({
+            ...jobDetails,
+            customer_shop_selection: shopId,
+            workflow_stage: 'awaiting_smartscan'
+          });
+        }
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('confirm-customer-selection', {
+        body: {
+          tracking_token: jobDetails!.tracking_token,
+          action: 'select_shop',
+          shop_id: shopId
+        }
+      });
+
+      if (error || data?.error) {
+        throw new Error(data?.error || 'Failed to confirm shop selection');
+      }
+
+      // Refresh job details
+      await fetchJobDetails();
+      
+      toast({
+        title: "Shop Selected",
+        description: "Your shop selection has been confirmed."
+      });
+    } catch (error: any) {
+      console.error('Error selecting shop:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to confirm shop selection.",
+        variant: "destructive"
+      });
+    } finally {
+      setConfirmationLoading(false);
+    }
+  };
+
+  const handleCostApprove = async () => {
+    if (!jobDetails?.tracking_token && !isMockMode) {
+      toast({
+        title: "Error",
+        description: "Unable to approve cost. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setConfirmationLoading(true);
+    
+    try {
+      if (isMockMode) {
+        // Mock mode - just update local state
+        setPendingCostEstimate(null);
+        if (jobDetails) {
+          setJobDetails({
+            ...jobDetails,
+            customer_cost_approved: true,
+            workflow_stage: 'approved'
+          });
+        }
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('confirm-customer-selection', {
+        body: {
+          tracking_token: jobDetails!.tracking_token,
+          action: 'approve_cost'
+        }
+      });
+
+      if (error || data?.error) {
+        throw new Error(data?.error || 'Failed to approve cost');
+      }
+
+      // Refresh job details
+      await fetchJobDetails();
+      
+      toast({
+        title: "Cost Approved",
+        description: "Your cost approval has been confirmed."
+      });
+    } catch (error: any) {
+      console.error('Error approving cost:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to approve cost.",
+        variant: "destructive"
+      });
+    } finally {
+      setConfirmationLoading(false);
     }
   };
 
@@ -151,6 +320,16 @@ export default function JobTracking() {
 
   const shop = jobDetails.shops;
   const isCancelled = jobDetails.job_status === 'cancelled' || jobDetails.status === 'cancelled';
+  
+  // Determine if customer actions are needed
+  const needsShopSelection = pendingShopSelections && 
+    pendingShopSelections.length > 0 && 
+    !jobDetails.customer_shop_selection &&
+    jobDetails.workflow_stage === 'shop_selection';
+    
+  const needsCostApproval = pendingCostEstimate && 
+    !jobDetails.customer_cost_approved &&
+    jobDetails.workflow_stage === 'cost_approval';
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -163,6 +342,11 @@ export default function JobTracking() {
               Back to Home
             </Link>
           </Button>
+          {isMockMode && (
+            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+              Mock Mode
+            </Badge>
+          )}
         </div>
         
         <div className="text-center space-y-2">
@@ -181,6 +365,26 @@ export default function JobTracking() {
               This appointment was cancelled. Please create a new appointment if you still need service.
             </AlertDescription>
           </Alert>
+        )}
+
+        {/* Customer Action Cards - Show prominently at top */}
+        {needsShopSelection && (
+          <ShopSelectionCard
+            shops={pendingShopSelections!}
+            onSelect={handleShopSelect}
+            isLoading={confirmationLoading}
+            isMockMode={isMockMode}
+          />
+        )}
+
+        {needsCostApproval && (
+          <CostApprovalCard
+            estimate={pendingCostEstimate!}
+            shopName={jobDetails.shop_name}
+            onApprove={handleCostApprove}
+            isLoading={confirmationLoading}
+            isMockMode={isMockMode}
+          />
         )}
 
         {/* Job Timeline */}
