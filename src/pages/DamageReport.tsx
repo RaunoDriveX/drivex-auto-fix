@@ -35,6 +35,9 @@ const DamageReport = () => {
   const [vehicleType, setVehicleType] = useState<VehicleType>("car");
   const [licensePlate, setLicensePlate] = useState("");
   const [insuredName, setInsuredName] = useState("");
+  const [customerStreet, setCustomerStreet] = useState("");
+  const [customerCity, setCustomerCity] = useState("");
+  const [customerPostalCode, setCustomerPostalCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showContactSelection, setShowContactSelection] = useState(false);
   const [submissionData, setSubmissionData] = useState<SubmissionData | null>(null);
@@ -62,7 +65,7 @@ const DamageReport = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!licensePlate.trim() || !insuredName.trim()) {
+    if (!licensePlate.trim() || !insuredName.trim() || !customerStreet.trim() || !customerCity.trim() || !customerPostalCode.trim()) {
       toast.error(t('damage_report.validation_error'));
       return;
     }
@@ -77,7 +80,10 @@ const DamageReport = () => {
           tracking_token: token,
           customer_name: insuredName.trim(),
           customer_email: '', // Will be collected later
-          shop_id: 'pending', // Will be assigned when a shop accepts
+          customer_street: customerStreet.trim(),
+          customer_city: customerCity.trim(),
+          customer_postal_code: customerPostalCode.trim(),
+          shop_id: 'pending', // Will be assigned when insurance selects shops
           shop_name: 'Pending Assignment',
           service_type: getServiceType(glassLocation),
           damage_type: getDamageTypeValue(damageType),
@@ -86,6 +92,7 @@ const DamageReport = () => {
             vehicle_type: vehicleType
           },
           status: 'pending',
+          is_insurance_claim: true, // Insurance will assign shops
           appointment_date: new Date().toISOString().split('T')[0],
           appointment_time: '09:00'
         })
@@ -430,6 +437,51 @@ const DamageReport = () => {
                 className="text-lg h-12"
                 required
               />
+            </div>
+          </div>
+
+          {/* Customer Address Section */}
+          <div className="space-y-4">
+            <div>
+              <Label className="text-lg font-semibold">{t('damage_report.customer_address')}</Label>
+              <p className="text-sm text-muted-foreground mt-1">{t('damage_report.customer_address_hint')}</p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="customer-street">{t('damage_report.street')}</Label>
+              <Input
+                id="customer-street"
+                value={customerStreet}
+                onChange={(e) => setCustomerStreet(e.target.value)}
+                placeholder={t('damage_report.street_placeholder')}
+                className="text-lg h-12"
+                required
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="customer-postal-code">{t('damage_report.postal_code')}</Label>
+                <Input
+                  id="customer-postal-code"
+                  value={customerPostalCode}
+                  onChange={(e) => setCustomerPostalCode(e.target.value)}
+                  placeholder={t('damage_report.postal_code_placeholder')}
+                  className="text-lg h-12"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="customer-city">{t('damage_report.city')}</Label>
+                <Input
+                  id="customer-city"
+                  value={customerCity}
+                  onChange={(e) => setCustomerCity(e.target.value)}
+                  placeholder={t('damage_report.city_placeholder')}
+                  className="text-lg h-12"
+                  required
+                />
+              </div>
             </div>
           </div>
 

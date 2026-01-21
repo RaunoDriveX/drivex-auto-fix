@@ -77,6 +77,7 @@
     "remove_job_confirm": "Sind Sie sicher, dass Sie diesen Auftrag vom Dashboard entfernen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "cancel": "Abbrechen",
     "created_on": "erstellt am",
+    "customer_location": "Standort",
     "insurance_number": "Versicherungsnr.",
     "columns": {
       "pending": "Noch nicht zugewiesen",
@@ -179,6 +180,7 @@
     "selected_count": "Ausgewählt: {{count}}/3",
     "ready": "Bereit",
     "no_results": "Keine Werkstätten gefunden",
+    "customer_location": "Kundenstandort",
     "max_three": "Sie können bis zu 3 Werkstätten auswählen",
     "send_to_customer": "An Kunden senden",
     "success": "Werkstätten ausgewählt und an Kunden gesendet",

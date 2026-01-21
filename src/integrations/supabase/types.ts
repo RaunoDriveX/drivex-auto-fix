@@ -28,13 +28,18 @@ export type Database = {
           completion_proof_uploaded_at: string | null
           confirmation_email_sent: boolean | null
           created_at: string
+          customer_city: string | null
           customer_cost_approved: boolean | null
           customer_cost_approved_at: string | null
           customer_email: string
+          customer_latitude: number | null
+          customer_longitude: number | null
           customer_name: string
           customer_phone: string | null
+          customer_postal_code: string | null
           customer_shop_selected_at: string | null
           customer_shop_selection: string | null
+          customer_street: string | null
           damage_photos: string[] | null
           damage_type: string | null
           driver_view_obstruction: boolean | null
@@ -78,13 +83,18 @@ export type Database = {
           completion_proof_uploaded_at?: string | null
           confirmation_email_sent?: boolean | null
           created_at?: string
+          customer_city?: string | null
           customer_cost_approved?: boolean | null
           customer_cost_approved_at?: string | null
           customer_email: string
+          customer_latitude?: number | null
+          customer_longitude?: number | null
           customer_name: string
           customer_phone?: string | null
+          customer_postal_code?: string | null
           customer_shop_selected_at?: string | null
           customer_shop_selection?: string | null
+          customer_street?: string | null
           damage_photos?: string[] | null
           damage_type?: string | null
           driver_view_obstruction?: boolean | null
@@ -128,13 +138,18 @@ export type Database = {
           completion_proof_uploaded_at?: string | null
           confirmation_email_sent?: boolean | null
           created_at?: string
+          customer_city?: string | null
           customer_cost_approved?: boolean | null
           customer_cost_approved_at?: string | null
           customer_email?: string
+          customer_latitude?: number | null
+          customer_longitude?: number | null
           customer_name?: string
           customer_phone?: string | null
+          customer_postal_code?: string | null
           customer_shop_selected_at?: string | null
           customer_shop_selection?: string | null
+          customer_street?: string | null
           damage_photos?: string[] | null
           damage_type?: string | null
           driver_view_obstruction?: boolean | null
