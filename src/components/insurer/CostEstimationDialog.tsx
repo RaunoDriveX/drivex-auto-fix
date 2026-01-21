@@ -279,6 +279,25 @@ export function CostEstimationDialog({
               </div>
             </div>
 
+            {/* Labor Cost - moved before Parts & Materials */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Wrench className="h-4 w-4" />
+                {t('cost_estimation.labor_cost', 'Labor Cost')}
+              </Label>
+              <div className="relative max-w-xs">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">€</span>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={laborCost}
+                  onChange={(e) => setLaborCost(parseFloat(e.target.value) || 0)}
+                  className="pl-7"
+                />
+              </div>
+            </div>
+
             {/* Line Items */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -368,25 +387,6 @@ export function CostEstimationDialog({
                     </Button>
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Labor Cost */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Wrench className="h-4 w-4" />
-                {t('cost_estimation.labor_cost', 'Labor Cost')}
-              </Label>
-              <div className="relative max-w-xs">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">€</span>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={laborCost}
-                  onChange={(e) => setLaborCost(parseFloat(e.target.value) || 0)}
-                  className="pl-7"
-                />
               </div>
             </div>
 
