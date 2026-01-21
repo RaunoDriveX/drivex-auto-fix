@@ -32,6 +32,8 @@ interface Shop {
   acceptance_rate?: number;
   response_time_minutes?: number;
   quality_score?: number;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface SelectedShop extends Shop {
@@ -40,12 +42,21 @@ interface SelectedShop extends Shop {
   distance_km?: number;
 }
 
+interface CustomerLocation {
+  street?: string;
+  city?: string;
+  postal_code?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 interface ShopSelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   appointmentId: string;
   onSuccess: () => void;
   isMockMode?: boolean;
+  customerLocation?: CustomerLocation;
 }
 
 export function ShopSelectionDialog({
@@ -54,6 +65,7 @@ export function ShopSelectionDialog({
   appointmentId,
   onSuccess,
   isMockMode = false,
+  customerLocation,
 }: ShopSelectionDialogProps) {
   const { t } = useTranslation('insurer');
   const [shops, setShops] = useState<Shop[]>([]);
@@ -200,6 +212,17 @@ export function ShopSelectionDialog({
           <DialogDescription>
             {t('shop_selection.select_description', 'Select 1 to 3 shops for the customer to choose from')}
           </DialogDescription>
+          {customerLocation && (customerLocation.city || customerLocation.postal_code) && (
+            <div className="flex items-center gap-2 mt-2 p-2 bg-muted/50 rounded-lg">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">
+                <span className="text-muted-foreground">{t('shop_selection.customer_location', 'Customer location')}:</span>{' '}
+                <span className="font-medium">
+                  {customerLocation.postal_code} {customerLocation.city}
+                </span>
+              </span>
+            </div>
+          )}
           {isMockMode && (
             <Badge variant="outline" className="w-fit bg-yellow-500/10 text-yellow-700 border-yellow-300">
               Mock Mode

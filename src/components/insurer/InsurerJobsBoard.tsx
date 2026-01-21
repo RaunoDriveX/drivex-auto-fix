@@ -21,7 +21,8 @@ import {
   ClipboardCheck,
   CreditCard,
   Store,
-  Calculator
+  Calculator,
+  MapPin
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { JobStatusTracker } from '@/components/realtime/JobStatusTracker';
@@ -51,6 +52,9 @@ interface Job {
   id: string;
   customer_name: string;
   customer_email: string;
+  customer_street?: string;
+  customer_city?: string;
+  customer_postal_code?: string;
   service_type: string;
   job_status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
   status: string;
@@ -573,6 +577,19 @@ export const InsurerJobsBoard: React.FC = () => {
 
                 {/* Details grid */}
                 <div className="space-y-2 text-sm">
+                  {/* Customer Location */}
+                  {(job.customer_street || job.customer_city) && (
+                    <div className="flex items-start justify-between">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {t('jobs_board.customer_location')}
+                      </span>
+                      <span className="font-medium text-right max-w-[60%]">
+                        {job.customer_postal_code} {job.customer_city}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Insurance number - using customer email as proxy */}
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">{t('jobs_board.insurance_number')}</span>
@@ -706,6 +723,11 @@ export const InsurerJobsBoard: React.FC = () => {
             onOpenChange={setShopSelectionOpen}
             appointmentId={selectedJobForAction.id}
             onSuccess={handleDialogSuccess}
+            customerLocation={{
+              street: selectedJobForAction.customer_street,
+              city: selectedJobForAction.customer_city,
+              postal_code: selectedJobForAction.customer_postal_code,
+            }}
           />
           <CostEstimationDialog
             open={costEstimationOpen}
