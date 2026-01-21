@@ -112,13 +112,13 @@ export function ShopSelectionDialog({
       };
       setSelectedShops([...selectedShops, newShop]);
     } else {
-      toast.error(t('shop_selection.max_three', 'You can only select 3 shops'));
+      toast.error(t('shop_selection.max_three', 'You can select up to 3 shops'));
     }
   };
 
   const handleSubmit = async () => {
-    if (selectedShops.length !== 3) {
-      toast.error(t('shop_selection.select_three', 'Please select exactly 3 shops'));
+    if (selectedShops.length < 1) {
+      toast.error(t('shop_selection.select_minimum', 'Please select at least 1 shop'));
       return;
     }
 
@@ -185,7 +185,7 @@ export function ShopSelectionDialog({
             {t('shop_selection.title', 'Select Shops for Customer')}
           </DialogTitle>
           <DialogDescription>
-            {t('shop_selection.select_three', 'Select exactly 3 shops for the customer to choose from')}
+            {t('shop_selection.select_description', 'Select 1 to 3 shops for the customer to choose from')}
           </DialogDescription>
           {isMockMode && (
             <Badge variant="outline" className="w-fit bg-yellow-500/10 text-yellow-700 border-yellow-300">
@@ -211,7 +211,7 @@ export function ShopSelectionDialog({
             <p className="text-sm text-muted-foreground">
               {t('shop_selection.selected_count', 'Selected: {{count}}/3', { count: selectedShops.length })}
             </p>
-            {selectedShops.length === 3 && (
+            {selectedShops.length >= 1 && (
               <Badge className="bg-green-500">
                 <Check className="h-3 w-3 mr-1" />
                 {t('shop_selection.ready', 'Ready')}
@@ -314,7 +314,7 @@ export function ShopSelectionDialog({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={selectedShops.length !== 3 || submitting}
+            disabled={selectedShops.length < 1 || submitting}
           >
             {submitting ? (
               <Clock className="h-4 w-4 mr-2 animate-spin" />
