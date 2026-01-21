@@ -152,6 +152,19 @@ export function ShopSelectionDialog({
 
         if (updateError) throw updateError;
 
+        // Send email notification to customer
+        try {
+          await supabase.functions.invoke('send-customer-notification', {
+            body: {
+              appointmentId,
+              notificationType: 'shop_selection',
+            },
+          });
+          console.log('Customer notification sent');
+        } catch (notifError) {
+          console.error('Failed to send notification (non-blocking):', notifError);
+        }
+
         toast.success(t('shop_selection.success', 'Shops selected and sent to customer'));
       }
 

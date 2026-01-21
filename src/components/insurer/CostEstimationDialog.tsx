@@ -181,6 +181,19 @@ export function CostEstimationDialog({
 
         if (updateError) throw updateError;
 
+        // Send email notification to customer
+        try {
+          await supabase.functions.invoke('send-customer-notification', {
+            body: {
+              appointmentId,
+              notificationType: 'cost_approval',
+            },
+          });
+          console.log('Customer notification sent');
+        } catch (notifError) {
+          console.error('Failed to send notification (non-blocking):', notifError);
+        }
+
         toast.success(t('cost_estimation.success', 'Cost estimate sent to customer'));
       }
 
