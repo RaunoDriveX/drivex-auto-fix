@@ -19,11 +19,15 @@ import {
   FileText,
   Users,
   ClipboardCheck,
-  CreditCard
+  CreditCard,
+  Store,
+  Calculator
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { JobStatusTracker } from '@/components/realtime/JobStatusTracker';
 import { CompletionDocumentsViewer } from '@/components/insurer/CompletionDocumentsViewer';
+import { ShopSelectionDialog } from '@/components/insurer/ShopSelectionDialog';
+import { CostEstimationDialog } from '@/components/insurer/CostEstimationDialog';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -65,6 +69,8 @@ interface Job {
   ai_assessment_details?: unknown;
   damage_type?: string | null;
   vehicle_info?: VehicleInfo | null;
+  workflow_stage?: string;
+  requires_adas_calibration?: boolean;
 }
 
 // Helper to safely parse vehicle_info from JSON
@@ -84,7 +90,6 @@ const getGlassLabel = (serviceType: string): string => {
     'front': 'Front Windshield',
     'side': 'Side Window',
     'rear': 'Rear Windshield',
-    // Legacy "repair" defaults to Front Windshield (most common case)
     'repair': 'Front Windshield'
   };
   return glassMap[serviceType.toLowerCase()] || 'Front Windshield';
@@ -114,12 +119,6 @@ const getCarTypeLabel = (carType: string): string => {
 
 type WorkflowStage = 'new' | 'customer_handover' | 'damage_report' | 'cost_approval' | 'completed';
 
-// Map job statuses to workflow stages
-// - 'new': Shop hasn't accepted yet (status is not 'accepted' or 'confirmed')
-// - 'customer_handover': Shop accepted, awaiting customer action
-// - 'damage_report': Has SmartScan AI assessment (ai_assessment_details present with actual data)
-// - 'cost_approval': Job in progress, awaiting cost approval
-// - 'completed': Job finished
 const hasAiAssessment = (details: unknown): boolean => {
   if (!details) return false;
   if (typeof details !== 'object') return false;
@@ -128,16 +127,13 @@ const hasAiAssessment = (details: unknown): boolean => {
 
 const getWorkflowStage = (job: Job): WorkflowStage => {
   if (job.job_status === 'completed') return 'completed';
-  if (job.job_status === 'cancelled') return 'completed'; // Show cancelled in completed tab
+  if (job.job_status === 'cancelled') return 'completed';
   if (job.job_status === 'in_progress') return 'cost_approval';
   
-  // If has AI assessment from SmartScan with actual data, show in damage_report stage
   if (hasAiAssessment(job.ai_assessment_details)) return 'damage_report';
   
-  // If shop has accepted the job, move to customer_handover
   if (job.status === 'accepted' || job.status === 'confirmed') return 'customer_handover';
   
-  // Default: new incoming jobs (shop hasn't accepted yet)
   return 'new';
 };
 
@@ -182,6 +178,11 @@ export const InsurerJobsBoard: React.FC = () => {
   const [activeWorkflowStage, setActiveWorkflowStage] = useState<WorkflowStage | 'all'>('all');
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   
+  // Dialog states for customer confirmation actions
+  const [shopSelectionOpen, setShopSelectionOpen] = useState(false);
+  const [costEstimationOpen, setCostEstimationOpen] = useState(false);
+  const [selectedJobForAction, setSelectedJobForAction] = useState<Job | null>(null);
+  
   const statusConfig = getStatusConfig(t);
   const isGerman = i18n.language === 'de';
 
@@ -201,7 +202,6 @@ export const InsurerJobsBoard: React.FC = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) return;
 
-      // Get insurer profile
       const { data: insurerProfile } = await supabase
         .from('insurer_profiles')
         .select('insurer_name')
@@ -210,7 +210,6 @@ export const InsurerJobsBoard: React.FC = () => {
 
       if (!insurerProfile) return;
 
-      // Get jobs for this insurer
       const { data, error } = await supabase
         .from('appointments')
         .select(`
@@ -234,7 +233,9 @@ export const InsurerJobsBoard: React.FC = () => {
           insurer_name,
           ai_assessment_details,
           damage_type,
-          vehicle_info
+          vehicle_info,
+          workflow_stage,
+          requires_adas_calibration
         `)
         .eq('insurer_name', insurerProfile.insurer_name)
         .order('created_at', { ascending: false });
@@ -314,7 +315,6 @@ export const InsurerJobsBoard: React.FC = () => {
   const filterJobs = () => {
     let filtered = jobs;
 
-    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(job => 
         job.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -325,12 +325,10 @@ export const InsurerJobsBoard: React.FC = () => {
       );
     }
 
-    // Filter by status
     if (statusFilter !== 'all') {
       filtered = filtered.filter(job => job.job_status === statusFilter);
     }
 
-    // Filter by workflow stage
     if (activeWorkflowStage !== 'all') {
       filtered = filtered.filter(job => getWorkflowStage(job) === activeWorkflowStage);
     }
@@ -380,6 +378,21 @@ export const InsurerJobsBoard: React.FC = () => {
     }
   };
 
+  const handleOpenShopSelection = (job: Job) => {
+    setSelectedJobForAction(job);
+    setShopSelectionOpen(true);
+  };
+
+  const handleOpenCostEstimation = (job: Job) => {
+    setSelectedJobForAction(job);
+    setCostEstimationOpen(true);
+  };
+
+  const handleDialogSuccess = () => {
+    fetchJobs();
+    setSelectedJobForAction(null);
+  };
+
   const getCancellationInfo = (job: Job): { reason: string; shop: string } | null => {
     if (job.job_status !== 'cancelled' && job.status !== 'cancelled') return null;
     
@@ -392,6 +405,17 @@ export const InsurerJobsBoard: React.FC = () => {
     return { 
       reason: reason || t('jobs_board.no_reason_provided'),
       shop: job.shop_name
+    };
+  };
+
+  // Determine which actions are available for a job
+  const getAvailableActions = (job: Job) => {
+    const stage = getWorkflowStage(job);
+    const workflowStage = job.workflow_stage || 'new';
+    
+    return {
+      canSelectShops: stage === 'new' && workflowStage === 'new',
+      canAddCostEstimate: stage === 'damage_report' || (stage === 'customer_handover' && workflowStage !== 'shop_selection')
     };
   };
 
@@ -486,13 +510,13 @@ export const InsurerJobsBoard: React.FC = () => {
         </Select>
       </div>
 
-      {/* Jobs Grid - Redesigned Cards */}
+      {/* Jobs Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredJobs.map((job) => {
           const config = statusConfig[job.job_status];
           const cancellationInfo = getCancellationInfo(job);
           const workflowStage = getWorkflowStage(job);
-          const isNewCase = workflowStage === 'new';
+          const actions = getAvailableActions(job);
           
           return (
             <Card key={job.id} className={cn(
@@ -587,7 +611,7 @@ export const InsurerJobsBoard: React.FC = () => {
                 )}
 
                 {/* Action buttons */}
-                <div className="flex gap-2 mt-4">
+                <div className="flex flex-wrap gap-2 mt-4">
                   <Button
                     variant="outline"
                     size="sm"
@@ -597,6 +621,30 @@ export const InsurerJobsBoard: React.FC = () => {
                     <Eye className="h-4 w-4 mr-2" />
                     {selectedJob === job.id ? t('jobs_board.hide_details') : t('jobs_board.view_details')}
                   </Button>
+                  
+                  {/* Select Shops button - for new jobs */}
+                  {actions.canSelectShops && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => handleOpenShopSelection(job)}
+                    >
+                      <Store className="h-4 w-4 mr-2" />
+                      {t('jobs_board.select_shops', 'Select Shops')}
+                    </Button>
+                  )}
+                  
+                  {/* Add Cost Estimate button - for jobs with damage report */}
+                  {actions.canAddCostEstimate && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleOpenCostEstimation(job)}
+                    >
+                      <Calculator className="h-4 w-4 mr-2" />
+                      {t('jobs_board.add_estimate', 'Add Estimate')}
+                    </Button>
+                  )}
                   
                   {/* Delete button for cancelled jobs */}
                   {(job.job_status === 'cancelled' || job.status === 'cancelled') && (
@@ -648,6 +696,26 @@ export const InsurerJobsBoard: React.FC = () => {
             </p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Shop Selection Dialog */}
+      {selectedJobForAction && (
+        <>
+          <ShopSelectionDialog
+            open={shopSelectionOpen}
+            onOpenChange={setShopSelectionOpen}
+            appointmentId={selectedJobForAction.id}
+            onSuccess={handleDialogSuccess}
+          />
+          <CostEstimationDialog
+            open={costEstimationOpen}
+            onOpenChange={setCostEstimationOpen}
+            appointmentId={selectedJobForAction.id}
+            serviceType={selectedJobForAction.service_type}
+            requiresAdas={selectedJobForAction.requires_adas_calibration}
+            onSuccess={handleDialogSuccess}
+          />
+        </>
       )}
     </div>
   );
