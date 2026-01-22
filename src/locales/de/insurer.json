@@ -231,6 +231,7 @@
   },
   "damage_report": {
     "title": "Schadensbericht",
+    "assessment_title": "Die Schadensbewertung Ihres Fahrzeugs",
     "pending": "Schadensbericht ausstehend",
     "pending_description": "Warten auf SmartScan-Inspektion durch den Kunden",
     "available": "Verfügbar",
