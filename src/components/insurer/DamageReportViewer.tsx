@@ -17,12 +17,26 @@ import { DamageReportDialog } from './DamageReportDialog';
 
 interface DamageReportViewerProps {
   appointmentId: string;
+  damageType?: string | null;
   className?: string;
 }
 
+// Helper to format damage type for display
+const formatDamageType = (damageType: string | null | undefined): string => {
+  if (!damageType) return 'Unknown';
+  const damageMap: Record<string, string> = {
+    'chip': 'Stone chip',
+    'stone_chip': 'Stone chip',
+    'crack': 'Crack',
+    'shattered': 'Shattered',
+    'scratch': 'Scratch'
+  };
+  return damageMap[damageType.toLowerCase()] || damageType;
+};
+
 // Mock data for damage report document
 // This will later be replaced with real data from the database
-export const getMockDamageReport = (appointmentId: string) => {
+export const getMockDamageReport = (appointmentId: string, damageType?: string | null) => {
   // Generate consistent mock data based on appointment ID
   const hash = appointmentId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const hasReport = hash % 3 !== 0; // 2/3 of jobs have a damage report
@@ -38,8 +52,8 @@ export const getMockDamageReport = (appointmentId: string) => {
     fileSize: 245000 + (hash % 100000), // ~245-345 KB
     createdAt: reportDate.toISOString(),
     status: 'completed' as const,
-    damageType: hash % 2 === 0 ? 'crack' : 'chip',
-    recommendation: hash % 2 === 0 ? 'replacement' : 'repair',
+    damageType: formatDamageType(damageType),
+    recommendation: 'Repair', // Mock data - always show "Repair" for now
     confidenceScore: 85 + (hash % 15), // 85-99%
   };
 };
@@ -52,13 +66,14 @@ const formatFileSize = (bytes: number): string => {
 
 export const DamageReportViewer: React.FC<DamageReportViewerProps> = ({ 
   appointmentId, 
+  damageType,
   className 
 }) => {
   const { t, i18n } = useTranslation('insurer');
   const [dialogOpen, setDialogOpen] = useState(false);
   const isGerman = i18n.language === 'de';
   
-  const report = getMockDamageReport(appointmentId);
+  const report = getMockDamageReport(appointmentId, damageType);
   
   if (!report) {
     return (
