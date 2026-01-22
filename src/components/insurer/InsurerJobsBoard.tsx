@@ -22,7 +22,8 @@ import {
   CreditCard,
   Store,
   Calculator,
-  MapPin
+  MapPin,
+  Pencil
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { JobStatusTracker } from '@/components/realtime/JobStatusTracker';
@@ -194,6 +195,7 @@ export const InsurerJobsBoard: React.FC = () => {
   
   // Dialog states for customer confirmation actions
   const [shopSelectionOpen, setShopSelectionOpen] = useState(false);
+  const [shopSelectionEditMode, setShopSelectionEditMode] = useState(false);
   const [costEstimationOpen, setCostEstimationOpen] = useState(false);
   const [selectedJobForAction, setSelectedJobForAction] = useState<Job | null>(null);
   
@@ -439,8 +441,9 @@ export const InsurerJobsBoard: React.FC = () => {
     }
   };
 
-  const handleOpenShopSelection = (job: Job) => {
+  const handleOpenShopSelection = (job: Job, editMode = false) => {
     setSelectedJobForAction(job);
+    setShopSelectionEditMode(editMode);
     setShopSelectionOpen(true);
   };
 
@@ -674,9 +677,20 @@ export const InsurerJobsBoard: React.FC = () => {
                 {/* Suggested Shops - shown when shops have been selected */}
                 {shopSelections[job.id] && shopSelections[job.id].length > 0 && (
                   <div className="mt-3 p-3 bg-muted/50 rounded-lg border">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Store className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium">{t('jobs_board.suggested_shops', 'Suggested Shops')}</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Store className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">{t('jobs_board.suggested_shops', 'Suggested Shops')}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2"
+                        onClick={() => handleOpenShopSelection(job, true)}
+                      >
+                        <Pencil className="h-3 w-3 mr-1" />
+                        {t('jobs_board.edit', 'Edit')}
+                      </Button>
                     </div>
                     <div className="space-y-1.5">
                       {shopSelections[job.id].map((sel, idx) => (
@@ -822,6 +836,13 @@ export const InsurerJobsBoard: React.FC = () => {
               city: selectedJobForAction.customer_city,
               postal_code: selectedJobForAction.customer_postal_code,
             }}
+            isEditMode={shopSelectionEditMode}
+            existingSelections={shopSelectionEditMode ? shopSelections[selectedJobForAction.id]?.map(s => ({
+              shop_id: s.shop_id,
+              priority_order: s.priority_order,
+              estimated_price: s.estimated_price,
+              distance_km: s.distance_km,
+            })) : []}
           />
           <CostEstimationDialog
             open={costEstimationOpen}

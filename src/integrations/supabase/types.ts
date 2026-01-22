@@ -57,8 +57,11 @@ export type Database = {
           job_status: Database["public"]["Enums"]["job_status_type"] | null
           notes: string | null
           preferred_contact_method: string | null
+          previous_shop_selection: string | null
           reminder_email_sent: boolean | null
           requires_adas_calibration: boolean | null
+          selection_change_accepted: boolean | null
+          selection_modified_at: string | null
           service_type: string
           shop_id: string
           shop_name: string
@@ -112,8 +115,11 @@ export type Database = {
           job_status?: Database["public"]["Enums"]["job_status_type"] | null
           notes?: string | null
           preferred_contact_method?: string | null
+          previous_shop_selection?: string | null
           reminder_email_sent?: boolean | null
           requires_adas_calibration?: boolean | null
+          selection_change_accepted?: boolean | null
+          selection_modified_at?: string | null
           service_type?: string
           shop_id: string
           shop_name: string
@@ -167,8 +173,11 @@ export type Database = {
           job_status?: Database["public"]["Enums"]["job_status_type"] | null
           notes?: string | null
           preferred_contact_method?: string | null
+          previous_shop_selection?: string | null
           reminder_email_sent?: boolean | null
           requires_adas_calibration?: boolean | null
+          selection_change_accepted?: boolean | null
+          selection_modified_at?: string | null
           service_type?: string
           shop_id?: string
           shop_name?: string

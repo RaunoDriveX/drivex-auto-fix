@@ -81,6 +81,7 @@
     "customer_location": "Location",
     "insurance_number": "Insurance No.",
     "suggested_shops": "Suggested Shops",
+    "edit": "Edit",
     "columns": {
       "pending": "Pending Allocation",
       "in_progress": "In Progress", 
@@ -175,8 +176,10 @@
   },
   "shop_selection": {
     "title": "Select Shops for Customer",
+    "edit_title": "Edit Shop Selections",
     "select_three": "Select exactly 3 shops for the customer to choose from",
     "select_description": "Select 1 to 3 shops for the customer to choose from",
+    "edit_description": "Modify the shop selections. The customer will be notified of changes.",
     "select_minimum": "Please select at least 1 shop",
     "search_placeholder": "Search shops...",
     "selected_count": "Selected: {{count}}/3",
@@ -185,7 +188,9 @@
     "customer_location": "Customer location",
     "max_three": "You can select up to 3 shops",
     "send_to_customer": "Send to Customer",
+    "update_selections": "Update Selections",
     "success": "Shops selected and sent to customer",
+    "update_success": "Shop selections updated",
     "mock_success": "Mock Mode - Selections saved locally",
     "error_loading": "Failed to load shops",
     "error_saving": "Failed to save shop selections",
