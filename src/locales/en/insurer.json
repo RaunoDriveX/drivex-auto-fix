@@ -80,6 +80,7 @@
     "created_on": "created on",
     "customer_location": "Location",
     "insurance_number": "Insurance No.",
+    "suggested_shops": "Suggested Shops",
     "columns": {
       "pending": "Pending Allocation",
       "in_progress": "In Progress", 
