@@ -239,6 +239,10 @@
     "confidence": "AI Confidence",
     "view": "View",
     "download": "Download",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "ai_comments": "AI Comments",
+    "no_ai_comments": "No AI comments.",
+    "comments": "Comments",
+    "no_comments": "No additional comments."
   }
 }
