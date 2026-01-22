@@ -231,6 +231,7 @@
   },
   "damage_report": {
     "title": "Damage Report",
+    "assessment_title": "Your car's damage assessment",
     "pending": "Damage Report Pending",
     "pending_description": "Waiting for customer to complete SmartScan inspection",
     "available": "Available",
