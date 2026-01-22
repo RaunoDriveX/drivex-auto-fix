@@ -24,11 +24,11 @@ const Index = () => {
         <title>Glassify Auto Glass Repair & Replacement</title>
         <meta
           name="description"
-          content="Report glass damage. AI triage and smart matching to top repair shops. Or order DIY resin. Fast, fair, quality."
+          content="Report glass damage. We handle insurance approval and coordinate your repair at certified shops. Fast, fair, quality."
         />
         <link rel="canonical" href={canonical} />
         <meta property="og:title" content="Glassify Auto Glass Repair & Replacement" />
-        <meta property="og:description" content="Report glass damage. AI triage and smart matching to top repair shops. Or DIY resin." />
+        <meta property="og:description" content="Report glass damage. We handle insurance approval and coordinate your repair at certified shops." />
         <meta property="og:type" content="website" />
         <script type="application/ld+json">{JSON.stringify(orgJsonLd)}</script>
       </Helmet>

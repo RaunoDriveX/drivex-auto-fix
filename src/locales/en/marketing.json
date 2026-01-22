@@ -1,7 +1,7 @@
 {
   "hero": {
     "title": "Fix your vehicle glass!",
-    "description": "Report your glass damage in minutes. Our AI triages repair vs. replacement and matches you with the best shop based on price, availability, and quality. Uninsured? Order a DIY resin kit.",
+    "description": "Report your glass damage in minutes. We handle insurance approval and coordinate your repair appointment at a nearby certified shop.",
     "license_plate": "License plate",
     "phone_number": "Phone number",
     "begin_assessment": "Begin damage assessment"
