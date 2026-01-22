@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import glassifyLogo from "@/assets/glassify-logo.svg";
@@ -35,6 +36,8 @@ const DamageReport = () => {
   const [vehicleType, setVehicleType] = useState<VehicleType>("car");
   const [licensePlate, setLicensePlate] = useState("");
   const [insuredName, setInsuredName] = useState("");
+  const [selectedInsurer, setSelectedInsurer] = useState("");
+  const [insurerOptions, setInsurerOptions] = useState<Array<{ id: string; name: string }>>([]);
   const [customerStreet, setCustomerStreet] = useState("");
   const [customerCity, setCustomerCity] = useState("");
   const [customerPostalCode, setCustomerPostalCode] = useState("");
@@ -43,6 +46,43 @@ const DamageReport = () => {
   const [submissionData, setSubmissionData] = useState<SubmissionData | null>(null);
   const [contactMethod, setContactMethod] = useState<ContactMethod>("email");
   const [contactValue, setContactValue] = useState("");
+
+  // Hardcoded common insurers
+  const hardcodedInsurers = [
+    { id: 'allianz', name: 'Allianz' },
+    { id: 'axa', name: 'AXA' },
+    { id: 'hdi', name: 'HDI' },
+    { id: 'huk-coburg', name: 'HUK-COBURG' },
+    { id: 'ergo', name: 'ERGO' },
+    { id: 'zurich', name: 'Zurich' },
+    { id: 'devk', name: 'DEVK' },
+    { id: 'vgh', name: 'VGH' },
+  ];
+
+  // Fetch insurers from database
+  useEffect(() => {
+    const fetchInsurers = async () => {
+      const { data, error } = await supabase
+        .from('insurer_profiles')
+        .select('id, insurer_name')
+        .order('insurer_name');
+
+      if (!error && data) {
+        const dbInsurers = data.map(i => ({ id: i.id, name: i.insurer_name }));
+        // Merge hardcoded with database insurers, avoiding duplicates
+        const allInsurers = [...hardcodedInsurers];
+        dbInsurers.forEach(dbIns => {
+          if (!allInsurers.some(h => h.name.toLowerCase() === dbIns.name.toLowerCase())) {
+            allInsurers.push(dbIns);
+          }
+        });
+        setInsurerOptions(allInsurers.sort((a, b) => a.name.localeCompare(b.name)));
+      } else {
+        setInsurerOptions(hardcodedInsurers);
+      }
+    };
+    fetchInsurers();
+  }, []);
 
   const getServiceType = (location: GlassLocation) => {
     switch (location) {
@@ -65,10 +105,12 @@ const DamageReport = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!licensePlate.trim() || !insuredName.trim() || !customerStreet.trim() || !customerCity.trim() || !customerPostalCode.trim()) {
+    if (!licensePlate.trim() || !insuredName.trim() || !selectedInsurer || !customerStreet.trim() || !customerCity.trim() || !customerPostalCode.trim()) {
       toast.error(t('damage_report.validation_error'));
       return;
     }
+
+    const selectedInsurerData = insurerOptions.find(i => i.id === selectedInsurer);
 
     setIsSubmitting(true);
 
@@ -93,6 +135,7 @@ const DamageReport = () => {
           },
           status: 'pending',
           is_insurance_claim: true, // Insurance will assign shops
+          insurer_name: selectedInsurerData?.name || '',
           appointment_date: new Date().toISOString().split('T')[0],
           appointment_time: '09:00'
         })
@@ -437,6 +480,24 @@ const DamageReport = () => {
                 className="text-lg h-12"
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="insurer-select" className="text-lg font-semibold">
+                {t('damage_report.insurance_company')}
+              </Label>
+              <Select value={selectedInsurer} onValueChange={setSelectedInsurer}>
+                <SelectTrigger id="insurer-select" className="text-lg h-12">
+                  <SelectValue placeholder={t('damage_report.select_insurance')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {insurerOptions.map((insurer) => (
+                    <SelectItem key={insurer.id} value={insurer.id}>
+                      {insurer.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

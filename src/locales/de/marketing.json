@@ -34,6 +34,8 @@
     "license_plate": "KFZ-Kennzeichen",
     "insured_name": "Name des Versicherten",
     "insured_name_placeholder": "Name des Versicherten eingeben",
+    "insurance_company": "Versicherungsgesellschaft",
+    "select_insurance": "Wählen Sie Ihre Versicherung",
     "customer_address": "Ihre Adresse",
     "customer_address_hint": "Zur Suche von Werkstätten in Ihrer Nähe",
     "street": "Straße & Hausnummer",
