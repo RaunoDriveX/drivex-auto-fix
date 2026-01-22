@@ -147,6 +147,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
           created_at,
           appointments (
             id,
+            shop_id,
             customer_name,
             customer_email,
             customer_phone,
@@ -172,14 +173,21 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
       if (selectionsError) throw selectionsError;
 
+      console.log('Insurer selections found for shop:', shopId, insurerSelections?.length || 0);
+      
       // Transform insurer selections to JobOffer format
       // Only show pending ones where customer hasn't selected yet AND appointment not yet assigned to this shop
       const insurerSelectionsAsOffers: JobOffer[] = (insurerSelections || [])
         .filter((selection: any) => {
           const appointment = selection.appointments;
-          if (!appointment) return false;
+          if (!appointment) {
+            console.log('Selection has no appointment:', selection.id);
+            return false;
+          }
           // Only show if appointment is still pending (shop_id = 'pending') and workflow is shop_selection
-          return appointment.shop_id === 'pending' && appointment.workflow_stage === 'shop_selection';
+          const shouldShow = appointment.shop_id === 'pending' && appointment.workflow_stage === 'shop_selection';
+          console.log('Selection filter:', selection.id, 'shop_id:', appointment.shop_id, 'workflow_stage:', appointment.workflow_stage, 'shouldShow:', shouldShow);
+          return shouldShow;
         })
         .map((selection: any) => {
           const appointmentDate = new Date(selection.appointments.appointment_date);
