@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { tracking_token, action, shop_id } = await req.json();
+    const { tracking_token, action, shop_id, appointment_date, appointment_time } = await req.json();
 
     // Validate tracking token
     if (!tracking_token || typeof tracking_token !== 'string') {
@@ -64,10 +64,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate action
-    if (!action || !['select_shop', 'approve_cost'].includes(action)) {
+    // Validate action - now includes 'select_shop_and_schedule'
+    const validActions = ['select_shop', 'approve_cost', 'select_shop_and_schedule'];
+    if (!action || !validActions.includes(action)) {
       return new Response(
-        JSON.stringify({ error: 'Invalid action. Use select_shop or approve_cost' }),
+        JSON.stringify({ error: 'Invalid action. Use select_shop, select_shop_and_schedule, or approve_cost' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -89,6 +90,164 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Handle combined shop + schedule selection (NEW - Phase 2)
+    if (action === 'select_shop_and_schedule') {
+      // Validate required fields
+      if (!shop_id || typeof shop_id !== 'string') {
+        return new Response(
+          JSON.stringify({ error: 'Shop ID is required for shop selection' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (!appointment_date || !appointment_time) {
+        return new Response(
+          JSON.stringify({ error: 'Appointment date and time are required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Validate date format (YYYY-MM-DD)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(appointment_date)) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid date format. Use YYYY-MM-DD' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Validate time format (HH:MM:SS)
+      if (!/^\d{2}:\d{2}:\d{2}$/.test(appointment_time)) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid time format. Use HH:MM:SS' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Check workflow stage
+      if (appointment.workflow_stage !== 'shop_selection') {
+        return new Response(
+          JSON.stringify({ error: 'Shop selection is not available for this appointment' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Already selected
+      if (appointment.customer_shop_selection) {
+        return new Response(
+          JSON.stringify({ error: 'Shop has already been selected' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Verify shop is one of the offered options
+      const { data: validSelection } = await supabase
+        .from('insurer_shop_selections')
+        .select('id, estimated_price')
+        .eq('appointment_id', appointment.id)
+        .eq('shop_id', shop_id)
+        .maybeSingle();
+
+      if (!validSelection) {
+        return new Response(
+          JSON.stringify({ error: 'Selected shop is not one of the available options' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Get shop details for the update
+      const { data: shopDetails } = await supabase
+        .from('shops')
+        .select('name')
+        .eq('id', shop_id)
+        .maybeSingle();
+
+      // Update appointment with shop selection AND schedule in one step
+      // Set workflow_stage to 'awaiting_shop_response' - waiting for shop to accept
+      const { error: updateError } = await supabase
+        .from('appointments')
+        .update({
+          customer_shop_selection: shop_id,
+          customer_shop_selected_at: new Date().toISOString(),
+          appointment_date: appointment_date,
+          appointment_time: appointment_time,
+          workflow_stage: 'awaiting_shop_response',
+          total_cost: validSelection.estimated_price,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', appointment.id);
+
+      if (updateError) {
+        console.error('Error updating shop selection and schedule:', updateError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to save shop selection and schedule' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Book the time slot in shop_availability
+      await supabase
+        .from('shop_availability')
+        .upsert({
+          shop_id: shop_id,
+          date: appointment_date,
+          time_slot: appointment_time,
+          is_available: false,
+          appointment_id: appointment.id
+        });
+
+      // Create a job offer for the selected shop so they can accept/decline
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour expiry
+
+      const { error: offerError } = await supabase
+        .from('job_offers')
+        .insert({
+          appointment_id: appointment.id,
+          shop_id: shop_id,
+          offered_price: validSelection.estimated_price || 0,
+          status: 'offered',
+          expires_at: expiresAt.toISOString(),
+          notes: `Customer selected shop and scheduled for ${appointment_date} at ${appointment_time}`
+        });
+
+      if (offerError) {
+        console.error('Error creating job offer:', offerError);
+        // Non-blocking - log but continue
+      }
+
+      // Send notification to shop
+      try {
+        await supabase
+          .from('shop_notifications')
+          .insert({
+            shop_id: shop_id,
+            notification_type: 'new_job_offer',
+            title: 'New Job Offer',
+            message: `Customer has selected your shop and scheduled for ${appointment_date} at ${appointment_time}`,
+            data: {
+              appointment_id: appointment.id,
+              appointment_date,
+              appointment_time,
+              estimated_price: validSelection.estimated_price
+            }
+          });
+      } catch (notifError) {
+        console.error('Failed to create shop notification:', notifError);
+      }
+
+      console.log(`Shop ${shop_id} selected with schedule ${appointment_date} ${appointment_time} for appointment ${appointment.id} from IP: ${clientIp}`);
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Shop selected and appointment scheduled successfully. Waiting for shop confirmation.',
+          next_stage: 'awaiting_shop_response'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Handle legacy select_shop action (without scheduling)
     if (action === 'select_shop') {
       // Validate shop_id is provided
       if (!shop_id || typeof shop_id !== 'string') {

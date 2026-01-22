@@ -66,6 +66,8 @@ interface ShopSelectionDialogProps {
   customerLocation?: CustomerLocation;
   isEditMode?: boolean;
   existingSelections?: ExistingSelection[];
+  serviceType?: string;
+  damageType?: string;
 }
 
 export function ShopSelectionDialog({
@@ -77,6 +79,8 @@ export function ShopSelectionDialog({
   customerLocation,
   isEditMode = false,
   existingSelections = [],
+  serviceType,
+  damageType,
 }: ShopSelectionDialogProps) {
   const { t } = useTranslation('insurer');
   const [shops, setShops] = useState<Shop[]>([]);
@@ -147,7 +151,45 @@ export function ShopSelectionDialog({
     }
   };
 
-  const handleShopToggle = (shop: Shop) => {
+  // Fetch real pricing from service_pricing table
+  const fetchShopPricing = async (shopId: string): Promise<number | null> => {
+    if (isMockMode || !serviceType) return null;
+    
+    try {
+      // Try exact match first (service_type + damage_type)
+      let query = supabase
+        .from('service_pricing')
+        .select('base_price')
+        .eq('shop_id', shopId)
+        .eq('service_type', serviceType);
+      
+      if (damageType) {
+        query = query.eq('damage_type', damageType);
+      }
+      
+      const { data: exactMatch } = await query.maybeSingle();
+      
+      if (exactMatch?.base_price) {
+        return exactMatch.base_price;
+      }
+      
+      // Fallback: try just service_type match
+      const { data: serviceMatch } = await supabase
+        .from('service_pricing')
+        .select('base_price')
+        .eq('shop_id', shopId)
+        .eq('service_type', serviceType)
+        .limit(1)
+        .maybeSingle();
+      
+      return serviceMatch?.base_price || null;
+    } catch (error) {
+      console.error('Error fetching shop pricing:', error);
+      return null;
+    }
+  };
+
+  const handleShopToggle = async (shop: Shop) => {
     const isSelected = selectedShops.some(s => s.id === shop.id);
     
     if (isSelected) {
@@ -158,14 +200,35 @@ export function ShopSelectionDialog({
         .map((s, index) => ({ ...s, priority_order: index + 1 }));
       setSelectedShops(remaining);
     } else if (selectedShops.length < 3) {
-      // Add shop with next priority
+      // Fetch real pricing for the shop
+      const realPrice = await fetchShopPricing(shop.id);
+      
+      // Calculate distance if we have customer location
+      let distance = parseFloat((Math.random() * 10 + 1).toFixed(1)); // Fallback mock distance
+      if (customerLocation?.latitude && customerLocation?.longitude && shop.latitude && shop.longitude) {
+        // Haversine formula for distance calculation
+        const R = 6371; // Earth's radius in km
+        const dLat = (shop.latitude - customerLocation.latitude) * Math.PI / 180;
+        const dLon = (shop.longitude - customerLocation.longitude) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(customerLocation.latitude * Math.PI / 180) * Math.cos(shop.latitude * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        distance = parseFloat((R * c).toFixed(1));
+      }
+      
+      // Add shop with next priority and real price
       const newShop: SelectedShop = {
         ...shop,
         priority_order: selectedShops.length + 1,
-        estimated_price: Math.floor(Math.random() * 100) + 250, // Mock price for demo
-        distance_km: parseFloat((Math.random() * 10 + 1).toFixed(1)), // Mock distance for demo
+        estimated_price: realPrice || Math.floor(Math.random() * 100) + 250, // Fallback to mock if no pricing
+        distance_km: distance,
       };
       setSelectedShops([...selectedShops, newShop]);
+      
+      if (!realPrice && !isMockMode) {
+        toast.warning(t('shop_selection.no_pricing', 'No pricing set for this shop - using estimate'));
+      }
     } else {
       toast.error(t('shop_selection.max_three', 'You can select up to 3 shops'));
     }

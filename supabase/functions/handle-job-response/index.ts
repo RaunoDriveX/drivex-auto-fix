@@ -265,13 +265,16 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       // Update appointment with selected shop and job_status
+      // IMPORTANT: Set workflow_stage to 'damage_report' after shop accepts (Phase 4)
       const { error: appointmentUpdateError } = await supabase
         .from('appointments')
         .update({
           shop_id: jobOffer.shop_id,
           shop_name: shopDetails.name,
           status: 'confirmed',
-          job_status: 'scheduled', // Keep as scheduled until work starts
+          job_status: 'scheduled',
+          workflow_stage: 'damage_report', // Move to damage report stage after shop accepts
+          appointment_confirmed_at: new Date().toISOString(), // Mark as confirmed
           total_cost: counterOffer || jobOffer.offered_price
         })
         .eq('id', jobOffer.appointment_id);
@@ -286,18 +289,19 @@ const handler = async (req: Request): Promise<Response> => {
         .insert({
           appointment_id: jobOffer.appointment_id,
           job_offer_id: jobOfferId,
-          old_status: 'scheduled',
-          new_status: 'scheduled',
+          old_status: 'awaiting_shop_response',
+          new_status: 'damage_report',
           changed_by_shop_id: jobOffer.shop_id,
           notes: `Job accepted by ${shopDetails.name} for €${counterOffer || jobOffer.offered_price}`,
           metadata: {
             action: 'job_accepted',
             shop_name: shopDetails.name,
-            offered_price: counterOffer || jobOffer.offered_price
+            offered_price: counterOffer || jobOffer.offered_price,
+            workflow_stage: 'damage_report'
           }
         });
 
-      console.log(`Job accepted by ${shopDetails.name} for €${counterOffer || jobOffer.offered_price}`);
+      console.log(`Job accepted by ${shopDetails.name} for €${counterOffer || jobOffer.offered_price}. Moved to damage_report stage.`);
     } else {
       console.log(`Job declined by ${shopDetails.name}. Reason: ${declineReason || 'Not specified'}`);
       
