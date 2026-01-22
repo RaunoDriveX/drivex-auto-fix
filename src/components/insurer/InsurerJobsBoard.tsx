@@ -23,7 +23,8 @@ import {
   Store,
   Calculator,
   MapPin,
-  Pencil
+  Pencil,
+  Calendar
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { JobStatusTracker } from '@/components/realtime/JobStatusTracker';
@@ -85,6 +86,7 @@ interface Job {
   vehicle_info?: VehicleInfo | null;
   workflow_stage?: string;
   requires_adas_calibration?: boolean;
+  appointment_confirmed_at?: string;
 }
 
 // Helper to safely parse vehicle_info from JSON
@@ -232,6 +234,9 @@ export const InsurerJobsBoard: React.FC = () => {
           id,
           customer_name,
           customer_email,
+          customer_street,
+          customer_city,
+          customer_postal_code,
           service_type,
           job_status,
           status,
@@ -251,7 +256,8 @@ export const InsurerJobsBoard: React.FC = () => {
           damage_type,
           vehicle_info,
           workflow_stage,
-          requires_adas_calibration
+          requires_adas_calibration,
+          appointment_confirmed_at
         `)
         .eq('insurer_name', insurerProfile.insurer_name)
         .order('created_at', { ascending: false });
@@ -672,6 +678,20 @@ export const InsurerJobsBoard: React.FC = () => {
                         isGerman ? { locale: de } : undefined)}
                     </span>
                   </div>
+
+                  {/* Customer confirmed appointment */}
+                  {job.appointment_confirmed_at && (
+                    <div className="flex items-center justify-between pt-2 border-t border-dashed">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {t('jobs_board.scheduled_for', 'Scheduled for')}
+                      </span>
+                      <span className="font-medium text-primary">
+                        {format(new Date(job.appointment_date), isGerman ? 'd. MMM' : 'MMM d', 
+                          isGerman ? { locale: de } : undefined)} {job.appointment_time?.substring(0, 5)}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Suggested Shops - shown when shops have been selected */}
