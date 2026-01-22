@@ -354,9 +354,10 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
     setRespondingTo(jobOfferId);
 
     try {
-      // Check if this is a direct booking
+      // Check the type of offer
       const offer = jobOffers.find(o => o.id === jobOfferId);
       const isDirectBooking = offer?.is_direct_booking;
+      const isInsurerSelection = offer?.is_insurer_selection;
 
       if (isDirectBooking) {
         // Handle direct booking - update appointment status directly
@@ -378,8 +379,35 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
           
           if (error) throw error;
         }
+      } else if (isInsurerSelection) {
+        // Handle insurer selection - update appointment to assign shop
+        const appointmentId = offer?.appointment_id;
+        if (!appointmentId) throw new Error('No appointment ID found');
+
+        if (response === 'accept') {
+          const { error } = await supabase
+            .from('appointments')
+            .update({ 
+              shop_id: shopId,
+              shop_name: shop?.name || 'Selected Shop',
+              status: 'confirmed',
+              workflow_stage: 'customer_handover'
+            })
+            .eq('id', appointmentId);
+          
+          if (error) throw error;
+        } else {
+          // Remove the shop from insurer selections for this appointment
+          const selectionId = jobOfferId.replace('selection-', '');
+          const { error } = await supabase
+            .from('insurer_shop_selections')
+            .delete()
+            .eq('id', selectionId);
+          
+          if (error) throw error;
+        }
       } else {
-        // Handle job offer (insurance routing) - call edge function
+        // Handle job offer (insurance routing via job_offers table) - call edge function
         const { error } = await supabase.functions.invoke('handle-job-response', {
           body: {
             jobOfferId,
