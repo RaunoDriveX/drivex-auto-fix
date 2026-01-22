@@ -8,9 +8,8 @@ import { CustomerJobTimeline } from "@/components/customer/CustomerJobTimeline";
 import { CustomerJobNotifications } from "@/components/customer/CustomerJobNotifications";
 import { RescheduleDialog } from "@/components/customer/RescheduleDialog";
 import { CancelAppointmentDialog } from "@/components/customer/CancelAppointmentDialog";
-import { ShopSelectionCard } from "@/components/customer/ShopSelectionCard";
+import { ShopAndScheduleCard } from "@/components/customer/ShopAndScheduleCard";
 import { CostApprovalCard } from "@/components/customer/CostApprovalCard";
-import { AppointmentSchedulingCard } from "@/components/customer/AppointmentSchedulingCard";
 import { useMockMode } from "@/hooks/useMockMode";
 import { mockJobStages, MockShopSelection, MockCostEstimate } from "@/lib/mockData";
 import { supabase } from "@/integrations/supabase/client";
@@ -164,6 +163,8 @@ export default function JobTracking() {
     }
   };
 
+  // Handle shop selection is now combined with scheduling in ShopAndScheduleCard
+  // This handler is kept for mock mode compatibility
   const handleShopSelect = async (shopId: string) => {
     if (!jobDetails?.tracking_token && !isMockMode) {
       toast({
@@ -184,25 +185,13 @@ export default function JobTracking() {
           setJobDetails({
             ...jobDetails,
             customer_shop_selection: shopId,
-            workflow_stage: 'awaiting_smartscan'
+            workflow_stage: 'awaiting_shop_response'
           });
         }
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('confirm-customer-selection', {
-        body: {
-          tracking_token: jobDetails!.tracking_token,
-          action: 'select_shop',
-          shop_id: shopId
-        }
-      });
-
-      if (error || data?.error) {
-        throw new Error(data?.error || 'Failed to confirm shop selection');
-      }
-
-      // Refresh job details
+      // Real mode now uses select_shop_and_schedule action in ShopAndScheduleCard
       await fetchJobDetails();
       
       toast({
@@ -325,7 +314,8 @@ export default function JobTracking() {
   const isCancelled = jobDetails.job_status === 'cancelled' || jobDetails.status === 'cancelled';
   
   // Determine if customer actions are needed
-  const needsShopSelection = pendingShopSelections && 
+  // Combined shop + schedule selection when in 'shop_selection' stage
+  const needsShopAndSchedule = pendingShopSelections && 
     pendingShopSelections.length > 0 && 
     !jobDetails.customer_shop_selection &&
     jobDetails.workflow_stage === 'shop_selection';
@@ -334,13 +324,8 @@ export default function JobTracking() {
     !jobDetails.customer_cost_approved &&
     jobDetails.workflow_stage === 'cost_approval';
 
-  // Check if customer needs to schedule appointment (shop assigned but no confirmed date)
-  const needsAppointmentScheduling = 
-    jobDetails.shop_id !== 'pending' && 
-    jobDetails.is_insurer_assigned &&
-    !jobDetails.appointment_confirmed_at &&
-    !isCancelled &&
-    jobDetails.workflow_stage === 'customer_handover';
+  // Show waiting message when in awaiting_shop_response stage
+  const isAwaitingShopResponse = jobDetails.workflow_stage === 'awaiting_shop_response';
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -379,13 +364,27 @@ export default function JobTracking() {
         )}
 
         {/* Customer Action Cards - Show prominently at top */}
-        {needsShopSelection && (
-          <ShopSelectionCard
+        {needsShopAndSchedule && (
+          <ShopAndScheduleCard
             shops={pendingShopSelections!}
-            onSelect={handleShopSelect}
+            appointmentId={jobDetails.id}
+            trackingToken={jobDetails.tracking_token}
+            onSuccess={fetchJobDetails}
             isLoading={confirmationLoading}
             isMockMode={isMockMode}
           />
+        )}
+
+        {/* Waiting for shop response message */}
+        {isAwaitingShopResponse && (
+          <Alert className="border-blue-200 bg-blue-50">
+            <Clock className="h-5 w-5 text-blue-600" />
+            <AlertTitle className="text-blue-800">Waiting for Shop Confirmation</AlertTitle>
+            <AlertDescription className="text-blue-700">
+              Your selected shop has been notified about your appointment request. 
+              They will confirm shortly and you'll receive an update.
+            </AlertDescription>
+          </Alert>
         )}
 
         {needsCostApproval && (
@@ -395,17 +394,6 @@ export default function JobTracking() {
             onApprove={handleCostApprove}
             isLoading={confirmationLoading}
             isMockMode={isMockMode}
-          />
-        )}
-
-        {/* Appointment Scheduling Card - shown when shop accepted but customer hasn't picked a time */}
-        {needsAppointmentScheduling && (
-          <AppointmentSchedulingCard
-            appointmentId={jobDetails.id}
-            shopId={jobDetails.shop_id}
-            shopName={shop?.name || jobDetails.shop_name}
-            trackingToken={jobDetails.tracking_token}
-            onScheduleSuccess={fetchJobDetails}
           />
         )}
 
