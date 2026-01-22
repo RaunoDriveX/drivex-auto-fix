@@ -122,6 +122,27 @@
     "crack_extending": "Riss bis zum Rand",
     "location_default": "Fahrerseite, linker unterer Quadrant"
   },
+  "damage_types": {
+    "chip": "Steinschlag",
+    "stone_chip": "Steinschlag",
+    "crack": "Riss",
+    "shattered": "Zerbrochen",
+    "scratch": "Kratzer",
+    "rear_window": "Heckscheibe",
+    "side_window": "Seitenfenster",
+    "front_windshield": "Frontscheibe",
+    "unknown": "Unbekannt"
+  },
+  "service_types": {
+    "repair": "Reparatur",
+    "replacement": "Austausch",
+    "windshield_repair": "Scheiben-Reparatur",
+    "windshield_replacement": "Scheiben-Austausch"
+  },
+  "time": {
+    "tbd": "TBD",
+    "to_be_determined": "Noch festzulegen"
+  },
   "customer_confirmation": {
     "select_shop_title": "Wählen Sie Ihre Werkstatt",
     "select_shop_description": "Ihr Versicherer hat Werkstätten für Sie vorausgewählt",
