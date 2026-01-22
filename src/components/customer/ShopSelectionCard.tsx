@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { StarRating } from '@/components/ui/star-rating';
 import {
   AlertDialog,
@@ -14,18 +15,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MapPin, Car, Wrench, Check, Clock } from 'lucide-react';
+import { MapPin, Car, Wrench, Check, Clock, AlertTriangle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import type { MockShopSelection } from '@/lib/mockData';
 
 interface ShopSelectionCardProps {
   shops: MockShopSelection[];
   onSelect: (shopId: string) => Promise<void>;
+  onAcceptChanges?: () => Promise<void>;
+  onDeclineChanges?: () => Promise<void>;
   isLoading?: boolean;
   isMockMode?: boolean;
+  hasChanges?: boolean;
+  previousSelection?: string | null;
 }
 
-export function ShopSelectionCard({ shops, onSelect, isLoading, isMockMode }: ShopSelectionCardProps) {
+export function ShopSelectionCard({ 
+  shops, 
+  onSelect, 
+  onAcceptChanges,
+  onDeclineChanges,
+  isLoading, 
+  isMockMode,
+  hasChanges = false,
+  previousSelection = null
+}: ShopSelectionCardProps) {
   const { t } = useTranslation('common');
   const [selectedShop, setSelectedShop] = useState<MockShopSelection | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -54,6 +68,37 @@ export function ShopSelectionCard({ shops, onSelect, isLoading, isMockMode }: Sh
       setSubmitting(false);
     }
   };
+
+  const handleAcceptChanges = async () => {
+    if (!onAcceptChanges) return;
+    setSubmitting(true);
+    try {
+      await onAcceptChanges();
+      toast.success(t('customer_confirmation.changes_accepted', 'Changes accepted'));
+    } catch (error) {
+      toast.error(t('customer_confirmation.error_accepting', 'Failed to accept changes'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeclineChanges = async () => {
+    if (!onDeclineChanges) return;
+    setSubmitting(true);
+    try {
+      await onDeclineChanges();
+      toast.success(t('customer_confirmation.changes_declined', 'Keeping your previous selection'));
+    } catch (error) {
+      toast.error(t('customer_confirmation.error_declining', 'Failed to process your request'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Find the previous shop name if there was a previous selection
+  const previousShopName = previousSelection 
+    ? shops.find(s => s.shop_id === previousSelection)?.name 
+    : null;
 
   if (isLoading) {
     return (
@@ -84,7 +129,10 @@ export function ShopSelectionCard({ shops, onSelect, isLoading, isMockMode }: Sh
                 {t('customer_confirmation.select_shop_title', 'Choose Your Repair Shop')}
               </CardTitle>
               <CardDescription>
-                {t('customer_confirmation.select_shop_description', 'Your insurer has pre-selected 3 shops for you')}
+                {hasChanges 
+                  ? t('customer_confirmation.selection_updated', 'Your insurer has updated the shop options')
+                  : t('customer_confirmation.select_shop_description', 'Your insurer has pre-selected shops for you')
+                }
               </CardDescription>
             </div>
           </div>
@@ -95,6 +143,44 @@ export function ShopSelectionCard({ shops, onSelect, isLoading, isMockMode }: Sh
           )}
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Changes notification banner */}
+          {hasChanges && (
+            <Alert className="bg-amber-50 border-amber-200">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                <p className="font-medium mb-2">
+                  {t('customer_confirmation.changes_made', 'There have been changes made to your selection options.')}
+                </p>
+                {previousShopName && (
+                  <p className="text-sm mb-3">
+                    {t('customer_confirmation.previous_selection', 'Your previous selection was: {{shop}}', { shop: previousShopName })}
+                  </p>
+                )}
+                <div className="flex gap-2 mt-2">
+                  <Button
+                    size="sm"
+                    onClick={handleAcceptChanges}
+                    disabled={submitting}
+                  >
+                    <Check className="h-4 w-4 mr-1" />
+                    {t('customer_confirmation.accept_changes', 'Accept & Choose New')}
+                  </Button>
+                  {previousShopName && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleDeclineChanges}
+                      disabled={submitting}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      {t('customer_confirmation.keep_previous', 'Keep Previous')}
+                    </Button>
+                  )}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {shops
             .sort((a, b) => a.priority_order - b.priority_order)
             .map((shop, index) => (

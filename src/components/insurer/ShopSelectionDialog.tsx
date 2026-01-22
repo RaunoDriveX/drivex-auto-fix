@@ -50,6 +50,13 @@ interface CustomerLocation {
   longitude?: number;
 }
 
+interface ExistingSelection {
+  shop_id: string;
+  priority_order: number;
+  estimated_price?: number;
+  distance_km?: number;
+}
+
 interface ShopSelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -57,6 +64,8 @@ interface ShopSelectionDialogProps {
   onSuccess: () => void;
   isMockMode?: boolean;
   customerLocation?: CustomerLocation;
+  isEditMode?: boolean;
+  existingSelections?: ExistingSelection[];
 }
 
 export function ShopSelectionDialog({
@@ -66,6 +75,8 @@ export function ShopSelectionDialog({
   onSuccess,
   isMockMode = false,
   customerLocation,
+  isEditMode = false,
+  existingSelections = [],
 }: ShopSelectionDialogProps) {
   const { t } = useTranslation('insurer');
   const [shops, setShops] = useState<Shop[]>([]);
@@ -77,15 +88,33 @@ export function ShopSelectionDialog({
   useEffect(() => {
     if (open) {
       fetchShops();
-      setSelectedShops([]);
+      // In edit mode, pre-populate with existing selections
+      if (isEditMode && existingSelections.length > 0) {
+        // Will be populated after shops are fetched
+      } else {
+        setSelectedShops([]);
+      }
     }
-  }, [open]);
+  }, [open, isEditMode]);
 
   const fetchShops = async () => {
     setLoading(true);
     try {
       if (isMockMode) {
         setShops(mockAvailableShops);
+        // Pre-populate in edit mode
+        if (isEditMode && existingSelections.length > 0) {
+          const preselected = existingSelections.map(sel => {
+            const shop = mockAvailableShops.find(s => s.id === sel.shop_id);
+            return shop ? {
+              ...shop,
+              priority_order: sel.priority_order,
+              estimated_price: sel.estimated_price,
+              distance_km: sel.distance_km,
+            } : null;
+          }).filter(Boolean) as SelectedShop[];
+          setSelectedShops(preselected);
+        }
       } else {
         const { data, error } = await supabase
           .from('shops')
@@ -95,6 +124,20 @@ export function ShopSelectionDialog({
 
         if (error) throw error;
         setShops(data || []);
+        
+        // Pre-populate in edit mode
+        if (isEditMode && existingSelections.length > 0 && data) {
+          const preselected = existingSelections.map(sel => {
+            const shop = data.find(s => s.id === sel.shop_id);
+            return shop ? {
+              ...shop,
+              priority_order: sel.priority_order,
+              estimated_price: sel.estimated_price,
+              distance_km: sel.distance_km,
+            } : null;
+          }).filter(Boolean) as SelectedShop[];
+          setSelectedShops(preselected);
+        }
       }
     } catch (error) {
       console.error('Error fetching shops:', error);
@@ -141,6 +184,16 @@ export function ShopSelectionDialog({
         await new Promise(resolve => setTimeout(resolve, 1000));
         toast.success(t('shop_selection.mock_success', 'Mock Mode - Selections saved locally'));
       } else {
+        // In edit mode, first delete existing selections
+        if (isEditMode) {
+          const { error: deleteError } = await supabase
+            .from('insurer_shop_selections')
+            .delete()
+            .eq('appointment_id', appointmentId);
+
+          if (deleteError) throw deleteError;
+        }
+
         // Insert shop selections
         const insertData = selectedShops.map(shop => ({
           appointment_id: appointmentId,
@@ -156,28 +209,57 @@ export function ShopSelectionDialog({
 
         if (insertError) throw insertError;
 
-        // Update appointment workflow stage
-        const { error: updateError } = await supabase
-          .from('appointments')
-          .update({ workflow_stage: 'shop_selection' })
-          .eq('id', appointmentId);
+        // Update appointment - different updates for edit vs new
+        if (isEditMode) {
+          // Get current appointment to preserve previous selection
+          const { data: appointment } = await supabase
+            .from('appointments')
+            .select('customer_shop_selection')
+            .eq('id', appointmentId)
+            .single();
 
-        if (updateError) throw updateError;
+          const updateData: Record<string, unknown> = {
+            selection_modified_at: new Date().toISOString(),
+            selection_change_accepted: null, // Reset for customer to respond
+          };
+          
+          // Store the previous selection if customer had made one
+          if (appointment?.customer_shop_selection) {
+            updateData.previous_shop_selection = appointment.customer_shop_selection;
+          }
+
+          const { error: updateError } = await supabase
+            .from('appointments')
+            .update(updateData)
+            .eq('id', appointmentId);
+
+          if (updateError) throw updateError;
+
+          toast.success(t('shop_selection.update_success', 'Shop selections updated'));
+        } else {
+          // New selection - update workflow stage
+          const { error: updateError } = await supabase
+            .from('appointments')
+            .update({ workflow_stage: 'shop_selection' })
+            .eq('id', appointmentId);
+
+          if (updateError) throw updateError;
+
+          toast.success(t('shop_selection.success', 'Shops selected and sent to customer'));
+        }
 
         // Send email notification to customer
         try {
           await supabase.functions.invoke('send-customer-notification', {
             body: {
               appointmentId,
-              notificationType: 'shop_selection',
+              notificationType: isEditMode ? 'shop_selection_updated' : 'shop_selection',
             },
           });
           console.log('Customer notification sent');
         } catch (notifError) {
           console.error('Failed to send notification (non-blocking):', notifError);
         }
-
-        toast.success(t('shop_selection.success', 'Shops selected and sent to customer'));
       }
 
       onSuccess();
@@ -207,10 +289,16 @@ export function ShopSelectionDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
-            {t('shop_selection.title', 'Select Shops for Customer')}
+            {isEditMode 
+              ? t('shop_selection.edit_title', 'Edit Shop Selections')
+              : t('shop_selection.title', 'Select Shops for Customer')
+            }
           </DialogTitle>
           <DialogDescription>
-            {t('shop_selection.select_description', 'Select 1 to 3 shops for the customer to choose from')}
+            {isEditMode
+              ? t('shop_selection.edit_description', 'Modify the shop selections. The customer will be notified of changes.')
+              : t('shop_selection.select_description', 'Select 1 to 3 shops for the customer to choose from')
+            }
           </DialogDescription>
           {customerLocation && (customerLocation.city || customerLocation.postal_code) && (
             <div className="flex items-center gap-2 mt-2 p-2 bg-muted/50 rounded-lg">
@@ -357,7 +445,10 @@ export function ShopSelectionDialog({
             ) : (
               <Check className="h-4 w-4 mr-2" />
             )}
-            {t('shop_selection.send_to_customer', 'Send to Customer')}
+            {isEditMode
+              ? t('shop_selection.update_selections', 'Update Selections')
+              : t('shop_selection.send_to_customer', 'Send to Customer')
+            }
           </Button>
         </DialogFooter>
       </DialogContent>
