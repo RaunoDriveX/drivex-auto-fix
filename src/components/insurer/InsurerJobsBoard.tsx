@@ -671,8 +671,8 @@ export const InsurerJobsBoard: React.FC = () => {
                     </Button>
                   )}
                   
-                  {/* Delete button for cancelled jobs */}
-                  {(job.job_status === 'cancelled' || job.status === 'cancelled') && (
+                  {/* Delete button for cancelled jobs OR new jobs without shop selection */}
+                  {(job.job_status === 'cancelled' || job.status === 'cancelled' || workflowStage === 'new') && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="destructive" size="sm">
@@ -683,7 +683,10 @@ export const InsurerJobsBoard: React.FC = () => {
                         <AlertDialogHeader>
                           <AlertDialogTitle>{t('jobs_board.remove_job')}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            {t('jobs_board.remove_job_confirm')}
+                            {workflowStage === 'new' 
+                              ? t('jobs_board.remove_new_job_confirm', 'This job has not been assigned to a shop yet. Are you sure you want to delete it?')
+                              : t('jobs_board.remove_job_confirm')
+                            }
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

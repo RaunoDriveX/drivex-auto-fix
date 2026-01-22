@@ -75,6 +75,7 @@
     "hide_details": "Details ausblenden",
     "remove_job": "Auftrag entfernen",
     "remove_job_confirm": "Sind Sie sicher, dass Sie diesen Auftrag vom Dashboard entfernen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "remove_new_job_confirm": "Dieser Auftrag wurde noch keiner Werkstatt zugewiesen. Möchten Sie ihn wirklich löschen?",
     "cancel": "Abbrechen",
     "created_on": "erstellt am",
     "customer_location": "Standort",
