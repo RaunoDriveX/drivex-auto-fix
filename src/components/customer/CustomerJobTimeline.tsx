@@ -199,6 +199,10 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   };
 
   const isOverdue = () => {
+    // Only show overdue if there's an actual scheduled date/time set
+    if (!scheduledDate || !scheduledTime || scheduledDate === 'Not scheduled' || scheduledTime === 'TBD') {
+      return false;
+    }
     const scheduledDateTime = new Date(`${scheduledDate} ${scheduledTime}`);
     const now = new Date();
     return scheduledDateTime < now && displayStatus === 'scheduled';
