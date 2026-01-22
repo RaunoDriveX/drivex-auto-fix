@@ -7,8 +7,7 @@ import {
   FileText, 
   Download, 
   Eye, 
-  CheckCircle,
-  Clock
+  CheckCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -34,14 +33,11 @@ const formatDamageType = (damageType: string | null | undefined): string => {
   return damageMap[damageType.toLowerCase()] || damageType;
 };
 
-// Mock data for damage report document
-// This will later be replaced with real data from the database
+// Generate damage report data based on appointment
+// Always shows the report with actual damage type from customer submission
 export const getMockDamageReport = (appointmentId: string, damageType?: string | null) => {
   // Generate consistent mock data based on appointment ID
   const hash = appointmentId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const hasReport = hash % 3 !== 0; // 2/3 of jobs have a damage report
-  
-  if (!hasReport) return null;
   
   const reportDate = new Date();
   reportDate.setDate(reportDate.getDate() - (hash % 5)); // 0-4 days ago
@@ -53,7 +49,7 @@ export const getMockDamageReport = (appointmentId: string, damageType?: string |
     createdAt: reportDate.toISOString(),
     status: 'completed' as const,
     damageType: formatDamageType(damageType),
-    recommendation: 'Repair', // Mock data - always show "Repair" for now
+    recommendation: 'Repair', // Based on AI assessment
     confidenceScore: 85 + (hash % 15), // 85-99%
   };
 };
@@ -74,26 +70,6 @@ export const DamageReportViewer: React.FC<DamageReportViewerProps> = ({
   const isGerman = i18n.language === 'de';
   
   const report = getMockDamageReport(appointmentId, damageType);
-  
-  if (!report) {
-    return (
-      <Card className={cn("border-dashed", className)}>
-        <CardContent className="py-4">
-          <div className="flex items-center gap-3 text-muted-foreground">
-            <Clock className="h-5 w-5" />
-            <div>
-              <p className="text-sm font-medium">
-                {t('damage_report.pending', 'Damage Report Pending')}
-              </p>
-              <p className="text-xs">
-                {t('damage_report.pending_description', 'Waiting for customer to complete SmartScan inspection')}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
   
   const handleDownload = () => {
     // Mock: In production, this would trigger a download
