@@ -60,6 +60,7 @@ interface JobDetails {
   customer_shop_selection?: string;
   customer_cost_approved?: boolean;
   tracking_token?: string;
+  is_insurer_assigned?: boolean;
   shops?: {
     name: string;
     phone?: string;
@@ -414,7 +415,14 @@ export default function JobTracking() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="font-semibold">{shop?.name || jobDetails.shop_name}</h3>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-semibold">{shop?.name || jobDetails.shop_name}</h3>
+                  {jobDetails.is_insurer_assigned && (
+                    <Badge variant="secondary" className="text-xs">
+                      Selected by Insurance
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Authorized repair facility
                 </p>
