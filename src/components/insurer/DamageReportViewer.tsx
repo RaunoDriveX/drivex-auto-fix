@@ -1,0 +1,176 @@
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  FileText, 
+  Download, 
+  Eye, 
+  Calendar,
+  CheckCircle,
+  Clock
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+
+interface DamageReportViewerProps {
+  appointmentId: string;
+  className?: string;
+}
+
+// Mock data for damage report document
+// This will later be replaced with real data from the database
+const getMockDamageReport = (appointmentId: string) => {
+  // Generate consistent mock data based on appointment ID
+  const hash = appointmentId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const hasReport = hash % 3 !== 0; // 2/3 of jobs have a damage report
+  
+  if (!hasReport) return null;
+  
+  const reportDate = new Date();
+  reportDate.setDate(reportDate.getDate() - (hash % 5)); // 0-4 days ago
+  
+  return {
+    id: `report-${appointmentId.substring(0, 8)}`,
+    fileName: `Schadensbericht_${appointmentId.substring(0, 8).toUpperCase()}.pdf`,
+    fileSize: 245000 + (hash % 100000), // ~245-345 KB
+    createdAt: reportDate.toISOString(),
+    status: 'completed' as const,
+    damageType: hash % 2 === 0 ? 'crack' : 'chip',
+    recommendation: hash % 2 === 0 ? 'replacement' : 'repair',
+    confidenceScore: 85 + (hash % 15), // 85-99%
+  };
+};
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+export const DamageReportViewer: React.FC<DamageReportViewerProps> = ({ 
+  appointmentId, 
+  className 
+}) => {
+  const { t, i18n } = useTranslation('insurer');
+  const [isViewing, setIsViewing] = useState(false);
+  const isGerman = i18n.language === 'de';
+  
+  const report = getMockDamageReport(appointmentId);
+  
+  if (!report) {
+    return (
+      <Card className={cn("border-dashed", className)}>
+        <CardContent className="py-4">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <Clock className="h-5 w-5" />
+            <div>
+              <p className="text-sm font-medium">
+                {t('damage_report.pending', 'Damage Report Pending')}
+              </p>
+              <p className="text-xs">
+                {t('damage_report.pending_description', 'Waiting for customer to complete SmartScan inspection')}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  const handleView = () => {
+    // Mock: In production, this would open the actual PDF
+    setIsViewing(true);
+    setTimeout(() => setIsViewing(false), 2000);
+  };
+  
+  const handleDownload = () => {
+    // Mock: In production, this would trigger a download
+    console.log('Downloading damage report:', report.fileName);
+  };
+
+  return (
+    <Card className={cn("bg-blue-50/50 border-blue-200", className)}>
+      <CardHeader className="py-3 px-4">
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <FileText className="h-4 w-4 text-blue-600" />
+          {t('damage_report.title', 'Damage Report')}
+          <Badge variant="secondary" className="ml-auto bg-green-100 text-green-700 border-green-300">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            {t('damage_report.available', 'Available')}
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="py-3 px-4 pt-0 space-y-3">
+        {/* File Info */}
+        <div className="flex items-center gap-3 p-2 bg-white rounded-md border">
+          <div className="p-2 bg-red-100 rounded">
+            <FileText className="h-5 w-5 text-red-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{report.fileName}</p>
+            <p className="text-xs text-muted-foreground">
+              {formatFileSize(report.fileSize)} • {format(
+                new Date(report.createdAt), 
+                isGerman ? 'd. MMM yyyy, HH:mm' : 'MMM d, yyyy, h:mm a',
+                isGerman ? { locale: de } : undefined
+              )}
+            </p>
+          </div>
+        </div>
+        
+        {/* AI Assessment Summary */}
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="p-2 bg-white rounded border">
+            <span className="text-muted-foreground">{t('damage_report.damage_type', 'Damage Type')}</span>
+            <p className="font-medium capitalize">{report.damageType}</p>
+          </div>
+          <div className="p-2 bg-white rounded border">
+            <span className="text-muted-foreground">{t('damage_report.recommendation', 'Recommendation')}</span>
+            <p className="font-medium capitalize">{report.recommendation}</p>
+          </div>
+          <div className="col-span-2 p-2 bg-white rounded border">
+            <span className="text-muted-foreground">{t('damage_report.confidence', 'AI Confidence')}</span>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-green-500 rounded-full"
+                  style={{ width: `${report.confidenceScore}%` }}
+                />
+              </div>
+              <span className="font-medium">{report.confidenceScore}%</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={handleView}
+            disabled={isViewing}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            {isViewing 
+              ? t('damage_report.loading', 'Loading...') 
+              : t('damage_report.view', 'View')
+            }
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            onClick={handleDownload}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {t('damage_report.download', 'Download')}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};

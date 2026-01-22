@@ -228,5 +228,17 @@
     "welcome_network": "Welcome to the DriveX network.",
     "error_create": "Failed to create insurer profile. Please try again.",
     "passwords_not_match": "Passwords do not match"
+  },
+  "damage_report": {
+    "title": "Damage Report",
+    "pending": "Damage Report Pending",
+    "pending_description": "Waiting for customer to complete SmartScan inspection",
+    "available": "Available",
+    "damage_type": "Damage Type",
+    "recommendation": "Recommendation",
+    "confidence": "AI Confidence",
+    "view": "View",
+    "download": "Download",
+    "loading": "Loading..."
   }
 }
