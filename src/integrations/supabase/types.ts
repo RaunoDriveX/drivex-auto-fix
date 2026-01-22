@@ -21,6 +21,7 @@ export type Database = {
           ai_assessment_details: Json | null
           ai_confidence_score: number | null
           ai_recommended_repair: string | null
+          appointment_confirmed_at: string | null
           appointment_date: string
           appointment_time: string
           completion_documents_verified: boolean | null
@@ -79,6 +80,7 @@ export type Database = {
           ai_assessment_details?: Json | null
           ai_confidence_score?: number | null
           ai_recommended_repair?: string | null
+          appointment_confirmed_at?: string | null
           appointment_date: string
           appointment_time: string
           completion_documents_verified?: boolean | null
@@ -137,6 +139,7 @@ export type Database = {
           ai_assessment_details?: Json | null
           ai_confidence_score?: number | null
           ai_recommended_repair?: string | null
+          appointment_confirmed_at?: string | null
           appointment_date?: string
           appointment_time?: string
           completion_documents_verified?: boolean | null
