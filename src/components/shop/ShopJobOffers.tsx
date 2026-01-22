@@ -49,6 +49,7 @@ interface JobOffer {
     short_code?: string;
     customer_shop_selection?: string;
     workflow_stage?: string;
+    appointment_confirmed_at?: string;
   };
 }
 
@@ -124,7 +125,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             ai_assessment_details,
             ai_recommended_repair,
             driver_view_obstruction,
-            short_code
+            short_code,
+            appointment_confirmed_at
           )
         `)
         .eq('shop_id', shopId)
@@ -166,7 +168,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             driver_view_obstruction,
             short_code,
             customer_shop_selection,
-            workflow_stage
+            workflow_stage,
+            appointment_confirmed_at
           )
         `)
         .eq('shop_id', shopId);
@@ -294,7 +297,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             ai_assessment_details,
             ai_recommended_repair,
             driver_view_obstruction,
-            short_code
+            short_code,
+            appointment_confirmed_at
           )
         `)
         .eq('shop_id', shopId)
@@ -981,11 +985,15 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                             <Calendar className="h-5 w-5 text-blue-600" />
                             <div>
                               <p className="font-medium">
-                                {offer.is_insurer_selection 
+                                {offer.is_insurer_selection && !offer.appointments.appointment_confirmed_at
                                   ? t('time.tbd', { ns: 'common' })
                                   : new Date(offer.appointments.appointment_date).toLocaleDateString()}
                               </p>
-                              <p className="text-sm text-muted-foreground">Appointment Date</p>
+                              <p className="text-sm text-muted-foreground">
+                                {offer.appointments.appointment_confirmed_at 
+                                  ? 'Customer Confirmed' 
+                                  : 'Appointment Date'}
+                              </p>
                             </div>
                           </div>
                           
@@ -993,7 +1001,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                             <Clock className="h-5 w-5 text-orange-600" />
                             <div>
                               <p className="font-medium">
-                                {offer.is_insurer_selection 
+                                {offer.is_insurer_selection && !offer.appointments.appointment_confirmed_at
                                   ? t('time.tbd', { ns: 'common' })
                                   : offer.appointments.appointment_time.substring(0, 5)}
                               </p>
