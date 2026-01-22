@@ -122,6 +122,27 @@
     "crack_extending": "Crack extending to edge",
     "location_default": "Driver side, lower left quadrant"
   },
+  "damage_types": {
+    "chip": "Stone chip",
+    "stone_chip": "Stone chip",
+    "crack": "Crack",
+    "shattered": "Shattered",
+    "scratch": "Scratch",
+    "rear_window": "Rear window",
+    "side_window": "Side window",
+    "front_windshield": "Front windshield",
+    "unknown": "Unknown"
+  },
+  "service_types": {
+    "repair": "Repair",
+    "replacement": "Replacement",
+    "windshield_repair": "Windshield Repair",
+    "windshield_replacement": "Windshield Replacement"
+  },
+  "time": {
+    "tbd": "TBD",
+    "to_be_determined": "To be determined"
+  },
   "customer_confirmation": {
     "select_shop_title": "Choose Your Repair Shop",
     "select_shop_description": "Your insurer has pre-selected shops for you",

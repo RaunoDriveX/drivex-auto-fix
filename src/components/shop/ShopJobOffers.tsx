@@ -580,7 +580,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                        {offer.appointments.damage_type && (
                          <Badge variant="outline" className="flex items-center gap-1">
                            <AlertTriangle className="h-3 w-3" />
-                           {offer.appointments.damage_type}
+                           {t(`damage_types.${offer.appointments.damage_type.toLowerCase()}`, { ns: 'common', defaultValue: offer.appointments.damage_type })}
                          </Badge>
                        )}
                        {offer.requires_adas_calibration && (
@@ -666,18 +666,26 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                       <div className="flex items-center gap-3">
                         <Calendar className="h-5 w-5 text-blue-600" />
                         <div>
-                          <p className="font-medium">{new Date(offer.appointments.appointment_date).toLocaleDateString()}</p>
+                          <p className="font-medium">
+                            {offer.is_insurer_selection 
+                              ? t('time.tbd', { ns: 'common' })
+                              : new Date(offer.appointments.appointment_date).toLocaleDateString()}
+                          </p>
                           <p className="text-sm text-muted-foreground">Appointment Date</p>
                         </div>
                       </div>
                       
-                          <div className="flex items-center gap-3">
-                            <Clock className="h-5 w-5 text-orange-600" />
-                            <div>
-                              <p className="font-medium">{offer.appointments.appointment_time.substring(0, 5)}</p>
-                              <p className="text-sm text-muted-foreground">Appointment Time</p>
-                            </div>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <Clock className="h-5 w-5 text-orange-600" />
+                        <div>
+                          <p className="font-medium">
+                            {offer.is_insurer_selection 
+                              ? t('time.tbd', { ns: 'common' })
+                              : offer.appointments.appointment_time.substring(0, 5)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">Appointment Time</p>
+                        </div>
+                      </div>
                       
                       {offer.estimated_completion_time && (
                         <div className="flex items-center gap-3">
