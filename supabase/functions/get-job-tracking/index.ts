@@ -279,7 +279,7 @@ Deno.serve(async (req) => {
           workflow_stage: appointment.workflow_stage,
           customer_shop_selection: appointment.customer_shop_selection,
           customer_cost_approved: appointment.customer_cost_approved,
-          tracking_token: tracking_token ? appointment.tracking_token : undefined,
+          tracking_token: appointment.tracking_token,
           shop_id: appointment.shop_id,
           is_insurer_assigned: isInsurerAssigned,
           appointment_confirmed_at: appointment.appointment_confirmed_at,

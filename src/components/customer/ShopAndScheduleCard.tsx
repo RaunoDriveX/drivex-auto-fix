@@ -223,8 +223,8 @@ export function ShopAndScheduleCard({
               <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
               {t('customer_confirmation.step_select_shop', 'Select a Shop')}
             </Label>
-            <ScrollArea className="h-[280px] pr-2">
-              <div className="space-y-3">
+            <ScrollArea className="h-auto max-h-[400px] pr-2">
+              <div className="space-y-3 pb-2">
                 {shops
                   .sort((a, b) => a.priority_order - b.priority_order)
                   .map((shop, index) => (
@@ -241,41 +241,41 @@ export function ShopAndScheduleCard({
                       )}
                     >
                       {index === 0 && !selectedShop && (
-                        <Badge className="absolute -top-2 left-4 bg-primary text-primary-foreground">
+                        <Badge className="absolute -top-2 left-4 bg-primary text-primary-foreground text-xs">
                           {t('customer_confirmation.recommended', 'Recommended')}
                         </Badge>
                       )}
                       {selectedShop?.shop_id === shop.shop_id && (
-                        <Badge className="absolute -top-2 left-4 bg-green-500 text-white">
+                        <Badge className="absolute -top-2 left-4 bg-green-500 text-white text-xs">
                           <Check className="h-3 w-3 mr-1" />
                           {t('customer_confirmation.selected', 'Selected')}
                         </Badge>
                       )}
                       
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-foreground">{shop.name}</h3>
+                      <div className="flex items-start justify-between gap-3 mt-1">
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-semibold text-foreground truncate">{shop.name}</h3>
                             {shop.is_mobile_service && (
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge variant="secondary" className="text-xs shrink-0">
                                 <Car className="h-3 w-3 mr-1" />
                                 {t('customer_confirmation.mobile_service', 'Mobile')}
                               </Badge>
                             )}
                           </div>
                           
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+                            <span className="flex items-center gap-1 shrink-0">
+                              <MapPin className="h-3.5 w-3.5" />
                               {shop.distance_km.toFixed(1)} km
                             </span>
                             <span className="flex items-center gap-1">
                               <StarRating rating={shop.rating} size="sm" />
-                              <span className="ml-1">({shop.total_reviews})</span>
+                              <span className="text-xs">({shop.total_reviews})</span>
                             </span>
                           </div>
                           
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground truncate">
                             {shop.address}, {shop.city}
                           </p>
                           
@@ -287,8 +287,8 @@ export function ShopAndScheduleCard({
                           )}
                         </div>
                         
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-foreground">€{shop.estimated_price}</p>
+                        <div className="text-right shrink-0">
+                          <p className="text-xl font-bold text-foreground">€{shop.estimated_price}</p>
                           <p className="text-xs text-muted-foreground">
                             {t('customer_confirmation.estimated', 'Estimated')}
                           </p>
