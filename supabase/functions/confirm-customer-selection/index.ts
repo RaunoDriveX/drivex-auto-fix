@@ -56,8 +56,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Tracking tokens are 32 alphanumeric characters
-    if (!/^[a-zA-Z0-9]{32}$/.test(tracking_token)) {
+    // Tracking tokens can be hex (32 chars) or base64-like (32 chars with alphanumeric, dashes, underscores)
+    if (!/^[a-zA-Z0-9_-]{32}$/.test(tracking_token)) {
+      console.log('Invalid tracking token format:', tracking_token);
       return new Response(
         JSON.stringify({ error: 'Invalid tracking token format' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
