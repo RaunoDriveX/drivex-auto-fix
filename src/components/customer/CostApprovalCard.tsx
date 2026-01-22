@@ -199,28 +199,30 @@ export function CostApprovalCard({
             <AlertDialogTitle>
               {t('customer_confirmation.confirm_approval_title', 'Confirm Cost Approval')}
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>
-                {t('customer_confirmation.confirm_approval_message', 'You are about to approve the following cost estimate:')}
-              </p>
-              <div className="p-3 bg-muted rounded-lg mt-2">
-                <div className="flex justify-between">
-                  <span>{t('customer_confirmation.parts_materials', 'Parts & Materials')}</span>
-                  <span>€{estimate.parts_cost.toFixed(2)}</span>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                <p>
+                  {t('customer_confirmation.confirm_approval_message', 'You are about to approve the following cost estimate:')}
+                </p>
+                <div className="p-3 bg-muted rounded-lg mt-2">
+                  <div className="flex justify-between">
+                    <span>{t('customer_confirmation.parts_materials', 'Parts & Materials')}</span>
+                    <span>€{estimate.parts_cost.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t('customer_confirmation.labor', 'Labor')}</span>
+                    <span>€{estimate.labor_cost.toFixed(2)}</span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between font-bold">
+                    <span>{t('customer_confirmation.total', 'Total')}</span>
+                    <span>€{estimate.total_cost.toFixed(2)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>{t('customer_confirmation.labor', 'Labor')}</span>
-                  <span>€{estimate.labor_cost.toFixed(2)}</span>
-                </div>
-                <Separator className="my-2" />
-                <div className="flex justify-between font-bold">
-                  <span>{t('customer_confirmation.total', 'Total')}</span>
-                  <span>€{estimate.total_cost.toFixed(2)}</span>
-                </div>
+                <p className="text-sm mt-3">
+                  {t('customer_confirmation.confirm_approval_note', 'Once approved, the repair shop will proceed with the work. You will receive updates on the repair progress.')}
+                </p>
               </div>
-              <p className="text-sm mt-3">
-                {t('customer_confirmation.confirm_approval_note', 'Once approved, the repair shop will proceed with the work. You will receive updates on the repair progress.')}
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
