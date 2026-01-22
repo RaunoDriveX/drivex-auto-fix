@@ -75,6 +75,7 @@
     "hide_details": "Hide Details",
     "remove_job": "Remove Job",
     "remove_job_confirm": "Are you sure you want to remove this job from the board? This action cannot be undone.",
+    "remove_new_job_confirm": "This job has not been assigned to a shop yet. Are you sure you want to delete it?",
     "cancel": "Cancel",
     "created_on": "created on",
     "customer_location": "Location",
