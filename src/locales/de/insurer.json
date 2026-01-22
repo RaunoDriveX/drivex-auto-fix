@@ -80,6 +80,7 @@
     "created_on": "erstellt am",
     "customer_location": "Standort",
     "insurance_number": "Versicherungsnr.",
+    "suggested_shops": "Vorgeschlagene Werkstätten",
     "columns": {
       "pending": "Noch nicht zugewiesen",
       "in_progress": "In Bearbeitung",

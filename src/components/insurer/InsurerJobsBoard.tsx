@@ -49,6 +49,14 @@ interface VehicleInfo {
   year?: string;
 }
 
+interface ShopSelection {
+  shop_id: string;
+  shop_name: string;
+  priority_order: number;
+  distance_km?: number;
+  estimated_price?: number;
+}
+
 interface Job {
   id: string;
   customer_name: string;
@@ -182,6 +190,7 @@ export const InsurerJobsBoard: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [activeWorkflowStage, setActiveWorkflowStage] = useState<WorkflowStage | 'all'>('all');
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [shopSelections, setShopSelections] = useState<Record<string, ShopSelection[]>>({});
   
   // Dialog states for customer confirmation actions
   const [shopSelectionOpen, setShopSelectionOpen] = useState(false);
@@ -250,7 +259,54 @@ export const InsurerJobsBoard: React.FC = () => {
         return;
       }
 
-      setJobs((data || []) as unknown as Job[]);
+      const jobsList = (data || []) as unknown as Job[];
+      setJobs(jobsList);
+      
+      // Fetch shop selections for all jobs
+      if (jobsList.length > 0) {
+        const jobIds = jobsList.map(j => j.id);
+        const { data: selectionsData } = await supabase
+          .from('insurer_shop_selections')
+          .select(`
+            appointment_id,
+            shop_id,
+            priority_order,
+            distance_km,
+            estimated_price
+          `)
+          .in('appointment_id', jobIds)
+          .order('priority_order', { ascending: true });
+        
+        if (selectionsData) {
+          // Fetch shop names
+          const shopIds = [...new Set(selectionsData.map(s => s.shop_id))];
+          const { data: shopsData } = await supabase
+            .from('shops')
+            .select('id, name')
+            .in('id', shopIds);
+          
+          const shopNameMap: Record<string, string> = {};
+          shopsData?.forEach(shop => {
+            shopNameMap[shop.id] = shop.name;
+          });
+          
+          // Group by appointment_id
+          const selectionsMap: Record<string, ShopSelection[]> = {};
+          selectionsData.forEach(sel => {
+            if (!selectionsMap[sel.appointment_id]) {
+              selectionsMap[sel.appointment_id] = [];
+            }
+            selectionsMap[sel.appointment_id].push({
+              shop_id: sel.shop_id,
+              shop_name: shopNameMap[sel.shop_id] || sel.shop_id,
+              priority_order: sel.priority_order,
+              distance_km: sel.distance_km,
+              estimated_price: sel.estimated_price
+            });
+          });
+          setShopSelections(selectionsMap);
+        }
+      }
     } catch (error) {
       console.error('Error fetching jobs:', error);
     } finally {
@@ -614,6 +670,33 @@ export const InsurerJobsBoard: React.FC = () => {
                     </span>
                   </div>
                 </div>
+
+                {/* Suggested Shops - shown when shops have been selected */}
+                {shopSelections[job.id] && shopSelections[job.id].length > 0 && (
+                  <div className="mt-3 p-3 bg-muted/50 rounded-lg border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Store className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium">{t('jobs_board.suggested_shops', 'Suggested Shops')}</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {shopSelections[job.id].map((sel, idx) => (
+                        <div key={sel.shop_id} className="flex items-center justify-between text-sm">
+                          <span className="flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-xs font-medium flex items-center justify-center">
+                              {idx + 1}
+                            </span>
+                            <span className="font-medium">{sel.shop_name}</span>
+                          </span>
+                          <span className="text-muted-foreground text-xs">
+                            {sel.distance_km && `${sel.distance_km.toFixed(1)} km`}
+                            {sel.distance_km && sel.estimated_price && ' • '}
+                            {sel.estimated_price && `€${sel.estimated_price}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Damage Report Document - shown inline for new cases */}
                 {workflowStage === 'new' && (
