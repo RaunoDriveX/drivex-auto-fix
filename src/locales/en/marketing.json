@@ -34,6 +34,8 @@
     "license_plate": "License Plate",
     "insured_name": "Insured Person's Name",
     "insured_name_placeholder": "Enter the insured person's name",
+    "insurance_company": "Insurance Company",
+    "select_insurance": "Select your insurance company",
     "customer_address": "Your Address",
     "customer_address_hint": "Used to find repair shops near you",
     "street": "Street & House Number",
