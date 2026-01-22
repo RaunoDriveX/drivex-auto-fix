@@ -239,6 +239,10 @@
     "confidence": "KI-Konfidenz",
     "view": "Ansehen",
     "download": "Herunterladen",
-    "loading": "Laden..."
+    "loading": "Laden...",
+    "ai_comments": "KI-Kommentare",
+    "no_ai_comments": "Keine KI-Kommentare.",
+    "comments": "Kommentare",
+    "no_comments": "Keine zusätzlichen Kommentare."
   }
 }
