@@ -421,6 +421,7 @@ export default function JobTracking() {
           scheduledTime={jobDetails.appointment_time}
           shopId={jobDetails.shop_id}
           hasShopAssigned={jobDetails.shop_id !== 'pending' && !!jobDetails.shop_id}
+          appointmentConfirmedAt={jobDetails.appointment_confirmed_at}
           onRescheduleClick={() => setRescheduleOpen(true)}
           onCancelClick={() => setCancelOpen(true)}
         />

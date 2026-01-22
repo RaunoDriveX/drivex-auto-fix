@@ -27,6 +27,7 @@ interface TimelineProps {
   scheduledTime: string;
   shopId: string;
   hasShopAssigned?: boolean;
+  appointmentConfirmedAt?: string;
   onRescheduleClick?: () => void;
   onCancelClick?: () => void;
 }
@@ -105,11 +106,16 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   scheduledTime,
   shopId,
   hasShopAssigned = false,
+  appointmentConfirmedAt,
   onRescheduleClick,
   onCancelClick
 }) => {
+  // Check if customer has confirmed their appointment time
+  const hasCustomerConfirmedAppointment = !!appointmentConfirmedAt;
+  
   // Check if we have a real scheduled date (not a placeholder)
-  const hasRealScheduledDate = scheduledDate && 
+  const hasRealScheduledDate = hasCustomerConfirmedAppointment && 
+    scheduledDate && 
     scheduledDate !== 'Not scheduled' && 
     scheduledTime !== 'TBD' &&
     shopId !== 'pending';
@@ -205,25 +211,27 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
         notes: 'Your insurer will select repair shops for you to choose from'
       });
     } else {
-      // Shop has been assigned - show scheduled step
-      steps.push({
-        status: 'scheduled',
-        timestamp: hasRealScheduledDate ? `${scheduledDate} ${scheduledTime}` : undefined,
-        isCompleted: ['confirmed', 'in_progress', 'completed'].includes(displayStatus),
-        isCurrent: displayStatus === 'scheduled',
-        notes: hasRealScheduledDate 
-          ? 'Appointment scheduled and pending shop confirmation'
-          : 'Shop assigned, awaiting appointment scheduling'
-      });
-
-      // Add confirmed step if shop has accepted
+      // Shop has been assigned
+      
+      // Add confirmed step (shop accepted the job) BEFORE scheduled
       if (appointmentStatus === 'confirmed' || ['in_progress', 'completed'].includes(displayStatus)) {
         steps.push({
           status: 'confirmed',
           timestamp: new Date().toISOString(),
           isCompleted: true,
-          isCurrent: displayStatus === 'confirmed',
+          isCurrent: !hasCustomerConfirmedAppointment && displayStatus === 'confirmed',
           notes: 'Shop has accepted your job and confirmed the appointment'
+        });
+      }
+      
+      // Only show "Scheduled" step AFTER customer has confirmed their appointment time
+      if (hasCustomerConfirmedAppointment) {
+        steps.push({
+          status: 'scheduled',
+          timestamp: hasRealScheduledDate ? `${scheduledDate} ${scheduledTime}` : undefined,
+          isCompleted: ['in_progress', 'completed'].includes(displayStatus),
+          isCurrent: hasCustomerConfirmedAppointment && !['in_progress', 'completed'].includes(displayStatus),
+          notes: `Your appointment is scheduled for ${format(new Date(`${scheduledDate} ${scheduledTime}`), 'PPpp')}`
         });
       }
 
@@ -272,22 +280,22 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   };
 
   const getStatusProgress = () => {
-    switch (displayStatus) {
-      case 'awaiting_shop': return 10;
-      case 'scheduled': return 25;
-      case 'confirmed': return 50;
-      case 'in_progress': return 75;
-      case 'completed': return 100;
-      case 'cancelled': return 0;
-      default: return 5;
-    }
+    // Progress based on actual flow: Report -> Confirmed -> Scheduled -> In Progress -> Completed
+    if (displayStatus === 'cancelled') return 0;
+    if (displayStatus === 'completed') return 100;
+    if (displayStatus === 'in_progress') return 75;
+    if (hasCustomerConfirmedAppointment) return 60; // Customer scheduled
+    if (displayStatus === 'confirmed' || appointmentStatus === 'confirmed') return 40; // Shop confirmed
+    if (hasShopAssigned && shopId !== 'pending') return 25; // Shop assigned
+    if (displayStatus === 'awaiting_shop') return 10;
+    return 5;
   };
 
-  // Only show management actions if shop is assigned and not yet confirmed
+  // Only show management actions if customer has scheduled and job not yet in progress
   const showManagementActions = hasShopAssigned && 
     shopId !== 'pending' && 
-    displayStatus === 'scheduled' && 
-    appointmentStatus !== 'confirmed' && 
+    hasCustomerConfirmedAppointment &&
+    !['in_progress', 'completed', 'cancelled'].includes(displayStatus) && 
     onRescheduleClick && 
     onCancelClick;
 
