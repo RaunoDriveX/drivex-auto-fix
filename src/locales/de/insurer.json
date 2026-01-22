@@ -228,5 +228,17 @@
     "welcome_network": "Willkommen im Glassify-Netzwerk.",
     "error_create": "Fehler beim Erstellen des Versichererprofils. Bitte versuchen Sie es erneut.",
     "passwords_not_match": "Passwörter stimmen nicht überein"
+  },
+  "damage_report": {
+    "title": "Schadensbericht",
+    "pending": "Schadensbericht ausstehend",
+    "pending_description": "Warten auf SmartScan-Inspektion durch den Kunden",
+    "available": "Verfügbar",
+    "damage_type": "Schadensart",
+    "recommendation": "Empfehlung",
+    "confidence": "KI-Konfidenz",
+    "view": "Ansehen",
+    "download": "Herunterladen",
+    "loading": "Laden..."
   }
 }

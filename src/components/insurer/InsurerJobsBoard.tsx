@@ -27,6 +27,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { JobStatusTracker } from '@/components/realtime/JobStatusTracker';
 import { CompletionDocumentsViewer } from '@/components/insurer/CompletionDocumentsViewer';
+import { DamageReportViewer } from '@/components/insurer/DamageReportViewer';
 import { ShopSelectionDialog } from '@/components/insurer/ShopSelectionDialog';
 import { CostEstimationDialog } from '@/components/insurer/CostEstimationDialog';
 import { format } from 'date-fns';
@@ -613,6 +614,13 @@ export const InsurerJobsBoard: React.FC = () => {
                     </span>
                   </div>
                 </div>
+
+                {/* Damage Report Document - shown inline for new cases */}
+                {workflowStage === 'new' && (
+                  <div className="mt-3">
+                    <DamageReportViewer appointmentId={job.id} />
+                  </div>
+                )}
 
                 {/* Cancellation Alert */}
                 {cancellationInfo && (
