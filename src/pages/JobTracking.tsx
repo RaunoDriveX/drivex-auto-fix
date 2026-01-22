@@ -10,6 +10,7 @@ import { RescheduleDialog } from "@/components/customer/RescheduleDialog";
 import { CancelAppointmentDialog } from "@/components/customer/CancelAppointmentDialog";
 import { ShopSelectionCard } from "@/components/customer/ShopSelectionCard";
 import { CostApprovalCard } from "@/components/customer/CostApprovalCard";
+import { AppointmentSchedulingCard } from "@/components/customer/AppointmentSchedulingCard";
 import { useMockMode } from "@/hooks/useMockMode";
 import { mockJobStages, MockShopSelection, MockCostEstimate } from "@/lib/mockData";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,6 +62,7 @@ interface JobDetails {
   customer_cost_approved?: boolean;
   tracking_token?: string;
   is_insurer_assigned?: boolean;
+  appointment_confirmed_at?: string;
   shops?: {
     name: string;
     phone?: string;
@@ -332,6 +334,14 @@ export default function JobTracking() {
     !jobDetails.customer_cost_approved &&
     jobDetails.workflow_stage === 'cost_approval';
 
+  // Check if customer needs to schedule appointment (shop assigned but no confirmed date)
+  const needsAppointmentScheduling = 
+    jobDetails.shop_id !== 'pending' && 
+    jobDetails.is_insurer_assigned &&
+    !jobDetails.appointment_confirmed_at &&
+    !isCancelled &&
+    jobDetails.workflow_stage === 'customer_handover';
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -385,6 +395,17 @@ export default function JobTracking() {
             onApprove={handleCostApprove}
             isLoading={confirmationLoading}
             isMockMode={isMockMode}
+          />
+        )}
+
+        {/* Appointment Scheduling Card - shown when shop accepted but customer hasn't picked a time */}
+        {needsAppointmentScheduling && (
+          <AppointmentSchedulingCard
+            appointmentId={jobDetails.id}
+            shopId={jobDetails.shop_id}
+            shopName={shop?.name || jobDetails.shop_name}
+            trackingToken={jobDetails.tracking_token}
+            onScheduleSuccess={fetchJobDetails}
           />
         )}
 

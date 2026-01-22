@@ -282,6 +282,7 @@ Deno.serve(async (req) => {
           tracking_token: tracking_token ? appointment.tracking_token : undefined,
           shop_id: appointment.shop_id,
           is_insurer_assigned: isInsurerAssigned,
+          appointment_confirmed_at: appointment.appointment_confirmed_at,
           shops: shopData ? {
             name: shopData.name,
             address: shopData.address,
