@@ -28,6 +28,7 @@ interface JobOffer {
   requires_adas_calibration?: boolean;
   adas_calibration_notes?: string;
   is_direct_booking?: boolean;
+  is_insurer_selection?: boolean;
   appointments: {
     customer_name: string;
     customer_email: string;
@@ -46,6 +47,8 @@ interface JobOffer {
     ai_recommended_repair: string;
     driver_view_obstruction: boolean;
     short_code?: string;
+    customer_shop_selection?: string;
+    workflow_stage?: string;
   };
 }
 
@@ -99,7 +102,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
   const fetchJobOffers = async () => {
     try {
-      // Fetch pending job offers (from insurance routing)
+      // Fetch pending job offers (from insurance routing via job_offers table)
       const { data: offersData, error: offersError } = await supabase
         .from('job_offers')
         .select(`
@@ -130,6 +133,73 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         .order('offered_at', { ascending: false });
 
       if (offersError) throw offersError;
+
+      // Fetch insurer shop selections where this shop has been suggested (new workflow)
+      const { data: insurerSelections, error: selectionsError } = await supabase
+        .from('insurer_shop_selections')
+        .select(`
+          id,
+          appointment_id,
+          shop_id,
+          priority_order,
+          estimated_price,
+          distance_km,
+          created_at,
+          appointments (
+            id,
+            customer_name,
+            customer_email,
+            customer_phone,
+            service_type,
+            damage_type,
+            appointment_date,
+            appointment_time,
+            vehicle_info,
+            notes,
+            is_insurance_claim,
+            damage_photos,
+            additional_notes,
+            ai_confidence_score,
+            ai_assessment_details,
+            ai_recommended_repair,
+            driver_view_obstruction,
+            short_code,
+            customer_shop_selection,
+            workflow_stage
+          )
+        `)
+        .eq('shop_id', shopId);
+
+      if (selectionsError) throw selectionsError;
+
+      // Transform insurer selections to JobOffer format
+      // Only show ones where customer hasn't selected yet OR customer selected this shop
+      const insurerSelectionsAsOffers: JobOffer[] = (insurerSelections || [])
+        .filter((selection: any) => {
+          const appointment = selection.appointments;
+          if (!appointment) return false;
+          // Show if customer hasn't selected, or selected this shop
+          return !appointment.customer_shop_selection || appointment.customer_shop_selection === shopId;
+        })
+        .map((selection: any) => {
+          const appointmentDate = new Date(selection.appointments.appointment_date);
+          appointmentDate.setHours(16, 0, 0, 0);
+          
+          return {
+            id: `selection-${selection.id}`,
+            appointment_id: selection.appointment_id,
+            shop_id: selection.shop_id,
+            offered_price: selection.estimated_price || 0,
+            status: 'offered',
+            offered_at: selection.created_at,
+            expires_at: appointmentDate.toISOString(),
+            estimated_completion_time: null,
+            notes: '',
+            appointments: selection.appointments,
+            is_direct_booking: false,
+            is_insurer_selection: true
+          };
+        });
       
       // Get ALL appointment IDs that have any job offers for this shop (any status)
       // This prevents showing direct bookings when a job offer exists (even if declined)
@@ -144,6 +214,11 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         (allOffersForShop || []).map((offer: any) => offer.appointment_id).filter(Boolean)
       );
 
+      // Also exclude appointments already shown via insurer selections
+      const insurerSelectionAppointmentIds = new Set(
+        insurerSelectionsAsOffers.map(o => o.appointment_id)
+      );
+
       // Fetch pending direct bookings (no job offer created)
       const { data: directBookings, error: directError } = await supabase
         .from('appointments')
@@ -154,9 +229,9 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
       if (directError) throw directError;
       
-      // Filter out appointments that have ANY job offers (including declined) to avoid duplicates
+      // Filter out appointments that have ANY job offers or insurer selections to avoid duplicates
       const filteredDirectBookings = (directBookings || []).filter(
-        booking => !appointmentIdsWithAnyOffers.has(booking.id)
+        booking => !appointmentIdsWithAnyOffers.has(booking.id) && !insurerSelectionAppointmentIds.has(booking.id)
       );
 
       // Transform direct bookings to match JobOffer structure
@@ -180,9 +255,10 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         };
       });
 
-      // Combine both types
+      // Combine all offer types
       const allOffers: JobOffer[] = [
         ...((offersData as JobOffer[])?.filter(offer => offer.appointments !== null) || []),
+        ...insurerSelectionsAsOffers,
         ...directBookingsAsOffers
       ].sort((a, b) => new Date(b.offered_at || 0).getTime() - new Date(a.offered_at || 0).getTime());
 
