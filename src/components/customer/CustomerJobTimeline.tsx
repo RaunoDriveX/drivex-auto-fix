@@ -20,11 +20,13 @@ interface TimelineProps {
   appointmentId: string;
   currentStatus: string;
   appointmentStatus?: string;
+  workflowStage?: string;
   startedAt?: string;
   completedAt?: string;
   scheduledDate: string;
   scheduledTime: string;
   shopId: string;
+  hasShopAssigned?: boolean;
   onRescheduleClick?: () => void;
   onCancelClick?: () => void;
 }
@@ -41,6 +43,20 @@ interface TimelineEvent {
 }
 
 const statusConfig = {
+  pending: {
+    icon: Clock,
+    label: 'Report Submitted',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted',
+    description: 'Your damage report is being processed'
+  },
+  awaiting_shop: {
+    icon: Clock,
+    label: 'Awaiting Shop Selection',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
+    description: 'Your insurer will select repair shops for you'
+  },
   scheduled: {
     icon: Calendar,
     label: 'Scheduled',
@@ -82,18 +98,38 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   appointmentId,
   currentStatus,
   appointmentStatus,
+  workflowStage,
   startedAt,
   completedAt,
   scheduledDate,
   scheduledTime,
   shopId,
+  hasShopAssigned = false,
   onRescheduleClick,
   onCancelClick
 }) => {
-  // Determine display status: use appointment status if confirmed, otherwise use job_status
-  const displayStatus = appointmentStatus === 'confirmed' && currentStatus === 'scheduled' 
-    ? 'confirmed' 
-    : currentStatus;
+  // Check if we have a real scheduled date (not a placeholder)
+  const hasRealScheduledDate = scheduledDate && 
+    scheduledDate !== 'Not scheduled' && 
+    scheduledTime !== 'TBD' &&
+    shopId !== 'pending';
+
+  // Determine display status based on workflow stage and actual status
+  const getDisplayStatus = () => {
+    if (currentStatus === 'cancelled') return 'cancelled';
+    if (currentStatus === 'completed') return 'completed';
+    if (currentStatus === 'in_progress') return 'in_progress';
+    if (appointmentStatus === 'confirmed') return 'confirmed';
+    
+    // For pending/new jobs without shop assignment
+    if (!hasShopAssigned || shopId === 'pending') {
+      return 'awaiting_shop';
+    }
+    
+    return currentStatus;
+  };
+  
+  const displayStatus = getDisplayStatus();
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -144,45 +180,72 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   };
 
   const getTimelineSteps = () => {
-    const steps = [
-      {
+    const steps: Array<{
+      status: string;
+      timestamp?: string;
+      isCompleted: boolean;
+      isCurrent: boolean;
+      notes: string;
+    }> = [];
+
+    // Always show the initial "Report Submitted" step
+    steps.push({
+      status: 'pending',
+      isCompleted: true,
+      isCurrent: false,
+      notes: 'Your damage report has been submitted'
+    });
+
+    // Show "Awaiting Shop Selection" for jobs without shop assignment
+    if (!hasShopAssigned || shopId === 'pending') {
+      steps.push({
+        status: 'awaiting_shop',
+        isCompleted: false,
+        isCurrent: displayStatus === 'awaiting_shop',
+        notes: 'Your insurer will select repair shops for you to choose from'
+      });
+    } else {
+      // Shop has been assigned - show scheduled step
+      steps.push({
         status: 'scheduled',
-        timestamp: `${scheduledDate} ${scheduledTime}`,
-        isCompleted: true,
+        timestamp: hasRealScheduledDate ? `${scheduledDate} ${scheduledTime}` : undefined,
+        isCompleted: ['confirmed', 'in_progress', 'completed'].includes(displayStatus),
         isCurrent: displayStatus === 'scheduled',
-        notes: 'Appointment created and pending shop confirmation'
+        notes: hasRealScheduledDate 
+          ? 'Appointment scheduled and pending shop confirmation'
+          : 'Shop assigned, awaiting appointment scheduling'
+      });
+
+      // Add confirmed step if shop has accepted
+      if (appointmentStatus === 'confirmed' || ['in_progress', 'completed'].includes(displayStatus)) {
+        steps.push({
+          status: 'confirmed',
+          timestamp: new Date().toISOString(),
+          isCompleted: true,
+          isCurrent: displayStatus === 'confirmed',
+          notes: 'Shop has accepted your job and confirmed the appointment'
+        });
       }
-    ];
 
-    // Add confirmed step if shop has accepted
-    if (appointmentStatus === 'confirmed' || ['in_progress', 'completed'].includes(displayStatus)) {
-      steps.push({
-        status: 'confirmed',
-        timestamp: new Date().toISOString(),
-        isCompleted: true,
-        isCurrent: displayStatus === 'confirmed',
-        notes: 'Shop has accepted your job and confirmed the appointment'
-      });
-    }
+      if (startedAt || ['in_progress', 'completed'].includes(displayStatus)) {
+        steps.push({
+          status: 'in_progress',
+          timestamp: startedAt || undefined,
+          isCompleted: startedAt ? true : false,
+          isCurrent: displayStatus === 'in_progress',
+          notes: 'Technician has started working on your vehicle'
+        });
+      }
 
-    if (startedAt || ['in_progress', 'completed'].includes(displayStatus)) {
-      steps.push({
-        status: 'in_progress',
-        timestamp: startedAt || new Date().toISOString(),
-        isCompleted: startedAt ? true : false,
-        isCurrent: displayStatus === 'in_progress',
-        notes: 'Technician has started working on your vehicle'
-      });
-    }
-
-    if (completedAt || displayStatus === 'completed') {
-      steps.push({
-        status: 'completed',
-        timestamp: completedAt || new Date().toISOString(), 
-        isCompleted: completedAt ? true : false,
-        isCurrent: displayStatus === 'completed',
-        notes: 'Repair work has been completed successfully'
-      });
+      if (completedAt || displayStatus === 'completed') {
+        steps.push({
+          status: 'completed',
+          timestamp: completedAt || undefined, 
+          isCompleted: completedAt ? true : false,
+          isCurrent: displayStatus === 'completed',
+          notes: 'Repair work has been completed successfully'
+        });
+      }
     }
 
     if (displayStatus === 'cancelled') {
@@ -199,8 +262,8 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   };
 
   const isOverdue = () => {
-    // Only show overdue if there's an actual scheduled date/time set
-    if (!scheduledDate || !scheduledTime || scheduledDate === 'Not scheduled' || scheduledTime === 'TBD') {
+    // Only show overdue if there's an actual scheduled date/time set and shop is assigned
+    if (!hasRealScheduledDate || !hasShopAssigned || shopId === 'pending') {
       return false;
     }
     const scheduledDateTime = new Date(`${scheduledDate} ${scheduledTime}`);
@@ -210,14 +273,23 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
 
   const getStatusProgress = () => {
     switch (displayStatus) {
-      case 'scheduled': return 20;
-      case 'confirmed': return 40;
-      case 'in_progress': return 70;
+      case 'awaiting_shop': return 10;
+      case 'scheduled': return 25;
+      case 'confirmed': return 50;
+      case 'in_progress': return 75;
       case 'completed': return 100;
       case 'cancelled': return 0;
-      default: return 0;
+      default: return 5;
     }
   };
+
+  // Only show management actions if shop is assigned and not yet confirmed
+  const showManagementActions = hasShopAssigned && 
+    shopId !== 'pending' && 
+    displayStatus === 'scheduled' && 
+    appointmentStatus !== 'confirmed' && 
+    onRescheduleClick && 
+    onCancelClick;
 
   if (loading) {
     return (
@@ -274,8 +346,8 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
           </div>
         )}
         
-        {/* Management Actions - show for pending/scheduled, hide if confirmed or later */}
-        {displayStatus === 'scheduled' && appointmentStatus !== 'confirmed' && onRescheduleClick && onCancelClick && (
+        {/* Management Actions - only show if shop is assigned and not yet confirmed */}
+        {showManagementActions && (
           <div className="flex gap-3 mt-4">
             <Button 
               variant="outline" 
