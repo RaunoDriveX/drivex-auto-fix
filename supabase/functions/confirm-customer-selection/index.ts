@@ -192,12 +192,13 @@ Deno.serve(async (req) => {
       }
 
       // Update appointment with cost approval
+      // After cost approval, job moves to 'damage_report' stage for the insurer to review
       const { error: updateError } = await supabase
         .from('appointments')
         .update({
           customer_cost_approved: true,
           customer_cost_approved_at: new Date().toISOString(),
-          workflow_stage: 'approved',
+          workflow_stage: 'damage_report',
           updated_at: new Date().toISOString()
         })
         .eq('id', appointment.id);
@@ -216,7 +217,7 @@ Deno.serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           message: 'Cost approved successfully',
-          next_stage: 'approved'
+          next_stage: 'damage_report'
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
