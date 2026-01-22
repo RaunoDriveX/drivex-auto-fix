@@ -701,7 +701,7 @@ export const InsurerJobsBoard: React.FC = () => {
                 {/* Damage Report Document - shown inline for new cases */}
                 {workflowStage === 'new' && (
                   <div className="mt-3">
-                    <DamageReportViewer appointmentId={job.id} />
+                    <DamageReportViewer appointmentId={job.id} damageType={job.damage_type} />
                   </div>
                 )}
 
