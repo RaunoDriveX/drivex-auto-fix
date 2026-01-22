@@ -173,13 +173,13 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       if (selectionsError) throw selectionsError;
 
       // Transform insurer selections to JobOffer format
-      // Only show ones where customer hasn't selected yet OR customer selected this shop
+      // Only show pending ones where customer hasn't selected yet AND appointment not yet assigned to this shop
       const insurerSelectionsAsOffers: JobOffer[] = (insurerSelections || [])
         .filter((selection: any) => {
           const appointment = selection.appointments;
           if (!appointment) return false;
-          // Show if customer hasn't selected, or selected this shop
-          return !appointment.customer_shop_selection || appointment.customer_shop_selection === shopId;
+          // Only show if appointment is still pending (shop_id = 'pending') and workflow is shop_selection
+          return appointment.shop_id === 'pending' && appointment.workflow_stage === 'shop_selection';
         })
         .map((selection: any) => {
           const appointmentDate = new Date(selection.appointments.appointment_date);
@@ -305,7 +305,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         .from('appointments')
         .select('*')
         .eq('shop_id', shopId)
-        .eq('status', 'confirmed')
+        .in('status', ['confirmed', 'pending'])
+        .in('workflow_stage', ['customer_handover', 'shop_selection'])
         .order('created_at', { ascending: false });
 
       if (confirmedError) throw confirmedError;
@@ -313,6 +314,16 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       // Filter out confirmed bookings that already have an accepted job offer to avoid duplicates
       const filteredConfirmedBookings = (confirmedBookings || []).filter(
         booking => !acceptedAppointmentIds.has(booking.id)
+      );
+
+      // Check which confirmed bookings came from insurer selections
+      const { data: confirmedInsurerSelections } = await supabase
+        .from('insurer_shop_selections')
+        .select('appointment_id')
+        .eq('shop_id', shopId);
+      
+      const acceptedInsurerSelectionIds = new Set(
+        (confirmedInsurerSelections || []).map((s: any) => s.appointment_id)
       );
 
       // Transform confirmed bookings to match JobOffer structure
@@ -328,7 +339,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         estimated_completion_time: null,
         notes: '',
         appointments: booking,
-        is_direct_booking: true
+        is_direct_booking: !acceptedInsurerSelectionIds.has(booking.id),
+        is_insurer_selection: acceptedInsurerSelectionIds.has(booking.id)
       }));
 
       // Combine both types
@@ -933,6 +945,12 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                                 {t('offers.insurance_claim')}
                               </Badge>
                             )}
+                            {offer.appointments.damage_type && (
+                              <Badge variant="outline" className="flex items-center gap-1">
+                                <AlertTriangle className="h-3 w-3" />
+                                {t(`damage_types.${offer.appointments.damage_type.toLowerCase()}`, { ns: 'common', defaultValue: offer.appointments.damage_type })}
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -954,7 +972,11 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                           <div className="flex items-center gap-3">
                             <Calendar className="h-5 w-5 text-blue-600" />
                             <div>
-                              <p className="font-medium">{new Date(offer.appointments.appointment_date).toLocaleDateString()}</p>
+                              <p className="font-medium">
+                                {offer.is_insurer_selection 
+                                  ? t('time.tbd', { ns: 'common' })
+                                  : new Date(offer.appointments.appointment_date).toLocaleDateString()}
+                              </p>
                               <p className="text-sm text-muted-foreground">Appointment Date</p>
                             </div>
                           </div>
@@ -962,7 +984,11 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                           <div className="flex items-center gap-3">
                             <Clock className="h-5 w-5 text-orange-600" />
                             <div>
-                              <p className="font-medium">{offer.appointments.appointment_time.substring(0, 5)}</p>
+                              <p className="font-medium">
+                                {offer.is_insurer_selection 
+                                  ? t('time.tbd', { ns: 'common' })
+                                  : offer.appointments.appointment_time.substring(0, 5)}
+                              </p>
                               <p className="text-sm text-muted-foreground">Appointment Time</p>
                             </div>
                           </div>
