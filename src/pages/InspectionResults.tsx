@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertCircle, ArrowRight, Camera, Clock, MapPin } from "lucide-react";
+import { CheckCircle, AlertCircle, ArrowRight, Camera, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -234,12 +234,7 @@ const InspectionResults = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div className="p-4 border rounded-lg text-center">
-                      <MapPin className="h-8 w-8 mx-auto mb-2 text-primary" />
-                      <h4 className="font-medium mb-1">{t('inspection_results.find_partners')}</h4>
-                      <p className="text-xs text-muted-foreground">{t('inspection_results.find_partners_desc')}</p>
-                    </div>
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div className="p-4 border rounded-lg text-center">
                       <Clock className="h-8 w-8 mx-auto mb-2 text-primary" />
                       <h4 className="font-medium mb-1">{t('inspection_results.book_appointment')}</h4>
@@ -251,6 +246,9 @@ const InspectionResults = () => {
                       <p className="text-xs text-muted-foreground">{t('inspection_results.get_it_fixed_desc')}</p>
                     </div>
                   </div>
+                  <p className="text-sm text-center text-muted-foreground pt-2 border-t">
+                    Your insurer will select repair shops for you. You can track your job status and choose your preferred shop from your tracking page.
+                  </p>
                 </CardContent>
               </Card>
             </div>
