@@ -143,13 +143,26 @@ Deno.serve(async (req) => {
 
     // Fetch shop details separately if appointment found (public info only)
     let shopData = null;
-    if (appointment && appointment.shop_id) {
+    if (appointment && appointment.shop_id && appointment.shop_id !== 'pending') {
       const { data } = await supabase
         .from('shops')
-        .select('name, address, city, postal_code, phone, rating')
+        .select('name, address, city, postal_code, phone, rating, email')
         .eq('id', appointment.shop_id)
         .maybeSingle();
       shopData = data;
+      console.log('Shop lookup result:', data ? 'found' : 'not found', 'for shop_id:', appointment.shop_id);
+    }
+
+    // Check if this shop was assigned via insurer selection
+    let isInsurerAssigned = false;
+    if (appointment && appointment.shop_id && appointment.shop_id !== 'pending') {
+      const { data: insurerSelection } = await supabase
+        .from('insurer_shop_selections')
+        .select('id')
+        .eq('appointment_id', appointment.id)
+        .eq('shop_id', appointment.shop_id)
+        .maybeSingle();
+      isInsurerAssigned = !!insurerSelection;
     }
 
     // Fetch audit trail for status history
@@ -267,12 +280,15 @@ Deno.serve(async (req) => {
           customer_shop_selection: appointment.customer_shop_selection,
           customer_cost_approved: appointment.customer_cost_approved,
           tracking_token: tracking_token ? appointment.tracking_token : undefined,
+          shop_id: appointment.shop_id,
+          is_insurer_assigned: isInsurerAssigned,
           shops: shopData ? {
             name: shopData.name,
             address: shopData.address,
             city: shopData.city,
             postal_code: shopData.postal_code,
             phone: shopData.phone,
+            email: shopData.email,
             rating: shopData.rating,
           } : null,
         },
