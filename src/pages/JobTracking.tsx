@@ -13,6 +13,7 @@ import { CostApprovalCard } from "@/components/customer/CostApprovalCard";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useMockMode } from "@/hooks/useMockMode";
 import { mockJobStages, MockShopSelection, MockCostEstimate } from "@/lib/mockData";
+import { useTranslation } from 'react-i18next';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { formatInsurerName, formatServiceType, formatDamageType } from "@/lib/utils";
@@ -78,6 +79,7 @@ interface JobDetails {
 export default function JobTracking() {
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const { isMockMode } = useMockMode();
+  const { t } = useTranslation('common');
   
   const [jobDetails, setJobDetails] = useState<JobDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -298,14 +300,14 @@ export default function JobTracking() {
     return (
       <div className="min-h-screen bg-background p-4">
         <div className="max-w-4xl mx-auto text-center py-12">
-          <h1 className="text-2xl font-bold text-destructive mb-4">Job Not Found</h1>
+          <h1 className="text-2xl font-bold text-destructive mb-4">{t('job_tracking.job_not_found_title')}</h1>
           <p className="text-muted-foreground mb-6">
-            The job tracking link may be invalid or expired. Please check the link and try again.
+            {t('job_tracking.job_not_found_description')}
           </p>
           <Button asChild>
             <Link to="/" className="gap-2">
               <Home className="h-4 w-4" />
-              Return to Home
+              {t('job_tracking.back_to_home')}
             </Link>
           </Button>
         </div>
@@ -338,7 +340,7 @@ export default function JobTracking() {
           <Button variant="ghost" size="sm" asChild>
             <Link to="/" className="gap-2">
               <Home className="h-4 w-4" />
-              Back to Home
+              {t('job_tracking.back_to_home')}
             </Link>
           </Button>
           <div className="flex items-center gap-3">
@@ -352,9 +354,9 @@ export default function JobTracking() {
         </div>
         
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Track Your Repair Job</h1>
+          <h1 className="text-3xl font-bold">{t('job_tracking.title')}</h1>
           <p className="text-muted-foreground">
-            Real-time updates for your windshield repair with {jobDetails.shop_name}
+            {t('job_tracking.subtitle', { shopName: jobDetails.shop_name })}
           </p>
         </div>
 
@@ -362,9 +364,9 @@ export default function JobTracking() {
         {isCancelled && (
           <Alert variant="destructive" className="border-red-300 bg-red-50">
             <XCircle className="h-5 w-5" />
-            <AlertTitle>This Job Has Been Cancelled</AlertTitle>
+            <AlertTitle>{t('job_tracking.cancelled_title')}</AlertTitle>
             <AlertDescription>
-              This appointment was cancelled. Please create a new appointment if you still need service.
+              {t('job_tracking.cancelled_description')}
             </AlertDescription>
           </Alert>
         )}
@@ -411,10 +413,9 @@ export default function JobTracking() {
             {isAwaitingShopResponse && (
               <Alert className="border-blue-200 bg-blue-50">
                 <Clock className="h-5 w-5 text-blue-600" />
-                <AlertTitle className="text-blue-800">Waiting for Shop Confirmation</AlertTitle>
+                <AlertTitle className="text-blue-800">{t('job_tracking.awaiting_shop_title')}</AlertTitle>
                 <AlertDescription className="text-blue-700">
-                  Your selected shop has been notified about your appointment request. 
-                  They will confirm shortly and you'll receive an update.
+                  {t('job_tracking.awaiting_shop_description')}
                 </AlertDescription>
               </Alert>
             )}
@@ -454,7 +455,7 @@ export default function JobTracking() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                Shop Details
+                {t('job_tracking.shop_details')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -463,12 +464,12 @@ export default function JobTracking() {
                   <h3 className="font-semibold">{shop?.name || jobDetails.shop_name}</h3>
                   {jobDetails.is_insurer_assigned && (
                     <Badge variant="secondary" className="text-xs">
-                      Selected by Insurance
+                      {t('job_tracking.selected_by_insurance')}
                     </Badge>
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Authorized repair facility
+                  {t('job_tracking.authorized_facility')}
                 </p>
               </div>
               
@@ -513,7 +514,7 @@ export default function JobTracking() {
                         rel="noopener noreferrer"
                         className="flex items-center gap-1"
                       >
-                        Open in Google Maps <ExternalLink className="h-3 w-3" />
+                        {t('job_tracking.open_in_maps')} <ExternalLink className="h-3 w-3" />
                       </a>
                     </Button>
                   </div>
@@ -527,12 +528,12 @@ export default function JobTracking() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Appointment Details
+                {t('job_tracking.appointment_details')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground">Service Type</p>
+                <p className="text-sm text-muted-foreground">{t('job_tracking.service_type')}</p>
                 <p className="font-medium">{formatServiceType(jobDetails.service_type)}</p>
                 {jobDetails.damage_type && (
                   <p className="text-sm text-muted-foreground">{formatDamageType(jobDetails.damage_type)}</p>
@@ -542,7 +543,7 @@ export default function JobTracking() {
                 <>
                   <Separator />
                   <div>
-                    <p className="text-sm text-muted-foreground">Insurer</p>
+                    <p className="text-sm text-muted-foreground">{t('job_tracking.insurer')}</p>
                     <p className="font-medium">{formatInsurerName(jobDetails.insurer_name)}</p>
                   </div>
                 </>
@@ -554,7 +555,7 @@ export default function JobTracking() {
                   <div>
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
                       <Car className="h-4 w-4" />
-                      Vehicle Information
+                      {t('job_tracking.vehicle_info')}
                     </p>
                     <div className="space-y-1 mt-2">
                       {(jobDetails.vehicle_info.year || jobDetails.vehicle_info.make || jobDetails.vehicle_info.model) && (
@@ -564,17 +565,17 @@ export default function JobTracking() {
                       )}
                       {(jobDetails.vehicle_info.licensePlate || jobDetails.vehicle_info.license_plate) && (
                         <p className="text-sm text-muted-foreground">
-                          License Plate: {jobDetails.vehicle_info.licensePlate || jobDetails.vehicle_info.license_plate}
+                          {t('job_tracking.license_plate')}: {jobDetails.vehicle_info.licensePlate || jobDetails.vehicle_info.license_plate}
                         </p>
                       )}
                       {jobDetails.vehicle_info.vin && (
                         <p className="text-sm text-muted-foreground">
-                          VIN: {jobDetails.vehicle_info.vin}
+                          {t('job_tracking.vin')}: {jobDetails.vehicle_info.vin}
                         </p>
                       )}
                       {jobDetails.vehicle_info.vehicle_type && (
                         <p className="text-sm text-muted-foreground capitalize">
-                          Type: {jobDetails.vehicle_info.vehicle_type}
+                          {t('job_tracking.vehicle_type')}: {jobDetails.vehicle_info.vehicle_type}
                         </p>
                       )}
                     </div>
@@ -588,14 +589,14 @@ export default function JobTracking() {
           {/* Customer Contact Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Your Contact Information</CardTitle>
+              <CardTitle>{t('job_tracking.your_contact_info')}</CardTitle>
               <CardDescription>
-                Keep your contact details up to date
+                {t('job_tracking.keep_contact_updated')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground">Name</p>
+                <p className="text-sm text-muted-foreground">{t('job_tracking.name')}</p>
                 <p className="font-medium">{jobDetails.customer_name}</p>
               </div>
               
@@ -605,7 +606,7 @@ export default function JobTracking() {
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="text-sm text-muted-foreground">{t('job_tracking.email')}</p>
                     <a 
                       href={`mailto:${jobDetails.customer_email}`}
                       className="text-primary hover:underline"
@@ -622,7 +623,7 @@ export default function JobTracking() {
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />
                     <div className="flex-1">
-                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <p className="text-sm text-muted-foreground">{t('job_tracking.phone')}</p>
                       <a 
                         href={`tel:${jobDetails.customer_phone}`}
                         className="text-primary hover:underline"
