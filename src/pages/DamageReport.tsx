@@ -13,7 +13,8 @@ import glassifyLogo from "@/assets/glassify-logo.svg";
 import windshieldFrontIcon from "@/assets/windshield-front.svg";
 import windshieldRearIcon from "@/assets/windshield-rear.svg";
 import windshieldSideIcon from "@/assets/windshield-side.svg";
-import { CircleDot, Zap, Layers, ArrowLeft, CheckCircle, Mail, Phone, MessageCircle } from "lucide-react";
+import { CircleDot, Zap, Layers, ArrowLeft, CheckCircle, Mail, Phone, MessageCircle, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 type GlassLocation = "front" | "side" | "rear";
@@ -481,70 +482,86 @@ const DamageReport = () => {
                 required
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="insurer-select" className="text-lg font-semibold">
-                {t('damage_report.insurance_company')}
-              </Label>
-              <Select value={selectedInsurer} onValueChange={setSelectedInsurer}>
-                <SelectTrigger id="insurer-select" className="text-lg h-12">
-                  <SelectValue placeholder={t('damage_report.select_insurance')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {insurerOptions.map((insurer) => (
-                    <SelectItem key={insurer.id} value={insurer.id}>
-                      {insurer.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
-          {/* Customer Address Section */}
-          <div className="space-y-4">
-            <div>
-              <Label className="text-lg font-semibold">{t('damage_report.customer_address')}</Label>
-              <p className="text-sm text-muted-foreground mt-1">{t('damage_report.customer_address_hint')}</p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="customer-street">{t('damage_report.street')}</Label>
-              <Input
-                id="customer-street"
-                value={customerStreet}
-                onChange={(e) => setCustomerStreet(e.target.value)}
-                placeholder={t('damage_report.street_placeholder')}
-                className="text-lg h-12"
-                required
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
+          {/* Collapsible Insurance & Address Section */}
+          <Collapsible className="space-y-4">
+            <CollapsibleTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-between h-12 text-base font-medium"
+              >
+                {t('damage_report.insurance_and_address', 'Insurance Company & Your Address')}
+                <ChevronDown className="h-5 w-5 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-6 pt-2">
+              {/* Insurance Company */}
               <div className="space-y-2">
-                <Label htmlFor="customer-postal-code">{t('damage_report.postal_code')}</Label>
-                <Input
-                  id="customer-postal-code"
-                  value={customerPostalCode}
-                  onChange={(e) => setCustomerPostalCode(e.target.value)}
-                  placeholder={t('damage_report.postal_code_placeholder')}
-                  className="text-lg h-12"
-                  required
-                />
+                <Label htmlFor="insurer-select" className="text-lg font-semibold">
+                  {t('damage_report.insurance_company')}
+                </Label>
+                <Select value={selectedInsurer} onValueChange={setSelectedInsurer}>
+                  <SelectTrigger id="insurer-select" className="text-lg h-12">
+                    <SelectValue placeholder={t('damage_report.select_insurance')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {insurerOptions.map((insurer) => (
+                      <SelectItem key={insurer.id} value={insurer.id}>
+                        {insurer.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="customer-city">{t('damage_report.city')}</Label>
-                <Input
-                  id="customer-city"
-                  value={customerCity}
-                  onChange={(e) => setCustomerCity(e.target.value)}
-                  placeholder={t('damage_report.city_placeholder')}
-                  className="text-lg h-12"
-                  required
-                />
+
+              {/* Customer Address Section */}
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-lg font-semibold">{t('damage_report.customer_address')}</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{t('damage_report.customer_address_hint')}</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="customer-street">{t('damage_report.street')}</Label>
+                  <Input
+                    id="customer-street"
+                    value={customerStreet}
+                    onChange={(e) => setCustomerStreet(e.target.value)}
+                    placeholder={t('damage_report.street_placeholder')}
+                    className="text-lg h-12"
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="customer-postal-code">{t('damage_report.postal_code')}</Label>
+                    <Input
+                      id="customer-postal-code"
+                      value={customerPostalCode}
+                      onChange={(e) => setCustomerPostalCode(e.target.value)}
+                      placeholder={t('damage_report.postal_code_placeholder')}
+                      className="text-lg h-12"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customer-city">{t('damage_report.city')}</Label>
+                    <Input
+                      id="customer-city"
+                      value={customerCity}
+                      onChange={(e) => setCustomerCity(e.target.value)}
+                      placeholder={t('damage_report.city_placeholder')}
+                      className="text-lg h-12"
+                      required
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
 
               {/* Submit Button */}
               <Button
