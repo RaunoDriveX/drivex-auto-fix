@@ -490,7 +490,7 @@ const DamageReport = () => {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full justify-between h-12 text-base font-medium border-success text-success hover:bg-success/10"
+                className="w-full justify-between h-12 text-base font-medium border-success hover:bg-success/10"
               >
                 {t('damage_report.insurance_and_address', 'Insurance Company & Your Address')}
                 <ChevronDown className="h-5 w-5 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
