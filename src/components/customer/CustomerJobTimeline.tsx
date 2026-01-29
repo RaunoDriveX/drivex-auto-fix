@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { useTranslation } from 'react-i18next';
 import { 
   Calendar, 
   Play, 
@@ -43,63 +44,26 @@ interface TimelineEvent {
   metadata?: any;
 }
 
-const statusConfig = {
-  pending: {
-    icon: Clock,
-    label: 'Report Submitted',
-    color: 'text-muted-foreground',
-    bgColor: 'bg-muted',
-    description: 'Your damage report is being processed'
-  },
-  awaiting_shop: {
-    icon: Clock,
-    label: 'Awaiting Shop Selection',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
-    description: 'Your insurer will select repair shops for you'
-  },
-  awaiting_shop_confirmation: {
-    icon: Clock,
-    label: 'Confirmation by the Shop',
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-100',
-    description: 'The next step will be done by the shop. You will be notified.'
-  },
-  scheduled: {
-    icon: Calendar,
-    label: 'Scheduled',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
-    description: 'Your appointment has been scheduled'
-  },
-  confirmed: {
-    icon: CheckCircle,
-    label: 'Confirmed',
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
-    description: 'Shop has accepted your job'
-  },
-  in_progress: {
-    icon: Play,
-    label: 'In Progress', 
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-100',
-    description: 'Work has started on your vehicle'
-  },
-  completed: {
-    icon: CheckCircle,
-    label: 'Completed',
-    color: 'text-green-600', 
-    bgColor: 'bg-green-100',
-    description: 'Your repair has been completed'
-  },
-  cancelled: {
-    icon: XCircle,
-    label: 'Cancelled',
-    color: 'text-red-600',
-    bgColor: 'bg-red-100', 
-    description: 'This appointment was cancelled'
-  }
+const statusIcons = {
+  pending: Clock,
+  awaiting_shop: Clock,
+  awaiting_shop_confirmation: Clock,
+  scheduled: Calendar,
+  confirmed: CheckCircle,
+  in_progress: Play,
+  completed: CheckCircle,
+  cancelled: XCircle
+};
+
+const statusColors = {
+  pending: { color: 'text-muted-foreground', bgColor: 'bg-muted' },
+  awaiting_shop: { color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  awaiting_shop_confirmation: { color: 'text-amber-600', bgColor: 'bg-amber-100' },
+  scheduled: { color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  confirmed: { color: 'text-green-600', bgColor: 'bg-green-100' },
+  in_progress: { color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
+  completed: { color: 'text-green-600', bgColor: 'bg-green-100' },
+  cancelled: { color: 'text-red-600', bgColor: 'bg-red-100' }
 };
 
 export const CustomerJobTimeline: React.FC<TimelineProps> = ({
@@ -117,6 +81,7 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   onRescheduleClick,
   onCancelClick
 }) => {
+  const { t } = useTranslation('common');
   // Check if customer has confirmed their appointment time
   const hasCustomerConfirmedAppointment = !!appointmentConfirmedAt;
   
@@ -352,8 +317,8 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Job Timeline</CardTitle>
-          <CardDescription>Loading timeline...</CardDescription>
+          <CardTitle>{t('timeline.title')}</CardTitle>
+          <CardDescription>{t('timeline.loading')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="animate-pulse space-y-4">
@@ -374,32 +339,30 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
 
   const timelineSteps = getTimelineSteps();
 
-  const config = statusConfig[displayStatus as keyof typeof statusConfig] || statusConfig.scheduled;
-
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />
-          Job Timeline
+          {t('timeline.title')}
         </CardTitle>
         <CardDescription>
-          Track your repair progress from start to finish
+          {t('timeline.description')}
         </CardDescription>
         
         {/* Progress Bar */}
         <div className="space-y-2 mt-4">
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Progress</span>
+            <span>{t('timeline.progress')}</span>
             <span>{getStatusProgress()}%</span>
           </div>
           <Progress value={getStatusProgress()} className="h-2" />
         </div>
 
         {isOverdue() && (
-          <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-2 rounded mt-4">
+          <div className="flex items-center gap-2 text-destructive bg-destructive/10 p-2 rounded mt-4">
             <AlertTriangle className="h-4 w-4" />
-            <span className="text-sm">Your scheduled appointment time has passed. The shop will contact you soon.</span>
+            <span className="text-sm">{t('timeline.overdue_message')}</span>
           </div>
         )}
         
@@ -412,7 +375,7 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
               className="flex-1"
               size="sm"
             >
-              Reschedule
+              {t('timeline.reschedule')}
             </Button>
             <Button 
               variant="outline" 
@@ -420,7 +383,7 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
               className="flex-1 text-destructive hover:text-destructive"
               size="sm"
             >
-              Cancel
+              {t('timeline.cancel')}
             </Button>
           </div>
         )}
@@ -428,9 +391,10 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
       <CardContent>
         <div className="space-y-0">
           {timelineSteps.map((step, index) => {
-            const config = statusConfig[step.status as keyof typeof statusConfig];
-            const Icon = config.icon;
+            const colors = statusColors[step.status as keyof typeof statusColors] || statusColors.scheduled;
+            const Icon = statusIcons[step.status as keyof typeof statusIcons] || Clock;
             const isLast = index === timelineSteps.length - 1;
+            const statusLabel = t(`timeline.status.${step.status}`);
 
             return (
               <div key={step.status} className="flex gap-4">
@@ -441,7 +405,7 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
                     className={cn(
                       "flex items-center justify-center w-8 h-8 rounded-full border-2 shrink-0",
                       step.isCompleted || step.isCurrent 
-                        ? `${config.bgColor} ${config.color} border-current` 
+                        ? `${colors.bgColor} ${colors.color} border-current` 
                         : "bg-muted text-muted-foreground border-muted"
                     )}
                   >
@@ -466,11 +430,11 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
                       "text-sm font-medium",
                       step.isCurrent && "text-primary"
                     )}>
-                      {config.label}
+                      {statusLabel}
                     </h3>
                     {step.isCurrent && (
                       <Badge variant="outline" className="text-xs">
-                        Current
+                        {t('timeline.current')}
                       </Badge>
                     )}
                   </div>
@@ -495,13 +459,13 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
           <>
             <Separator className="my-6" />
             <div>
-              <h4 className="text-sm font-medium mb-4">Status Change History</h4>
+              <h4 className="text-sm font-medium mb-4">{t('timeline.status_history')}</h4>
               <div className="space-y-3">
                 {timelineEvents.map((event) => (
                   <div key={event.id} className="flex justify-between items-start text-sm">
                     <div>
                       <p className="font-medium">
-                        Status changed to {event.new_status.replace('_', ' ')}
+                        {t(`timeline.status.${event.new_status}`, { defaultValue: event.new_status.replace('_', ' ') })}
                       </p>
                       {event.notes && (
                         <p className="text-muted-foreground text-xs mt-1">
