@@ -301,24 +301,24 @@ export function ShopAndScheduleCard({
                 {t('customer_confirmation.step_select_time', 'Choose Date & Time at')} {selectedShop.name}
               </Label>
               
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="space-y-2 shrink-0">
+              <div className="flex flex-col lg:flex-row gap-6">
+                <div className="space-y-2 flex-1">
                   <Label className="flex items-center gap-2 text-sm text-muted-foreground">
                     <CalendarIcon className="h-4 w-4" />
                     {t('customer_confirmation.select_date', 'Select Date')}
                   </Label>
-                  <div className="rounded-md border p-2 w-fit bg-background">
+                  <div className="rounded-md border p-3 bg-background">
                     <Calendar
                       mode="single"
                       selected={selectedDate}
                       onSelect={setSelectedDate}
                       disabled={(date) => isBefore(date, startOfDay(minDate))}
-                      className="pointer-events-auto"
+                      className="pointer-events-auto w-full"
                     />
                   </div>
                 </div>
 
-                <div className="flex-1 space-y-4">
+                <div className="lg:w-72 space-y-4 shrink-0">
                   {selectedDate && (
                     <>
                       <div className="space-y-2">
@@ -332,7 +332,7 @@ export function ShopAndScheduleCard({
                           </div>
                         ) : (
                           <Select value={selectedTime} onValueChange={setSelectedTime}>
-                            <SelectTrigger className="w-full md:w-64">
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Choose an available time" />
                             </SelectTrigger>
                             <SelectContent>
@@ -354,7 +354,7 @@ export function ShopAndScheduleCard({
                       </div>
 
                       {selectedTime && (
-                        <div className="rounded-lg bg-muted/50 p-4 border w-full md:w-64">
+                        <div className="rounded-lg bg-muted/50 p-4 border w-full">
                           <p className="text-sm text-muted-foreground mb-2">Your appointment summary:</p>
                           <p className="font-semibold">{selectedShop.name}</p>
                           <p className="text-sm text-muted-foreground">{selectedShop.address}, {selectedShop.city}</p>
