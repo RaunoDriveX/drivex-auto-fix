@@ -246,7 +246,7 @@ export function ShopAndScheduleCard({
                         </Badge>
                       )}
                       {selectedShop?.shop_id === shop.shop_id && (
-                        <Badge className="absolute -top-2 right-4 bg-green-500 text-white text-xs">
+                        <Badge className="absolute top-1/2 -translate-y-1/2 right-4 bg-green-500 text-white text-xs">
                           <Check className="h-3 w-3 mr-1" />
                           {t('customer_confirmation.selected', 'Selected')}
                         </Badge>
