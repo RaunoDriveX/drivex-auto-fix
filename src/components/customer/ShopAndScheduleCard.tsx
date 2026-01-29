@@ -286,13 +286,6 @@ export function ShopAndScheduleCard({
                             </Badge>
                           )}
                         </div>
-                        
-                        <div className="text-right shrink-0">
-                          <p className="text-xl font-bold text-foreground">€{shop.estimated_price}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {t('customer_confirmation.estimated', 'Estimated')}
-                          </p>
-                        </div>
                       </div>
                     </div>
                   ))}
@@ -371,7 +364,6 @@ export function ShopAndScheduleCard({
                               {format(new Date(`2000-01-01T${selectedTime}`), 'h:mm a')}
                             </p>
                           </div>
-                          <p className="text-lg font-bold mt-2">€{selectedShop.estimated_price}</p>
                         </div>
                       )}
                     </>
@@ -424,7 +416,6 @@ export function ShopAndScheduleCard({
                       {format(new Date(`2000-01-01T${selectedTime}`), 'h:mm a')}
                     </p>
                   </div>
-                  <p className="text-lg font-bold text-foreground">€{selectedShop.estimated_price}</p>
                 </div>
               )}
               <p className="text-sm mt-3">
