@@ -3,15 +3,16 @@ import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type DamageReportStep = 'reporting' | 'contact';
+export type DamageReportStep = 'reporting' | 'contact' | 'confirmation';
 
 interface DamageReportStepperProps {
   currentStep: DamageReportStep;
 }
 
-const steps: { id: DamageReportStep; labelKey: string }[] = [
-  { id: 'reporting', labelKey: 'stepper.reporting' },
-  { id: 'contact', labelKey: 'stepper.contact_details' },
+const steps: { id: DamageReportStep; labelKey: string; fallback: string }[] = [
+  { id: 'reporting', labelKey: 'stepper.reporting', fallback: 'Reporting' },
+  { id: 'contact', labelKey: 'stepper.contact_details', fallback: 'Contact Details' },
+  { id: 'confirmation', labelKey: 'stepper.confirmation', fallback: 'Confirmation' },
 ];
 
 export const DamageReportStepper: React.FC<DamageReportStepperProps> = ({ currentStep }) => {
@@ -69,7 +70,7 @@ export const DamageReportStepper: React.FC<DamageReportStepperProps> = ({ curren
                   !isCurrent && !isCompleted && "text-muted-foreground"
                 )}
               >
-                {t(step.labelKey, step.id === 'reporting' ? 'Reporting' : 'Contact Details')}
+                {t(step.labelKey, step.fallback)}
               </p>
             </div>
           </div>
