@@ -58,6 +58,13 @@ const statusConfig = {
     bgColor: 'bg-blue-100',
     description: 'Your insurer will select repair shops for you'
   },
+  awaiting_shop_confirmation: {
+    icon: Clock,
+    label: 'Confirmation by the Shop',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-100',
+    description: 'The next step will be done by the shop. You will be notified.'
+  },
   scheduled: {
     icon: Calendar,
     label: 'Scheduled',
@@ -211,10 +218,31 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
         notes: 'Your insurer will select repair shops for you to choose from'
       });
     } else {
-      // Shop has been assigned
+      // Shop has been assigned by customer
+      
+      // Check if shop has confirmed (accepted the job)
+      const shopHasConfirmed = appointmentStatus === 'confirmed' || ['in_progress', 'completed'].includes(displayStatus);
+      
+      // Add "Awaiting Shop Confirmation" step after customer selects shop
+      if (!shopHasConfirmed) {
+        steps.push({
+          status: 'awaiting_shop_confirmation',
+          isCompleted: false,
+          isCurrent: true,
+          notes: 'The next step will be done by the shop. You will be notified.'
+        });
+      } else {
+        // Shop has confirmed - show completed confirmation step
+        steps.push({
+          status: 'awaiting_shop_confirmation',
+          isCompleted: true,
+          isCurrent: false,
+          notes: 'The shop has confirmed your appointment'
+        });
+      }
       
       // Add confirmed step (shop accepted the job) BEFORE scheduled
-      if (appointmentStatus === 'confirmed' || ['in_progress', 'completed'].includes(displayStatus)) {
+      if (shopHasConfirmed) {
         steps.push({
           status: 'confirmed',
           timestamp: new Date().toISOString(),
