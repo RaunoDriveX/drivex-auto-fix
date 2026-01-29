@@ -305,15 +305,6 @@ const DamageReport = () => {
               </CardContent>
             </Card>
 
-            {/* Reference Number */}
-            {submissionData && (
-              <div className="text-center text-sm text-muted-foreground">
-                <p>
-                  {t('damage_report.reference_info')} <span className="font-mono font-bold text-foreground">{submissionData.shortCode}</span>
-                </p>
-              </div>
-            )}
-
             <Button
               size="lg"
               className="w-full h-14 text-lg bg-brand hover:bg-brand/90"
