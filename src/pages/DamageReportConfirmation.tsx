@@ -149,10 +149,9 @@ const DamageReportConfirmation = () => {
           <Button
             size="lg"
             className="w-full h-14 text-lg bg-brand hover:bg-brand/90"
-            onClick={() => navigate(`/inspection/${token}`)}
+            onClick={() => navigate('/')}
           >
-            {t('confirmation.continue_inspection')}
-            <ArrowRight className="w-5 h-5 ml-2" />
+            {t('confirmation.close', 'Close')}
           </Button>
           
           <Button
