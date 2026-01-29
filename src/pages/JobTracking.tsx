@@ -363,56 +363,84 @@ export default function JobTracking() {
           </Alert>
         )}
 
-        {/* Customer Action Cards - Show prominently at top */}
-        {needsShopAndSchedule && (
-          <ShopAndScheduleCard
-            shops={pendingShopSelections!}
-            appointmentId={jobDetails.id}
-            trackingToken={jobDetails.tracking_token}
-            onSuccess={fetchJobDetails}
-            isLoading={confirmationLoading}
-            isMockMode={isMockMode}
-          />
-        )}
+        {/* Customer Action Cards with Timeline - Two column layout when shop selection is needed */}
+        {needsShopAndSchedule ? (
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Left: Shop Selection Card */}
+            <div className="flex-1 min-w-0">
+              <ShopAndScheduleCard
+                shops={pendingShopSelections!}
+                appointmentId={jobDetails.id}
+                trackingToken={jobDetails.tracking_token}
+                onSuccess={fetchJobDetails}
+                isLoading={confirmationLoading}
+                isMockMode={isMockMode}
+              />
+            </div>
+            
+            {/* Right: Job Timeline (sticky on desktop) */}
+            <div className="lg:w-80 xl:w-96 shrink-0">
+              <div className="lg:sticky lg:top-4">
+                <CustomerJobTimeline
+                  appointmentId={jobDetails.id}
+                  currentStatus={jobDetails.job_status}
+                  appointmentStatus={jobDetails.status}
+                  workflowStage={jobDetails.workflow_stage}
+                  startedAt={jobDetails.job_started_at}
+                  completedAt={jobDetails.job_completed_at}
+                  scheduledDate={jobDetails.appointment_date}
+                  scheduledTime={jobDetails.appointment_time}
+                  shopId={jobDetails.shop_id}
+                  hasShopAssigned={jobDetails.shop_id !== 'pending' && !!jobDetails.shop_id}
+                  appointmentConfirmedAt={jobDetails.appointment_confirmed_at}
+                  onRescheduleClick={() => setRescheduleOpen(true)}
+                  onCancelClick={() => setCancelOpen(true)}
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Waiting for shop response message */}
+            {isAwaitingShopResponse && (
+              <Alert className="border-blue-200 bg-blue-50">
+                <Clock className="h-5 w-5 text-blue-600" />
+                <AlertTitle className="text-blue-800">Waiting for Shop Confirmation</AlertTitle>
+                <AlertDescription className="text-blue-700">
+                  Your selected shop has been notified about your appointment request. 
+                  They will confirm shortly and you'll receive an update.
+                </AlertDescription>
+              </Alert>
+            )}
 
-        {/* Waiting for shop response message */}
-        {isAwaitingShopResponse && (
-          <Alert className="border-blue-200 bg-blue-50">
-            <Clock className="h-5 w-5 text-blue-600" />
-            <AlertTitle className="text-blue-800">Waiting for Shop Confirmation</AlertTitle>
-            <AlertDescription className="text-blue-700">
-              Your selected shop has been notified about your appointment request. 
-              They will confirm shortly and you'll receive an update.
-            </AlertDescription>
-          </Alert>
-        )}
+            {needsCostApproval && (
+              <CostApprovalCard
+                estimate={pendingCostEstimate!}
+                shopName={jobDetails.shop_name}
+                onApprove={handleCostApprove}
+                isLoading={confirmationLoading}
+                isMockMode={isMockMode}
+              />
+            )}
 
-        {needsCostApproval && (
-          <CostApprovalCard
-            estimate={pendingCostEstimate!}
-            shopName={jobDetails.shop_name}
-            onApprove={handleCostApprove}
-            isLoading={confirmationLoading}
-            isMockMode={isMockMode}
-          />
+            {/* Job Timeline - Full width when no shop selection needed */}
+            <CustomerJobTimeline
+              appointmentId={jobDetails.id}
+              currentStatus={jobDetails.job_status}
+              appointmentStatus={jobDetails.status}
+              workflowStage={jobDetails.workflow_stage}
+              startedAt={jobDetails.job_started_at}
+              completedAt={jobDetails.job_completed_at}
+              scheduledDate={jobDetails.appointment_date}
+              scheduledTime={jobDetails.appointment_time}
+              shopId={jobDetails.shop_id}
+              hasShopAssigned={jobDetails.shop_id !== 'pending' && !!jobDetails.shop_id}
+              appointmentConfirmedAt={jobDetails.appointment_confirmed_at}
+              onRescheduleClick={() => setRescheduleOpen(true)}
+              onCancelClick={() => setCancelOpen(true)}
+            />
+          </>
         )}
-
-        {/* Job Timeline */}
-        <CustomerJobTimeline
-          appointmentId={jobDetails.id}
-          currentStatus={jobDetails.job_status}
-          appointmentStatus={jobDetails.status}
-          workflowStage={jobDetails.workflow_stage}
-          startedAt={jobDetails.job_started_at}
-          completedAt={jobDetails.job_completed_at}
-          scheduledDate={jobDetails.appointment_date}
-          scheduledTime={jobDetails.appointment_time}
-          shopId={jobDetails.shop_id}
-          hasShopAssigned={jobDetails.shop_id !== 'pending' && !!jobDetails.shop_id}
-          appointmentConfirmedAt={jobDetails.appointment_confirmed_at}
-          onRescheduleClick={() => setRescheduleOpen(true)}
-          onCancelClick={() => setCancelOpen(true)}
-        />
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Shop Details */}
