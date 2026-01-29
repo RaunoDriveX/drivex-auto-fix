@@ -307,13 +307,15 @@ export function ShopAndScheduleCard({
                     <CalendarIcon className="h-4 w-4" />
                     {t('customer_confirmation.select_date', 'Select Date')}
                   </Label>
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    disabled={(date) => isBefore(date, startOfDay(minDate))}
-                    className={cn("rounded-md border pointer-events-auto")}
-                  />
+                  <div className="rounded-md border p-1 w-fit">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={(date) => isBefore(date, startOfDay(minDate))}
+                      className="pointer-events-auto"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-4">
