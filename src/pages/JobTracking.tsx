@@ -569,19 +569,6 @@ export default function JobTracking() {
                 </>
               )}
               
-              {jobDetails.total_cost && (
-              <>
-                  <Separator />
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Estimated Cost
-                    </p>
-                    <p className="font-medium">
-                      {jobDetails.total_cost !== undefined && jobDetails.total_cost !== null ? `€${jobDetails.total_cost}` : 'Not yet available'}
-                    </p>
-                  </div>
-                </>
-              )}
             </CardContent>
           </Card>
 
