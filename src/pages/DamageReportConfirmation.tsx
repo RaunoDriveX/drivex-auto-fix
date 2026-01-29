@@ -176,7 +176,7 @@ const DamageReportConfirmation = () => {
               <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">
                 Progress
               </h3>
-              <DamageReportStepper currentStep="contact" />
+              <DamageReportStepper currentStep="confirmation" />
             </div>
           </aside>
         </div>
