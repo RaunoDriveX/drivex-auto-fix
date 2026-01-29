@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   Clock, 
   PlayCircle, 
@@ -24,7 +25,8 @@ import {
   Calculator,
   MapPin,
   Pencil,
-  Calendar
+  Calendar,
+  ChevronDown
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { JobStatusTracker } from '@/components/realtime/JobStatusTracker';
@@ -641,58 +643,66 @@ export const InsurerJobsBoard: React.FC = () => {
                   );
                 })()}
 
-                {/* Details grid */}
-                <div className="space-y-2 text-sm">
-                  {/* Customer Location */}
-                  {(job.customer_street || job.customer_city) && (
-                    <div className="flex items-start justify-between">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {t('jobs_board.customer_location')}
-                      </span>
-                      <span className="font-medium text-right max-w-[60%]">
-                        {job.customer_postal_code} {job.customer_city}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Insurance number - using customer email as proxy */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">{t('jobs_board.insurance_number')}</span>
-                    <span className="font-medium">{job.customer_email.split('@')[0]}</span>
-                  </div>
-
-                  {/* Tracking code */}
-                  {job.short_code && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">{t('jobs_board.tracking_code')}</span>
-                      <span className="font-mono font-bold text-primary">{job.short_code}</span>
-                    </div>
-                  )}
-
-                  {/* Created date */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">{t('jobs_board.created_on')}</span>
-                    <span className="font-medium">
-                      {format(new Date(job.created_at), isGerman ? 'd. MMM yyyy' : 'MMM d, yyyy', 
-                        isGerman ? { locale: de } : undefined)}
+                {/* Customer confirmed appointment - always visible */}
+                {job.appointment_confirmed_at && (
+                  <div className="flex items-center justify-between text-sm py-2 border-b border-dashed mb-2">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {t('jobs_board.scheduled_for', 'Scheduled for')}
+                    </span>
+                    <span className="font-medium text-primary">
+                      {format(new Date(job.appointment_date), isGerman ? 'd. MMM' : 'MMM d', 
+                        isGerman ? { locale: de } : undefined)} {job.appointment_time?.substring(0, 5)}
                     </span>
                   </div>
+                )}
 
-                  {/* Customer confirmed appointment */}
-                  {job.appointment_confirmed_at && (
-                    <div className="flex items-center justify-between pt-2 border-t border-dashed">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {t('jobs_board.scheduled_for', 'Scheduled for')}
-                      </span>
-                      <span className="font-medium text-primary">
-                        {format(new Date(job.appointment_date), isGerman ? 'd. MMM' : 'MMM d', 
-                          isGerman ? { locale: de } : undefined)} {job.appointment_time?.substring(0, 5)}
+                {/* Collapsible Details Section */}
+                <Collapsible>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm" className="w-full justify-between px-2 h-8 text-xs text-muted-foreground hover:text-foreground">
+                      <span>{t('jobs_board.case_details', 'Case Details')}</span>
+                      <ChevronDown className="h-3 w-3 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 text-sm pt-2">
+                    {/* Customer Location */}
+                    {(job.customer_street || job.customer_city) && (
+                      <div className="flex items-start justify-between">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {t('jobs_board.customer_location')}
+                        </span>
+                        <span className="font-medium text-right max-w-[60%]">
+                          {job.customer_postal_code} {job.customer_city}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Insurance number - using customer email as proxy */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">{t('jobs_board.insurance_number')}</span>
+                      <span className="font-medium">{job.customer_email.split('@')[0]}</span>
+                    </div>
+
+                    {/* Tracking code */}
+                    {job.short_code && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">{t('jobs_board.tracking_code')}</span>
+                        <span className="font-mono font-bold text-primary">{job.short_code}</span>
+                      </div>
+                    )}
+
+                    {/* Created date */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">{t('jobs_board.created_on')}</span>
+                      <span className="font-medium">
+                        {format(new Date(job.created_at), isGerman ? 'd. MMM yyyy' : 'MMM d, yyyy', 
+                          isGerman ? { locale: de } : undefined)}
                       </span>
                     </div>
-                  )}
-                </div>
+                  </CollapsibleContent>
+                </Collapsible>
 
                 {/* Suggested Shops - shown when shops have been selected */}
                 {shopSelections[job.id] && shopSelections[job.id].length > 0 && (
@@ -732,11 +742,22 @@ export const InsurerJobsBoard: React.FC = () => {
                   </div>
                 )}
 
-                {/* Damage Report Document - shown inline for new cases */}
+                {/* Collapsible Damage Report Section - shown for new cases */}
                 {workflowStage === 'new' && (
-                  <div className="mt-3">
-                    <DamageReportViewer appointmentId={job.id} damageType={job.damage_type} />
-                  </div>
+                  <Collapsible className="mt-3">
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-full justify-between px-2 h-8 text-xs text-muted-foreground hover:text-foreground border border-dashed">
+                        <span className="flex items-center gap-1">
+                          <FileText className="h-3 w-3" />
+                          {t('damage_report.title', 'Damage Report')}
+                        </span>
+                        <ChevronDown className="h-3 w-3 transition-transform duration-200" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pt-2">
+                      <DamageReportViewer appointmentId={job.id} damageType={job.damage_type} />
+                    </CollapsibleContent>
+                  </Collapsible>
                 )}
 
                 {/* Cancellation Alert */}
@@ -753,6 +774,7 @@ export const InsurerJobsBoard: React.FC = () => {
                 )}
 
                 {/* Action buttons */}
+                {/* Action buttons */}
                 <div className="flex flex-wrap gap-2 mt-4">
                   <Button
                     variant="outline"
@@ -761,7 +783,7 @@ export const InsurerJobsBoard: React.FC = () => {
                     onClick={() => setSelectedJob(selectedJob === job.id ? null : job.id)}
                   >
                     <Eye className="h-4 w-4 mr-2" />
-                    {selectedJob === job.id ? t('jobs_board.hide_details') : t('jobs_board.view_details')}
+                    {selectedJob === job.id ? t('jobs_board.hide_status') : t('jobs_board.job_status')}
                   </Button>
                   
                   {/* Select Shops button - for new jobs */}
