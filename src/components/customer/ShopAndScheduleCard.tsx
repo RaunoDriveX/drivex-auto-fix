@@ -301,8 +301,8 @@ export function ShopAndScheduleCard({
                 {t('customer_confirmation.step_select_time', 'Choose Date & Time at')} {selectedShop.name}
               </Label>
               
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="space-y-2 shrink-0">
                   <Label className="flex items-center gap-2 text-sm text-muted-foreground">
                     <CalendarIcon className="h-4 w-4" />
                     {t('customer_confirmation.select_date', 'Select Date')}
@@ -318,7 +318,7 @@ export function ShopAndScheduleCard({
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="flex-1 space-y-4">
                   {selectedDate && (
                     <>
                       <div className="space-y-2">
@@ -332,7 +332,7 @@ export function ShopAndScheduleCard({
                           </div>
                         ) : (
                           <Select value={selectedTime} onValueChange={setSelectedTime}>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full md:w-64">
                               <SelectValue placeholder="Choose an available time" />
                             </SelectTrigger>
                             <SelectContent>
@@ -354,7 +354,7 @@ export function ShopAndScheduleCard({
                       </div>
 
                       {selectedTime && (
-                        <div className="rounded-lg bg-background p-4 border">
+                        <div className="rounded-lg bg-muted/50 p-4 border w-full md:w-64">
                           <p className="text-sm text-muted-foreground mb-2">Your appointment summary:</p>
                           <p className="font-semibold">{selectedShop.name}</p>
                           <p className="text-sm text-muted-foreground">{selectedShop.address}, {selectedShop.city}</p>
@@ -370,7 +370,6 @@ export function ShopAndScheduleCard({
                       )}
                     </>
                   )}
-                  
                 </div>
               </div>
             </div>
