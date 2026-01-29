@@ -10,6 +10,7 @@ import { RescheduleDialog } from "@/components/customer/RescheduleDialog";
 import { CancelAppointmentDialog } from "@/components/customer/CancelAppointmentDialog";
 import { ShopAndScheduleCard } from "@/components/customer/ShopAndScheduleCard";
 import { CostApprovalCard } from "@/components/customer/CostApprovalCard";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useMockMode } from "@/hooks/useMockMode";
 import { mockJobStages, MockShopSelection, MockCostEstimate } from "@/lib/mockData";
 import { supabase } from "@/integrations/supabase/client";
@@ -340,11 +341,14 @@ export default function JobTracking() {
               Back to Home
             </Link>
           </Button>
-          {isMockMode && (
-            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-              Mock Mode
-            </Badge>
-          )}
+          <div className="flex items-center gap-3">
+            {isMockMode && (
+              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                Mock Mode
+              </Badge>
+            )}
+            <LanguageSwitcher />
+          </div>
         </div>
         
         <div className="text-center space-y-2">
