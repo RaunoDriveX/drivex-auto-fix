@@ -2,9 +2,10 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, Copy, ArrowRight, Search } from "lucide-react";
+import { CheckCircle, Copy, Search } from "lucide-react";
 import { toast } from "sonner";
 import glassifyLogo from "@/assets/glassify-logo.svg";
+import { DamageReportStepper } from "@/components/customer/DamageReportStepper";
 
 interface LocationState {
   appointmentId: string;
@@ -76,93 +77,108 @@ const DamageReportConfirmation = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        {/* Success Message */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <CheckCircle className="w-16 h-16 text-green-500" />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-            {t('confirmation.success_title')}
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {t('confirmation.success_description')}
-          </p>
-        </div>
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8 max-w-4xl mx-auto">
+          {/* Main Content */}
+          <div className="flex-1 max-w-2xl">
+            {/* Success Message */}
+            <div className="text-center mb-8">
+              <div className="flex justify-center mb-4">
+                <CheckCircle className="w-16 h-16 text-green-500" />
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                {t('confirmation.success_title')}
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                {t('confirmation.success_description')}
+              </p>
+            </div>
 
-        {/* Job Tracking ID */}
-        <Card className="mb-8 border-2 border-primary">
-          <CardContent className="p-6 text-center">
-            <p className="text-sm text-muted-foreground mb-2">
-              {t('confirmation.your_job_id')}
-            </p>
-            <div className="flex items-center justify-center gap-3">
-              <span className="text-4xl md:text-5xl font-mono font-bold text-primary tracking-wider">
-                {shortCode}
-              </span>
+            {/* Job Tracking ID */}
+            <Card className="mb-8 border-2 border-primary">
+              <CardContent className="p-6 text-center">
+                <p className="text-sm text-muted-foreground mb-2">
+                  {t('confirmation.your_job_id')}
+                </p>
+                <div className="flex items-center justify-center gap-3">
+                  <span className="text-4xl md:text-5xl font-mono font-bold text-primary tracking-wider">
+                    {shortCode}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={copyToClipboard}
+                    className="flex-shrink-0"
+                  >
+                    <Copy className="w-5 h-5" />
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground mt-3">
+                  {t('confirmation.save_id_note')}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Summary */}
+            <Card className="mb-8">
+              <CardContent className="p-6">
+                <h2 className="font-semibold text-lg mb-4">{t('confirmation.summary')}</h2>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('damage_report.glass_location')}:</span>
+                    <span className="font-medium">{getGlassLocationLabel(glassLocation)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('damage_report.damage_type')}:</span>
+                    <span className="font-medium">{getDamageTypeLabel(damageType)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('damage_report.vehicle_type')}:</span>
+                    <span className="font-medium">{getVehicleTypeLabel(vehicleType)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('damage_report.license_plate')}:</span>
+                    <span className="font-medium">{licensePlate}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('damage_report.insured_name')}:</span>
+                    <span className="font-medium">{insuredName}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Action Buttons */}
+            <div className="space-y-4">
+              <Button
+                size="lg"
+                className="w-full h-14 text-lg bg-brand hover:bg-brand/90"
+                onClick={() => navigate('/')}
+              >
+                {t('confirmation.close', 'Close')}
+              </Button>
+              
               <Button
                 variant="outline"
-                size="icon"
-                onClick={copyToClipboard}
-                className="flex-shrink-0"
+                size="lg"
+                className="w-full h-14 text-lg"
+                onClick={() => navigate(`/track/${shortCode}`)}
               >
-                <Copy className="w-5 h-5" />
+                <Search className="w-5 h-5 mr-2" />
+                {t('confirmation.track_job')}
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground mt-3">
-              {t('confirmation.save_id_note')}
-            </p>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Summary */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <h2 className="font-semibold text-lg mb-4">{t('confirmation.summary')}</h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t('damage_report.glass_location')}:</span>
-                <span className="font-medium">{getGlassLocationLabel(glassLocation)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t('damage_report.damage_type')}:</span>
-                <span className="font-medium">{getDamageTypeLabel(damageType)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t('damage_report.vehicle_type')}:</span>
-                <span className="font-medium">{getVehicleTypeLabel(vehicleType)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t('damage_report.license_plate')}:</span>
-                <span className="font-medium">{licensePlate}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t('damage_report.insured_name')}:</span>
-                <span className="font-medium">{insuredName}</span>
-              </div>
+          {/* Timeline Sidebar */}
+          <aside className="hidden lg:block w-48 shrink-0 pt-4">
+            <div className="sticky top-8">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">
+                Progress
+              </h3>
+              <DamageReportStepper currentStep="contact" />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Action Buttons */}
-        <div className="space-y-4">
-          <Button
-            size="lg"
-            className="w-full h-14 text-lg bg-brand hover:bg-brand/90"
-            onClick={() => navigate('/')}
-          >
-            {t('confirmation.close', 'Close')}
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full h-14 text-lg"
-            onClick={() => navigate(`/track/${shortCode}`)}
-          >
-            <Search className="w-5 h-5 mr-2" />
-            {t('confirmation.track_job')}
-          </Button>
+          </aside>
         </div>
       </main>
     </div>

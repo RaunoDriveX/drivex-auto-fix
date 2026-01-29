@@ -16,6 +16,7 @@ import windshieldSideIcon from "@/assets/windshield-side.svg";
 import { CircleDot, Zap, Layers, ArrowLeft, CheckCircle, Mail, Phone, MessageCircle, ChevronDown } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { DamageReportStepper, DamageReportStep } from "@/components/customer/DamageReportStepper";
 
 type GlassLocation = "front" | "side" | "rear";
 type DamageType = "chip" | "crack" | "multiple";
@@ -234,7 +235,10 @@ const DamageReport = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8 max-w-4xl mx-auto">
+          {/* Main Content */}
+          <div className="flex-1 max-w-2xl">
         {showContactSelection ? (
           // Contact Selection View
           <div className="space-y-8">
@@ -566,6 +570,18 @@ const DamageReport = () => {
             </form>
           </>
         )}
+          </div>
+
+          {/* Timeline Sidebar */}
+          <aside className="hidden lg:block w-48 shrink-0 pt-4">
+            <div className="sticky top-8">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">
+                Progress
+              </h3>
+              <DamageReportStepper currentStep={showContactSelection ? 'contact' : 'reporting'} />
+            </div>
+          </aside>
+        </div>
       </main>
     </div>
   );
