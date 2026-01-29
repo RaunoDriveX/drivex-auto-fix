@@ -307,7 +307,7 @@ export function ShopAndScheduleCard({
                     <CalendarIcon className="h-4 w-4" />
                     {t('customer_confirmation.select_date', 'Select Date')}
                   </Label>
-                  <div className="rounded-md border p-1 w-fit">
+                  <div className="rounded-md border p-2 w-fit bg-background">
                     <Calendar
                       mode="single"
                       selected={selectedDate}
