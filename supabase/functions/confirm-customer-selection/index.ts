@@ -164,13 +164,17 @@ Deno.serve(async (req) => {
 
       // Update appointment with shop selection AND schedule in one step
       // Set workflow_stage to 'awaiting_shop_response' - waiting for shop to accept
+      // Also update shop_id and shop_name so the job is properly assigned
       const { error: updateError } = await supabase
         .from('appointments')
         .update({
+          shop_id: shop_id,
+          shop_name: shopDetails?.name || 'Selected Shop',
           customer_shop_selection: shop_id,
           customer_shop_selected_at: new Date().toISOString(),
           appointment_date: appointment_date,
           appointment_time: appointment_time,
+          appointment_confirmed_at: new Date().toISOString(),
           workflow_stage: 'awaiting_shop_response',
           total_cost: validSelection.estimated_price,
           updated_at: new Date().toISOString()
