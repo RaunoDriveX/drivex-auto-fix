@@ -50,7 +50,9 @@ interface JobDetails {
     make?: string;
     model?: string;
     licensePlate?: string;
+    license_plate?: string;
     vin?: string;
+    vehicle_type?: string;
   };
   additional_notes?: string;
   shop_name: string;
@@ -551,17 +553,24 @@ export default function JobTracking() {
                       Vehicle Information
                     </p>
                     <div className="space-y-1 mt-2">
-                      <p className="font-medium">
-                        {jobDetails.vehicle_info.year} {jobDetails.vehicle_info.make} {jobDetails.vehicle_info.model}
-                      </p>
-                      {jobDetails.vehicle_info.licensePlate && (
+                      {(jobDetails.vehicle_info.year || jobDetails.vehicle_info.make || jobDetails.vehicle_info.model) && (
+                        <p className="font-medium">
+                          {jobDetails.vehicle_info.year} {jobDetails.vehicle_info.make} {jobDetails.vehicle_info.model}
+                        </p>
+                      )}
+                      {(jobDetails.vehicle_info.licensePlate || jobDetails.vehicle_info.license_plate) && (
                         <p className="text-sm text-muted-foreground">
-                          License Plate: {jobDetails.vehicle_info.licensePlate}
+                          License Plate: {jobDetails.vehicle_info.licensePlate || jobDetails.vehicle_info.license_plate}
                         </p>
                       )}
                       {jobDetails.vehicle_info.vin && (
                         <p className="text-sm text-muted-foreground">
                           VIN: {jobDetails.vehicle_info.vin}
+                        </p>
+                      )}
+                      {jobDetails.vehicle_info.vehicle_type && (
+                        <p className="text-sm text-muted-foreground capitalize">
+                          Type: {jobDetails.vehicle_info.vehicle_type}
                         </p>
                       )}
                     </div>
