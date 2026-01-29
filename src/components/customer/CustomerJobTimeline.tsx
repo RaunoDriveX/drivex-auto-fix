@@ -217,8 +217,22 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
         isCurrent: displayStatus === 'awaiting_shop',
         notes: 'Your insurer will select repair shops for you to choose from'
       });
+      
+      // Show "Confirmation by the Shop" as upcoming step
+      steps.push({
+        status: 'awaiting_shop_confirmation',
+        isCompleted: false,
+        isCurrent: false,
+        notes: 'The next step will be done by the shop. You will be notified.'
+      });
     } else {
-      // Shop has been assigned by customer
+      // Shop has been assigned by customer - mark awaiting shop as completed
+      steps.push({
+        status: 'awaiting_shop',
+        isCompleted: true,
+        isCurrent: false,
+        notes: 'You have selected a repair shop'
+      });
       
       // Check if shop has confirmed (accepted the job)
       const shopHasConfirmed = appointmentStatus === 'confirmed' || ['in_progress', 'completed'].includes(displayStatus);
