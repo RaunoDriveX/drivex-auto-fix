@@ -371,11 +371,6 @@ export function ShopAndScheduleCard({
                     </>
                   )}
                   
-                  {!selectedDate && (
-                    <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
-                      Select a date to see available time slots
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
