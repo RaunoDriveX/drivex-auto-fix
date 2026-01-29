@@ -209,8 +209,15 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
       notes: 'Your damage report has been submitted'
     });
 
+    // Check if shop has been selected - either by shop_id or workflow_stage
+    const shopIsSelected = (hasShopAssigned && shopId !== 'pending') || 
+                           workflowStage === 'awaiting_shop_response' ||
+                           workflowStage === 'damage_report' ||
+                           workflowStage === 'cost_approval' ||
+                           workflowStage === 'completed';
+
     // Show "Awaiting Shop Selection" for jobs without shop assignment
-    if (!hasShopAssigned || shopId === 'pending') {
+    if (!shopIsSelected) {
       steps.push({
         status: 'awaiting_shop',
         isCompleted: false,
