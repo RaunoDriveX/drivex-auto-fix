@@ -302,10 +302,10 @@ export function ShopAndScheduleCard({
               </Label>
               
               {/* Contained Date & Time Selection Card */}
-              <div className="rounded-lg border bg-background p-4">
-                <div className="flex flex-col lg:flex-row gap-6">
+              <div className="rounded-lg border bg-background p-4 md:p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Left: Calendar */}
-                  <div className="flex-1 min-w-0 space-y-2">
+                  <div className="space-y-2">
                     <Label className="flex items-center gap-2 text-sm text-muted-foreground">
                       <CalendarIcon className="h-4 w-4" />
                       {t('customer_confirmation.select_date', 'Select Date')}
@@ -316,10 +316,10 @@ export function ShopAndScheduleCard({
                         selected={selectedDate}
                         onSelect={setSelectedDate}
                         disabled={(date) => isBefore(date, startOfDay(minDate))}
-                        className="pointer-events-auto w-full"
+                        className="pointer-events-auto mx-auto"
                         classNames={{
-                          months: "flex flex-col w-full",
-                          month: "space-y-4 w-full",
+                          months: "flex flex-col",
+                          month: "space-y-4",
                           caption: "flex justify-center pt-1 relative items-center h-10",
                           caption_label: "text-sm font-semibold",
                           nav: "space-x-1 flex items-center",
@@ -327,11 +327,11 @@ export function ShopAndScheduleCard({
                           nav_button_previous: "absolute left-1",
                           nav_button_next: "absolute right-1",
                           table: "w-full border-collapse",
-                          head_row: "flex w-full",
-                          head_cell: "text-muted-foreground rounded-md w-full font-normal text-[0.8rem] text-center flex-1",
-                          row: "flex w-full mt-2",
-                          cell: "flex-1 h-9 text-sm p-0 relative flex items-center justify-center",
-                          day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 flex items-center justify-center rounded-md hover:bg-accent transition-colors",
+                          head_row: "flex w-full justify-between",
+                          head_cell: "text-muted-foreground rounded-md w-10 font-normal text-[0.8rem] text-center",
+                          row: "flex w-full justify-between mt-2",
+                          cell: "h-10 w-10 text-sm p-0 relative flex items-center justify-center",
+                          day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 flex items-center justify-center rounded-md hover:bg-accent transition-colors",
                           day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground rounded-md",
                           day_today: "bg-accent text-accent-foreground",
                           day_outside: "day-outside text-muted-foreground opacity-50",
@@ -343,7 +343,7 @@ export function ShopAndScheduleCard({
                   </div>
 
                   {/* Right: Time Slot and Summary */}
-                  <div className="lg:w-72 space-y-4 shrink-0">
+                  <div className="space-y-4">
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
