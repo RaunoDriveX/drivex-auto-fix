@@ -31,6 +31,7 @@ interface TimelineProps {
   appointmentConfirmedAt?: string;
   onRescheduleClick?: () => void;
   onCancelClick?: () => void;
+  horizontal?: boolean;
 }
 
 interface TimelineEvent {
@@ -81,7 +82,8 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   hasShopAssigned = false,
   appointmentConfirmedAt,
   onRescheduleClick,
-  onCancelClick
+  onCancelClick,
+  horizontal = false
 }) => {
   const { t } = useTranslation('common');
   // Check if customer has confirmed their appointment time
@@ -378,6 +380,92 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   }
 
   const timelineSteps = getTimelineSteps();
+
+  // Horizontal layout - compact stepper style
+  if (horizontal) {
+    return (
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              <CardTitle className="text-lg">{t('timeline.title')}</CardTitle>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>{t('timeline.progress')}</span>
+              <span className="font-medium">{getStatusProgress()}%</span>
+            </div>
+          </div>
+          <Progress value={getStatusProgress()} className="h-2 mt-2" />
+        </CardHeader>
+        <CardContent className="pt-0">
+          {/* Horizontal timeline steps */}
+          <div className="flex items-start justify-between overflow-x-auto pb-2">
+            {timelineSteps.map((step, index) => {
+              const colors = statusColors[step.status as keyof typeof statusColors] || statusColors.scheduled;
+              const Icon = statusIcons[step.status as keyof typeof statusIcons] || Clock;
+              const isLast = index === timelineSteps.length - 1;
+              const statusLabel = t(`timeline.status.${step.status}`);
+
+              return (
+                <div key={step.status} className="flex flex-col items-center flex-1 min-w-0">
+                  {/* Icon row with connector line */}
+                  <div className="flex items-center w-full">
+                    {/* Left connector */}
+                    {index > 0 && (
+                      <div 
+                        className={cn(
+                          "h-0.5 flex-1",
+                          timelineSteps[index - 1]?.isCompleted ? "bg-primary" : "bg-muted"
+                        )} 
+                      />
+                    )}
+                    
+                    {/* Status icon */}
+                    <div 
+                      className={cn(
+                        "flex items-center justify-center w-8 h-8 rounded-full border-2 shrink-0",
+                        step.isCompleted || step.isCurrent 
+                          ? `${colors.bgColor} ${colors.color} border-current` 
+                          : "bg-muted text-muted-foreground border-muted"
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    
+                    {/* Right connector */}
+                    {!isLast && (
+                      <div 
+                        className={cn(
+                          "h-0.5 flex-1",
+                          step.isCompleted ? "bg-primary" : "bg-muted"
+                        )} 
+                      />
+                    )}
+                  </div>
+                  
+                  {/* Status label */}
+                  <div className="text-center mt-2 px-1">
+                    <p className={cn(
+                      "text-xs font-medium leading-tight",
+                      step.isCurrent ? "text-primary" : "text-muted-foreground"
+                    )}>
+                      {statusLabel}
+                    </p>
+                    {step.isCurrent && (
+                      <Badge variant="outline" className="text-[10px] mt-1 px-1.5 py-0">
+                        {t('timeline.current')}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

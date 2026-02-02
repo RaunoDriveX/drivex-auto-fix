@@ -373,39 +373,34 @@ export default function JobTracking() {
 
         {/* Customer Action Cards with Timeline - Two column layout when shop selection is needed */}
         {needsShopAndSchedule ? (
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Left: Job Timeline (sticky on desktop) */}
-            <div className="lg:w-72 xl:w-80 shrink-0 order-2 lg:order-1">
-              <div className="lg:sticky lg:top-4">
-                <CustomerJobTimeline
-                  appointmentId={jobDetails.id}
-                  currentStatus={jobDetails.job_status}
-                  appointmentStatus={jobDetails.status}
-                  workflowStage={jobDetails.workflow_stage}
-                  startedAt={jobDetails.job_started_at}
-                  completedAt={jobDetails.job_completed_at}
-                  scheduledDate={jobDetails.appointment_date}
-                  scheduledTime={jobDetails.appointment_time}
-                  shopId={jobDetails.shop_id}
-                  hasShopAssigned={jobDetails.shop_id !== 'pending' && !!jobDetails.shop_id}
-                  appointmentConfirmedAt={jobDetails.appointment_confirmed_at}
-                  onRescheduleClick={() => setRescheduleOpen(true)}
-                  onCancelClick={() => setCancelOpen(true)}
-                />
-              </div>
-            </div>
+          <div className="space-y-6">
+            {/* Top: Horizontal Job Timeline */}
+            <CustomerJobTimeline
+              appointmentId={jobDetails.id}
+              currentStatus={jobDetails.job_status}
+              appointmentStatus={jobDetails.status}
+              workflowStage={jobDetails.workflow_stage}
+              startedAt={jobDetails.job_started_at}
+              completedAt={jobDetails.job_completed_at}
+              scheduledDate={jobDetails.appointment_date}
+              scheduledTime={jobDetails.appointment_time}
+              shopId={jobDetails.shop_id}
+              hasShopAssigned={jobDetails.shop_id !== 'pending' && !!jobDetails.shop_id}
+              appointmentConfirmedAt={jobDetails.appointment_confirmed_at}
+              onRescheduleClick={() => setRescheduleOpen(true)}
+              onCancelClick={() => setCancelOpen(true)}
+              horizontal
+            />
             
-            {/* Right: Shop Selection Card - takes remaining space */}
-            <div className="flex-1 min-w-0 order-1 lg:order-2">
-              <ShopAndScheduleCard
-                shops={pendingShopSelections!}
-                appointmentId={jobDetails.id}
-                trackingToken={jobDetails.tracking_token}
-                onSuccess={fetchJobDetails}
-                isLoading={confirmationLoading}
-                isMockMode={isMockMode}
-              />
-            </div>
+            {/* Below: Shop Selection Card - full width */}
+            <ShopAndScheduleCard
+              shops={pendingShopSelections!}
+              appointmentId={jobDetails.id}
+              trackingToken={jobDetails.tracking_token}
+              onSuccess={fetchJobDetails}
+              isLoading={confirmationLoading}
+              isMockMode={isMockMode}
+            />
           </div>
         ) : (
           <>
