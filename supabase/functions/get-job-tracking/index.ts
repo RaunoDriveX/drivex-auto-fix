@@ -100,6 +100,7 @@ Deno.serve(async (req) => {
         job_completed_at,
         appointment_date,
         appointment_time,
+        appointment_confirmed_at,
         service_type,
         damage_type,
         shop_name,
