@@ -301,75 +301,100 @@ export function ShopAndScheduleCard({
                 {t('customer_confirmation.step_select_time', 'Choose Date & Time at')} {selectedShop.name}
               </Label>
               
-              <div className="flex flex-col lg:flex-row gap-6">
-                <div className="space-y-2 flex-1">
-                  <Label className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CalendarIcon className="h-4 w-4" />
-                    {t('customer_confirmation.select_date', 'Select Date')}
-                  </Label>
-                  <div className="rounded-md border p-3 bg-background">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={setSelectedDate}
-                      disabled={(date) => isBefore(date, startOfDay(minDate))}
-                      className="pointer-events-auto w-full"
-                    />
+              {/* Contained Date & Time Selection Card */}
+              <div className="rounded-lg border bg-background p-4">
+                <div className="flex flex-col lg:flex-row gap-6">
+                  {/* Left: Calendar */}
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CalendarIcon className="h-4 w-4" />
+                      {t('customer_confirmation.select_date', 'Select Date')}
+                    </Label>
+                    <div className="rounded-md border p-3 bg-card">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        disabled={(date) => isBefore(date, startOfDay(minDate))}
+                        className="pointer-events-auto w-full"
+                        classNames={{
+                          months: "flex flex-col w-full",
+                          month: "space-y-4 w-full",
+                          caption: "flex justify-center pt-1 relative items-center h-10",
+                          caption_label: "text-sm font-semibold",
+                          nav: "space-x-1 flex items-center",
+                          nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input hover:bg-accent",
+                          nav_button_previous: "absolute left-1",
+                          nav_button_next: "absolute right-1",
+                          table: "w-full border-collapse",
+                          head_row: "flex w-full",
+                          head_cell: "text-muted-foreground rounded-md w-full font-normal text-[0.8rem] text-center flex-1",
+                          row: "flex w-full mt-2",
+                          cell: "flex-1 h-9 text-sm p-0 relative flex items-center justify-center",
+                          day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 flex items-center justify-center rounded-md hover:bg-accent transition-colors",
+                          day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground rounded-md",
+                          day_today: "bg-accent text-accent-foreground",
+                          day_outside: "day-outside text-muted-foreground opacity-50",
+                          day_disabled: "text-muted-foreground opacity-50",
+                          day_hidden: "invisible",
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <div className="lg:w-72 space-y-4 shrink-0">
-                  {selectedDate && (
-                    <>
-                      <div className="space-y-2">
-                        <Label className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          {t('customer_confirmation.select_time', 'Select Time Slot')}
-                        </Label>
-                        {fetchingSlots ? (
-                          <div className="flex items-center justify-center py-8">
-                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                          </div>
-                        ) : (
-                          <Select value={selectedTime} onValueChange={setSelectedTime}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Choose an available time" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {availableSlots
-                                .filter(slot => slot.available)
-                                .map(slot => (
-                                  <SelectItem key={slot.time} value={slot.time}>
-                                    {format(new Date(`2000-01-01T${slot.time}`), 'h:mm a')}
-                                  </SelectItem>
-                                ))}
-                              {availableSlots.filter(slot => slot.available).length === 0 && (
-                                <div className="px-2 py-4 text-center text-sm text-muted-foreground">
-                                  No available slots for this date
-                                </div>
-                              )}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </div>
-
-                      {selectedTime && (
-                        <div className="rounded-lg bg-muted/50 p-4 border w-full">
-                          <p className="text-sm text-muted-foreground mb-2">Your appointment summary:</p>
-                          <p className="font-semibold">{selectedShop.name}</p>
-                          <p className="text-sm text-muted-foreground">{selectedShop.address}, {selectedShop.city}</p>
-                          <div className="mt-2 pt-2 border-t">
-                            <p className="font-medium">
-                              {format(selectedDate, 'EEEE, MMMM d, yyyy')}
-                            </p>
-                            <p className="text-primary font-medium">
-                              {format(new Date(`2000-01-01T${selectedTime}`), 'h:mm a')}
-                            </p>
-                          </div>
+                  {/* Right: Time Slot and Summary */}
+                  <div className="lg:w-72 space-y-4 shrink-0">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        {t('customer_confirmation.select_time', 'Select Time Slot')}
+                      </Label>
+                      {fetchingSlots ? (
+                        <div className="flex items-center justify-center py-8 border rounded-lg bg-card">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
                         </div>
+                      ) : (
+                        <Select value={selectedTime} onValueChange={setSelectedTime} disabled={!selectedDate}>
+                          <SelectTrigger className="w-full h-11 border-2 border-primary/20 focus:border-primary bg-card">
+                            <SelectValue placeholder={selectedDate ? "Choose an available time" : "Select a date first"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableSlots
+                              .filter(slot => slot.available)
+                              .map(slot => (
+                                <SelectItem key={slot.time} value={slot.time}>
+                                  {format(new Date(`2000-01-01T${slot.time}`), 'h:mm a')}
+                                </SelectItem>
+                              ))}
+                            {selectedDate && availableSlots.filter(slot => slot.available).length === 0 && (
+                              <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                                No available slots for this date
+                              </div>
+                            )}
+                          </SelectContent>
+                        </Select>
                       )}
-                    </>
-                  )}
+                    </div>
+
+                    {/* Appointment Summary */}
+                    {selectedDate && selectedTime && (
+                      <div className="rounded-lg bg-muted/30 p-4 border space-y-3">
+                        <p className="text-sm text-muted-foreground">Your appointment summary:</p>
+                        <div className="space-y-1">
+                          <p className="font-semibold text-foreground">{selectedShop.name}</p>
+                          <p className="text-sm text-muted-foreground">{selectedShop.address}, {selectedShop.city}</p>
+                        </div>
+                        <div className="space-y-1 pt-2 border-t">
+                          <p className="font-medium text-foreground">
+                            {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+                          </p>
+                          <p className="text-primary font-semibold">
+                            {format(new Date(`2000-01-01T${selectedTime}`), 'h:mm a')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
