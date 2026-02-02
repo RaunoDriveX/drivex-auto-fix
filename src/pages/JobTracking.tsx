@@ -374,20 +374,8 @@ export default function JobTracking() {
         {/* Customer Action Cards with Timeline - Two column layout when shop selection is needed */}
         {needsShopAndSchedule ? (
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Left: Shop Selection Card */}
-            <div className="flex-1 min-w-0">
-              <ShopAndScheduleCard
-                shops={pendingShopSelections!}
-                appointmentId={jobDetails.id}
-                trackingToken={jobDetails.tracking_token}
-                onSuccess={fetchJobDetails}
-                isLoading={confirmationLoading}
-                isMockMode={isMockMode}
-              />
-            </div>
-            
-            {/* Right: Job Timeline (sticky on desktop) */}
-            <div className="lg:w-80 xl:w-96 shrink-0">
+            {/* Left: Job Timeline (sticky on desktop) */}
+            <div className="lg:w-72 xl:w-80 shrink-0 order-2 lg:order-1">
               <div className="lg:sticky lg:top-4">
                 <CustomerJobTimeline
                   appointmentId={jobDetails.id}
@@ -405,6 +393,18 @@ export default function JobTracking() {
                   onCancelClick={() => setCancelOpen(true)}
                 />
               </div>
+            </div>
+            
+            {/* Right: Shop Selection Card - takes remaining space */}
+            <div className="flex-1 min-w-0 order-1 lg:order-2">
+              <ShopAndScheduleCard
+                shops={pendingShopSelections!}
+                appointmentId={jobDetails.id}
+                trackingToken={jobDetails.tracking_token}
+                onSuccess={fetchJobDetails}
+                isLoading={confirmationLoading}
+                isMockMode={isMockMode}
+              />
             </div>
           </div>
         ) : (
