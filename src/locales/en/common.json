@@ -237,6 +237,9 @@
     "cancel": "Cancel",
     "overdue_message": "Your scheduled appointment time has passed. The shop will contact you soon.",
     "status_history": "Status Change History",
+    "perform_smartscan": "Perform SmartScan",
+    "smartscan_dialog_title": "SmartScan Your Windshield",
+    "smartscan_dialog_description": "Scan the QR code with your smartphone to capture photos of your windshield damage for AI analysis",
     "status": {
       "pending": "Report Submitted",
       "pending_desc": "Your damage report is being processed",

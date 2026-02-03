@@ -237,6 +237,9 @@
     "cancel": "Abbrechen",
     "overdue_message": "Ihr geplanter Termin ist überschritten. Die Werkstatt wird Sie bald kontaktieren.",
     "status_history": "Status-Änderungsverlauf",
+    "perform_smartscan": "SmartScan durchführen",
+    "smartscan_dialog_title": "SmartScan Ihrer Windschutzscheibe",
+    "smartscan_dialog_description": "Scannen Sie den QR-Code mit Ihrem Smartphone, um Fotos Ihres Windschutzscheibenschadens für die KI-Analyse aufzunehmen",
     "status": {
       "pending": "Bericht eingereicht",
       "pending_desc": "Ihr Schadensbericht wird bearbeitet",

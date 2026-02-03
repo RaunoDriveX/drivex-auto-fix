@@ -387,6 +387,7 @@ export default function JobTracking() {
               shopId={jobDetails.shop_id}
               hasShopAssigned={jobDetails.shop_id !== 'pending' && !!jobDetails.shop_id}
               appointmentConfirmedAt={jobDetails.appointment_confirmed_at}
+              trackingToken={jobDetails.tracking_token}
               onRescheduleClick={() => setRescheduleOpen(true)}
               onCancelClick={() => setCancelOpen(true)}
               horizontal
@@ -438,6 +439,7 @@ export default function JobTracking() {
               shopId={jobDetails.shop_id}
               hasShopAssigned={jobDetails.shop_id !== 'pending' && !!jobDetails.shop_id}
               appointmentConfirmedAt={jobDetails.appointment_confirmed_at}
+              trackingToken={jobDetails.tracking_token}
               onRescheduleClick={() => setRescheduleOpen(true)}
               onCancelClick={() => setCancelOpen(true)}
             />

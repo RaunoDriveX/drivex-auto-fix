@@ -4,16 +4,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useTranslation } from 'react-i18next';
+import QRCode from 'react-qr-code';
 import { 
   Calendar, 
   Play, 
   CheckCircle, 
   XCircle, 
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  ScanLine
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -29,6 +32,7 @@ interface TimelineProps {
   shopId: string;
   hasShopAssigned?: boolean;
   appointmentConfirmedAt?: string;
+  trackingToken?: string;
   onRescheduleClick?: () => void;
   onCancelClick?: () => void;
   horizontal?: boolean;
@@ -81,10 +85,18 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   shopId,
   hasShopAssigned = false,
   appointmentConfirmedAt,
+  trackingToken,
   onRescheduleClick,
   onCancelClick,
   horizontal = false
 }) => {
+  const [smartScanDialogOpen, setSmartScanDialogOpen] = useState(false);
+  
+  // Generate SmartScan URL using tracking token
+  const getSmartScanUrl = () => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/inspection?token=${trackingToken || appointmentId}`;
+  };
   const { t } = useTranslation('common');
   // Check if customer has confirmed their appointment time
   const hasCustomerConfirmedAppointment = !!appointmentConfirmedAt;
@@ -456,6 +468,40 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
                       <Badge variant="outline" className="text-[10px] mt-1 px-1.5 py-0">
                         {t('timeline.current')}
                       </Badge>
+                    )}
+                    {/* SmartScan button for awaiting_shop status */}
+                    {step.status === 'awaiting_shop' && step.isCurrent && (
+                      <Dialog open={smartScanDialogOpen} onOpenChange={setSmartScanDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="default" size="sm" className="mt-2 text-xs h-7 px-2">
+                            <ScanLine className="h-3 w-3 mr-1" />
+                            {t('timeline.perform_smartscan')}
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <ScanLine className="h-5 w-5" />
+                              {t('timeline.smartscan_dialog_title')}
+                            </DialogTitle>
+                            <DialogDescription>
+                              {t('timeline.smartscan_dialog_description')}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex flex-col items-center space-y-4 py-6">
+                            <div className="bg-white p-4 rounded-lg shadow-sm">
+                              <QRCode
+                                value={getSmartScanUrl()}
+                                size={200}
+                                level="H"
+                              />
+                            </div>
+                            <p className="text-sm text-muted-foreground text-center max-w-xs">
+                              {t('inspection.qr_instruction')}
+                            </p>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     )}
                   </div>
                 </div>
