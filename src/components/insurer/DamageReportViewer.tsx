@@ -72,8 +72,13 @@ export const DamageReportViewer: React.FC<DamageReportViewerProps> = ({
   const report = getMockDamageReport(appointmentId, damageType);
   
   const handleDownload = () => {
-    // Mock: In production, this would trigger a download
-    console.log('Downloading damage report:', report.fileName);
+    // Download the actual PDF file
+    const link = document.createElement('a');
+    link.href = '/damage-assessment-report.pdf';
+    link.download = report.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
