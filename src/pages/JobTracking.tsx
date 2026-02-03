@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { formatInsurerName, formatServiceType, formatDamageType } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import QRCode from 'react-qr-code';
+import smartScanQrCode from "@/assets/smartscan-qr-code.png";
 import { 
   Clock, 
   MapPin, 
@@ -95,11 +95,8 @@ export default function JobTracking() {
   const [pendingCostEstimate, setPendingCostEstimate] = useState<MockCostEstimate | null>(null);
   const [confirmationLoading, setConfirmationLoading] = useState(false);
   
-  // Generate SmartScan URL using tracking token
-  const getSmartScanUrl = () => {
-    const baseUrl = window.location.origin;
-    return `${baseUrl}/inspection?token=${jobDetails?.tracking_token || appointmentId}`;
-  };
+  // SmartScan URL
+  const smartScanUrl = "https://smartscan.drivex.ee/?urlId=FBLhLeT8gOim_Wb-g_SxybH_&lang=de";
 
   useEffect(() => {
     if (appointmentId) {
@@ -435,10 +432,10 @@ export default function JobTracking() {
                       </DialogHeader>
                       <div className="flex flex-col items-center space-y-4 py-6">
                         <div className="bg-background p-4 rounded-lg shadow-sm border">
-                          <QRCode
-                            value={getSmartScanUrl()}
-                            size={200}
-                            level="H"
+                          <img 
+                            src={smartScanQrCode} 
+                            alt="SmartScan QR Code" 
+                            className="w-[200px] h-[200px]"
                           />
                         </div>
                         <p className="text-sm text-muted-foreground text-center max-w-xs">
@@ -449,7 +446,7 @@ export default function JobTracking() {
                           size="sm"
                           className="w-full max-w-xs"
                           onClick={() => {
-                            navigator.clipboard.writeText(getSmartScanUrl());
+                            navigator.clipboard.writeText(smartScanUrl);
                             toast({
                               title: t('timeline.link_copied'),
                               description: t('timeline.link_copied_description'),
