@@ -642,9 +642,6 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                        )}
                     </div>
                   </div>
-                  <Badge variant={getStatusColor(offer.expires_at)} className="text-sm">
-                    {formatTimeRemaining(offer.expires_at)}
-                  </Badge>
                 </div>
               </CardHeader>
               
