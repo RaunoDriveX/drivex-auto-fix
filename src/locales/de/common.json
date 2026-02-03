@@ -240,6 +240,11 @@
     "perform_smartscan": "SmartScan durchführen",
     "smartscan_dialog_title": "SmartScan Ihrer Windschutzscheibe",
     "smartscan_dialog_description": "Scannen Sie den QR-Code mit Ihrem Smartphone, um Fotos Ihres Windschutzscheibenschadens für die KI-Analyse aufzunehmen",
+    "smartscan_cta_title": "Bereit, Ihren Schaden zu scannen?",
+    "smartscan_cta_description": "Nutzen Sie Ihr Smartphone, um Fotos Ihres Windschutzscheibenschadens für sofortige KI-Analyse aufzunehmen",
+    "copy_link": "Link kopieren",
+    "link_copied": "Link kopiert",
+    "link_copied_description": "SmartScan-Link wurde in Ihre Zwischenablage kopiert",
     "status": {
       "pending": "Bericht eingereicht",
       "pending_desc": "Ihr Schadensbericht wird bearbeitet",

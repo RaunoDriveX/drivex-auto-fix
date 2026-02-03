@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CustomerJobTimeline } from "@/components/customer/CustomerJobTimeline";
 import { CustomerJobNotifications } from "@/components/customer/CustomerJobNotifications";
 import { RescheduleDialog } from "@/components/customer/RescheduleDialog";
@@ -18,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { formatInsurerName, formatServiceType, formatDamageType } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import QRCode from 'react-qr-code';
 import { 
   Clock, 
   MapPin, 
@@ -27,7 +29,8 @@ import {
   ExternalLink,
   Calendar,
   Home,
-  XCircle
+  XCircle,
+  ScanLine
 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 
@@ -85,11 +88,18 @@ export default function JobTracking() {
   const [loading, setLoading] = useState(true);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [smartScanDialogOpen, setSmartScanDialogOpen] = useState(false);
   
   // Customer confirmation states
   const [pendingShopSelections, setPendingShopSelections] = useState<MockShopSelection[] | null>(null);
   const [pendingCostEstimate, setPendingCostEstimate] = useState<MockCostEstimate | null>(null);
   const [confirmationLoading, setConfirmationLoading] = useState(false);
+  
+  // Generate SmartScan URL using tracking token
+  const getSmartScanUrl = () => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/inspection?token=${jobDetails?.tracking_token || appointmentId}`;
+  };
 
   useEffect(() => {
     if (appointmentId) {
@@ -392,6 +402,68 @@ export default function JobTracking() {
               onCancelClick={() => setCancelOpen(true)}
               horizontal
             />
+            
+            {/* SmartScan CTA Card - Between timeline and shop selection */}
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="py-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-full bg-primary/10">
+                      <ScanLine className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">{t('timeline.smartscan_cta_title')}</h3>
+                      <p className="text-sm text-muted-foreground">{t('timeline.smartscan_cta_description')}</p>
+                    </div>
+                  </div>
+                  <Dialog open={smartScanDialogOpen} onOpenChange={setSmartScanDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="lg" className="gap-2 w-full sm:w-auto">
+                        <ScanLine className="h-5 w-5" />
+                        {t('timeline.perform_smartscan')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <ScanLine className="h-5 w-5" />
+                          {t('timeline.smartscan_dialog_title')}
+                        </DialogTitle>
+                        <DialogDescription>
+                          {t('timeline.smartscan_dialog_description')}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="flex flex-col items-center space-y-4 py-6">
+                        <div className="bg-background p-4 rounded-lg shadow-sm border">
+                          <QRCode
+                            value={getSmartScanUrl()}
+                            size={200}
+                            level="H"
+                          />
+                        </div>
+                        <p className="text-sm text-muted-foreground text-center max-w-xs">
+                          {t('inspection.qr_instruction')}
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="w-full max-w-xs"
+                          onClick={() => {
+                            navigator.clipboard.writeText(getSmartScanUrl());
+                            toast({
+                              title: t('timeline.link_copied'),
+                              description: t('timeline.link_copied_description'),
+                            });
+                          }}
+                        >
+                          {t('timeline.copy_link')}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardContent>
+            </Card>
             
             {/* Below: Shop Selection Card - full width */}
             <ShopAndScheduleCard
