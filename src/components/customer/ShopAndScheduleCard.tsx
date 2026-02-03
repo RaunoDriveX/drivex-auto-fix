@@ -197,9 +197,9 @@ export function ShopAndScheduleCard({
     <>
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-background">
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Wrench className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-lg">
+              2
             </div>
             <div>
               <CardTitle className="text-lg">
