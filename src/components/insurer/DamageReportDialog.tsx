@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface DamageReportDialogProps {
   open: boolean;
@@ -29,13 +30,20 @@ export const DamageReportDialog: React.FC<DamageReportDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
         
-        <div className="flex-1 min-h-0">
-          <iframe
-            src="/damage-assessment-report.pdf"
-            className="w-full h-[calc(90vh-100px)]"
-            title={t('damage_report.assessment_title', "Your car's damage assessment")}
-          />
-        </div>
+        <ScrollArea className="max-h-[calc(90vh-80px)]">
+          <div className="p-6 pt-4">
+            {/* Use the static damage assessment image */}
+            <div className="rounded-md border overflow-hidden">
+              <img
+                src="/lovable-uploads/c1b17908-3759-47aa-8be9-2ca25b318c3d.png"
+                alt="AI windshield inspection: reference images and detected chip damage — recommended repair"
+                className="w-full h-auto"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
