@@ -405,8 +405,8 @@ export default function JobTracking() {
               <CardContent className="py-6">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-full bg-primary/10">
-                      <ScanLine className="h-6 w-6 text-primary" />
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-lg">
+                      1
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg">{t('timeline.smartscan_cta_title')}</h3>
