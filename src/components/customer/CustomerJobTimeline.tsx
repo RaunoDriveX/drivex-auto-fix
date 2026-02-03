@@ -220,14 +220,39 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
         notes: 'You have selected a repair shop'
       });
       
-      // Check if customer has selected date/time
-      const hasDateTimeSelected = hasCustomerConfirmedAppointment;
-      
       // Check if shop has confirmed (accepted the job)
       const shopHasConfirmed = appointmentStatus === 'confirmed' || ['in_progress', 'completed'].includes(displayStatus);
       
-      // Show "Waiting on date & time" step
-      if (!hasDateTimeSelected) {
+      // Check if customer has selected date/time
+      const hasDateTimeSelected = hasCustomerConfirmedAppointment || shopHasConfirmed;
+      
+      // If shop has confirmed, all previous steps are complete
+      if (shopHasConfirmed) {
+        // Date/time is completed (either customer selected or shop confirmed implies it)
+        steps.push({
+          status: 'awaiting_datetime',
+          isCompleted: true,
+          isCurrent: false,
+          notes: 'Appointment date and time has been set'
+        });
+        
+        // Shop confirmation is completed
+        steps.push({
+          status: 'awaiting_shop_confirmation',
+          isCompleted: true,
+          isCurrent: false,
+          notes: 'The shop has confirmed your appointment'
+        });
+        
+        // Add confirmed step
+        steps.push({
+          status: 'confirmed',
+          timestamp: new Date().toISOString(),
+          isCompleted: true,
+          isCurrent: !['in_progress', 'completed'].includes(displayStatus),
+          notes: 'Shop has accepted your job and confirmed the appointment'
+        });
+      } else if (!hasDateTimeSelected) {
         // Customer needs to select date/time - this is the current step
         steps.push({
           status: 'awaiting_datetime',
@@ -244,7 +269,7 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
           notes: 'The shop will confirm your appointment after you select a time'
         });
       } else {
-        // Date/time has been selected - mark as completed
+        // Date/time has been selected but shop hasn't confirmed yet
         steps.push({
           status: 'awaiting_datetime',
           isCompleted: true,
@@ -252,33 +277,12 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
           notes: 'You have selected your appointment date and time'
         });
         
-        // Now show shop confirmation status
-        if (!shopHasConfirmed) {
-          steps.push({
-            status: 'awaiting_shop_confirmation',
-            isCompleted: false,
-            isCurrent: true,
-            notes: 'Waiting for the shop to confirm your appointment'
-          });
-        } else {
-          // Shop has confirmed
-          steps.push({
-            status: 'awaiting_shop_confirmation',
-            isCompleted: true,
-            isCurrent: false,
-            notes: 'The shop has confirmed your appointment'
-          });
-        }
-      }
-      
-      // Add confirmed step (shop accepted the job)
-      if (shopHasConfirmed) {
+        // Waiting for shop confirmation
         steps.push({
-          status: 'confirmed',
-          timestamp: new Date().toISOString(),
-          isCompleted: true,
-          isCurrent: false,
-          notes: 'Shop has accepted your job and confirmed the appointment'
+          status: 'awaiting_shop_confirmation',
+          isCompleted: false,
+          isCurrent: true,
+          notes: 'Waiting for the shop to confirm your appointment'
         });
       }
       
