@@ -240,6 +240,11 @@
     "perform_smartscan": "Perform SmartScan",
     "smartscan_dialog_title": "SmartScan Your Windshield",
     "smartscan_dialog_description": "Scan the QR code with your smartphone to capture photos of your windshield damage for AI analysis",
+    "smartscan_cta_title": "Ready to scan your damage?",
+    "smartscan_cta_description": "Use your smartphone to take photos of your windshield damage for instant AI analysis",
+    "copy_link": "Copy Link",
+    "link_copied": "Link Copied",
+    "link_copied_description": "SmartScan link has been copied to your clipboard",
     "status": {
       "pending": "Report Submitted",
       "pending_desc": "Your damage report is being processed",
