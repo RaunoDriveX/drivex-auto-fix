@@ -404,7 +404,7 @@ export default function JobTracking() {
             />
             
             {/* SmartScan CTA Card - Between timeline and shop selection */}
-            <Card className="border-primary/20 bg-primary/5">
+            <Card className="border-2 border-green-500 bg-green-50 dark:bg-green-950/20">
               <CardContent className="py-6">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
