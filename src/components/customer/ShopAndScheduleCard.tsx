@@ -239,11 +239,6 @@ export function ShopAndScheduleCard({
                             : 'border-border bg-card'
                       )}
                     >
-                      {index === 0 && !selectedShop && (
-                        <Badge className="absolute -top-2 left-4 bg-primary text-primary-foreground text-xs">
-                          {t('customer_confirmation.recommended', 'Recommended')}
-                        </Badge>
-                      )}
                       {selectedShop?.shop_id === shop.shop_id && (
                         <Badge className="absolute top-1/2 -translate-y-1/2 right-4 bg-green-500 text-white text-xs">
                           <Check className="h-3 w-3 mr-1" />
