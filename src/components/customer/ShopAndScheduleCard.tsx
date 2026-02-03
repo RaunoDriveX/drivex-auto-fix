@@ -219,8 +219,7 @@ export function ShopAndScheduleCard({
         <CardContent className="space-y-6">
           {/* Step 1: Shop Selection */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
+            <Label className="text-sm font-medium">
               {t('customer_confirmation.step_select_shop', 'Select a Shop')}
             </Label>
             <ScrollArea className="h-auto max-h-[400px] pr-2">
