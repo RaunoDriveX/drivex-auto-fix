@@ -206,11 +206,12 @@ export function ShopPriceOfferDialog({
       ];
 
       // Insert into insurer_cost_estimates (shop's offer)
+      // Note: created_by is uuid type, so we don't pass shopId (which is text)
+      // RLS policy uses appointment.shop_id to verify shop ownership
       const { error: insertError } = await supabase
         .from('insurer_cost_estimates')
         .insert({
           appointment_id: appointmentId,
-          created_by: shopId,
           line_items: lineItems,
           labor_cost: laborCost,
           parts_cost: partsCost,
