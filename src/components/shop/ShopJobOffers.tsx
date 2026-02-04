@@ -999,12 +999,41 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         <div className="space-y-3">
                           <h4 className="font-semibold text-lg">Job Details</h4>
                           
+                          {/* Price Section - Editable when no price set yet */}
                           <div className="flex items-center gap-3">
                             <DollarSign className="h-5 w-5 text-green-600" />
-                            <div>
-                              <p className="font-medium text-lg">${offer.offered_price}</p>
-                              <p className="text-sm text-muted-foreground">Job Price</p>
+                            <div className="flex-1">
+                              {offer.appointments.total_cost ? (
+                                <>
+                                  <p className="font-medium text-lg">€{offer.appointments.total_cost}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {offer.appointments.workflow_stage === 'cost_approval' 
+                                      ? 'Approved by Insurer' 
+                                      : offer.appointments.workflow_stage === 'damage_report'
+                                        ? 'Pending Insurer Review'
+                                        : 'Your Price Offer'}
+                                  </p>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="font-medium text-lg text-muted-foreground">Not set</p>
+                                  <p className="text-sm text-muted-foreground">Click to set price</p>
+                                </>
+                              )}
                             </div>
+                            {/* Edit price button - always visible when in customer_handover or damage_report without submitted price */}
+                            {(offer.appointments.workflow_stage === 'customer_handover' || offer.appointments.workflow_stage === 'damage_report') && !offer.appointments.total_cost && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedJobForPricing(offer);
+                                  setPriceOfferDialogOpen(true);
+                                }}
+                              >
+                                Set Price
+                              </Button>
+                            )}
                           </div>
                           
                           <div className="flex items-center gap-3">
@@ -1059,24 +1088,30 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         </div>
                       </div>
 
-                      {/* Offer Price Button - Show when workflow_stage is customer_handover or damage_report and no price submitted yet */}
+                      {/* Price Action Section - Shows appropriate UI based on workflow state */}
                       {(offer.appointments.workflow_stage === 'customer_handover' || offer.appointments.workflow_stage === 'damage_report') && !offer.appointments.total_cost && (
                         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-semibold text-amber-900">{t('offers.price_offer_required', 'Price Offer Required')}</h4>
-                              <p className="text-sm text-amber-700">{t('offers.price_offer_description', 'Submit your pricing for insurer approval')}</p>
+                          <div className="flex flex-col gap-3">
+                            <div className="flex items-start gap-3">
+                              <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-amber-900">{t('offers.price_offer_required', 'Price Offer Required')}</h4>
+                                <p className="text-sm text-amber-700">{t('offers.price_offer_description', 'Set your pricing in Job Details above, then confirm to send for insurer review')}</p>
+                              </div>
                             </div>
-                            <Button
-                              onClick={() => {
-                                setSelectedJobForPricing(offer);
-                                setPriceOfferDialogOpen(true);
-                              }}
-                              className="gap-2"
-                            >
-                              <Send className="h-4 w-4" />
-                              {t('offers.offer_price', 'Offer Price')}
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedJobForPricing(offer);
+                                  setPriceOfferDialogOpen(true);
+                                }}
+                                className="gap-2"
+                              >
+                                <DollarSign className="h-4 w-4" />
+                                {t('offers.set_price', 'Set Price')}
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       )}

@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FileText, Check, Clock, DollarSign, Wrench, Package, Car, Zap } from 'lucide-react';
+import { FileText, Check, Clock, DollarSign, Wrench, Package, Car, Zap, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -444,19 +444,27 @@ export function ShopPriceOfferDialog({
               rows={2}
             />
           </div>
+
+          {/* Confirmation Notice */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-sm text-blue-800">
+              <strong>{t('price_offer.confirm_notice_title', 'Confirmation:')}</strong>{' '}
+              {t('price_offer.confirm_notice', 'By submitting, this price offer will be sent to the insurer for review and approval.')}
+            </p>
+          </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t('cancel', { ns: 'common' })}
           </Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
+          <Button onClick={handleSubmit} disabled={submitting} className="gap-2">
             {submitting ? (
-              <Clock className="h-4 w-4 mr-2 animate-spin" />
+              <Clock className="h-4 w-4 animate-spin" />
             ) : (
-              <Check className="h-4 w-4 mr-2" />
+              <Send className="h-4 w-4" />
             )}
-            {t('price_offer.submit', 'Submit Price Offer')}
+            {t('price_offer.confirm_submit', 'Confirm & Send for Insurance Review')}
           </Button>
         </DialogFooter>
       </DialogContent>
