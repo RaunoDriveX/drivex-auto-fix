@@ -23,6 +23,7 @@
     "customer_handover": "Customer Handover",
     "damage_report": "Damage Report & Quote",
     "cost_approval": "Cost Approval",
+    "scheduled": "Scheduled",
     "completed": "Completed Cases"
   },
   "preferred_shops": {
@@ -269,6 +270,8 @@
     "confirm_approval_title": "Approve Price Offer",
     "confirm_approval_message": "Approving this offer will send it to the customer for final confirmation.",
     "confirm_reject_title": "Reject Price Offer",
-    "confirm_reject_message": "Rejecting this offer will notify the shop to revise their pricing."
+    "confirm_reject_message": "Rejecting this offer will notify the shop to revise their pricing.",
+    "approved_status": "Price approved - awaiting customer confirmation",
+    "customer_approved_status": "Customer approved - job is scheduled"
   }
 }

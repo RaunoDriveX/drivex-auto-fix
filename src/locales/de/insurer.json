@@ -23,6 +23,7 @@
     "customer_handover": "An Kunden übergeben Fälle",
     "damage_report": "Damage Report & Kostenvoranschlag",
     "cost_approval": "Kostenfreigabe",
+    "scheduled": "Geplant",
     "completed": "erledigte Vorgänge"
   },
   "preferred_shops": {
@@ -268,6 +269,8 @@
     "confirm_approval_title": "Preisangebot genehmigen",
     "confirm_approval_message": "Durch die Genehmigung wird das Angebot zur endgültigen Bestätigung an den Kunden gesendet.",
     "confirm_reject_title": "Preisangebot ablehnen",
-    "confirm_reject_message": "Durch die Ablehnung wird die Werkstatt aufgefordert, ihren Preis zu überarbeiten."
+    "confirm_reject_message": "Durch die Ablehnung wird die Werkstatt aufgefordert, ihren Preis zu überarbeiten.",
+    "approved_status": "Preis genehmigt - warten auf Kundenbestätigung",
+    "customer_approved_status": "Kunde hat genehmigt - Auftrag ist geplant"
   }
 }

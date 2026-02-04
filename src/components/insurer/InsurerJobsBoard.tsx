@@ -93,6 +93,7 @@ interface Job {
   vehicle_info?: unknown;
   damage_type?: string;
   requires_adas_calibration?: boolean;
+  customer_cost_approved?: boolean;
   job_offers?: Array<{
     id: string;
     offered_price: number;
@@ -145,7 +146,7 @@ const getCarTypeLabel = (carType: string): string => {
   return carMap[carType.toLowerCase()] || carType;
 };
 
-type WorkflowStage = 'new' | 'customer_handover' | 'damage_report' | 'cost_approval' | 'completed';
+type WorkflowStage = 'new' | 'customer_handover' | 'damage_report' | 'cost_approval' | 'scheduled' | 'completed';
 
 const hasAiAssessment = (details: unknown): boolean => {
   if (!details) return false;
@@ -159,6 +160,7 @@ const getWorkflowStage = (job: Job): WorkflowStage => {
   
   // Use the actual workflow_stage field from the database
   if (job.workflow_stage) {
+    if (job.workflow_stage === 'scheduled') return 'scheduled';
     if (job.workflow_stage === 'cost_approval') return 'cost_approval';
     if (job.workflow_stage === 'damage_report') return 'damage_report';
     if (job.workflow_stage === 'customer_handover') return 'customer_handover';
@@ -166,7 +168,8 @@ const getWorkflowStage = (job: Job): WorkflowStage => {
   }
   
   // Fallback logic for legacy data
-  if (job.job_status === 'in_progress') return 'cost_approval';
+  if (job.job_status === 'scheduled') return 'scheduled';
+  if (job.job_status === 'in_progress') return 'scheduled';
   if (job.status === 'accepted' || job.status === 'confirmed') return 'customer_handover';
   
   return 'new';
@@ -177,6 +180,7 @@ const workflowStageConfig: Record<WorkflowStage, { icon: React.ElementType }> = 
   customer_handover: { icon: Users },
   damage_report: { icon: ClipboardCheck },
   cost_approval: { icon: CreditCard },
+  scheduled: { icon: Clock },
   completed: { icon: CheckCircle }
 };
 
@@ -223,7 +227,7 @@ export const InsurerJobsBoard: React.FC = () => {
   const statusConfig = getStatusConfig(t);
   const isGerman = i18n.language === 'de';
 
-  const workflowStages: WorkflowStage[] = ['new', 'customer_handover', 'damage_report', 'cost_approval', 'completed'];
+  const workflowStages: WorkflowStage[] = ['new', 'customer_handover', 'damage_report', 'cost_approval', 'scheduled', 'completed'];
 
   useEffect(() => {
     fetchJobs();
@@ -278,6 +282,7 @@ export const InsurerJobsBoard: React.FC = () => {
           vehicle_info,
           damage_type,
           requires_adas_calibration,
+          customer_cost_approved,
           job_offers!appointment_id (
             id,
             offered_price,
@@ -438,6 +443,7 @@ export const InsurerJobsBoard: React.FC = () => {
       customer_handover: 0,
       damage_report: 0,
       cost_approval: 0,
+      scheduled: 0,
       completed: 0
     };
 
@@ -833,15 +839,16 @@ export const InsurerJobsBoard: React.FC = () => {
                   </Collapsible>
                 )}
 
-                {/* Shop Price Offer - Show for jobs in damage_report or cost_approval stage */}
-                {(job.workflow_stage === 'damage_report' || job.workflow_stage === 'cost_approval') && (
+                {/* Shop Price Offer - Show for jobs in damage_report, cost_approval, or scheduled stage */}
+                {(job.workflow_stage === 'damage_report' || job.workflow_stage === 'cost_approval' || job.workflow_stage === 'scheduled') && (
                   <div className="mt-3">
                     <ShopPriceOfferViewer
                       appointmentId={job.id}
                       shopName={job.shop_name}
                       onApproved={fetchJobs}
                       onRejected={fetchJobs}
-                      isApproved={job.workflow_stage === 'cost_approval'}
+                      isApproved={job.workflow_stage === 'cost_approval' || job.workflow_stage === 'scheduled'}
+                      isCustomerApproved={job.customer_cost_approved === true || job.workflow_stage === 'scheduled'}
                     />
                   </div>
                 )}
