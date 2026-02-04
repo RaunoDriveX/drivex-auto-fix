@@ -5,6 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import CallCenterToolbarWidget from "@/components/call-center/CallCenterToolbarWidget";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import glassifyLogo from "@/assets/glassify-logo.svg";
 
 const Header = () => {
@@ -29,7 +30,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
+    <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 lg:px-2">
         <div className="flex items-center justify-between h-24 gap-4 -ml-2 lg:-ml-4">
           {/* Logo and Track Job grouped together */}
@@ -88,6 +89,7 @@ const Header = () => {
               </Button>
             </Link>
             <LanguageSwitcher />
+            <ThemeSwitcher />
           </div>
 
           {/* Mobile Menu Button */}
@@ -143,8 +145,9 @@ const Header = () => {
               })}
               <div className="pt-4 border-t border-border">
                 <div className="space-y-2">
-                  <div className="mb-3">
+                  <div className="mb-3 flex items-center gap-2">
                     <LanguageSwitcher />
+                    <ThemeSwitcher />
                   </div>
                   <Link to="/insurer-auth">
                     <Button variant="outline" size="sm" className="w-full">
