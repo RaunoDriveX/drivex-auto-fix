@@ -833,14 +833,15 @@ export const InsurerJobsBoard: React.FC = () => {
                   </Collapsible>
                 )}
 
-                {/* Shop Price Offer - Show for jobs in damage_report stage */}
-                {(job.workflow_stage === 'damage_report') && (
+                {/* Shop Price Offer - Show for jobs in damage_report or cost_approval stage */}
+                {(job.workflow_stage === 'damage_report' || job.workflow_stage === 'cost_approval') && (
                   <div className="mt-3">
                     <ShopPriceOfferViewer
                       appointmentId={job.id}
                       shopName={job.shop_name}
                       onApproved={fetchJobs}
                       onRejected={fetchJobs}
+                      isApproved={job.workflow_stage === 'cost_approval'}
                     />
                   </div>
                 )}
