@@ -341,37 +341,37 @@ const ShopAuth = () => {
               {t('auth:shop.subtitle')}
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             {needsProfileSetup ? (
               <ShopProfileForm />
             ) : (
               <Tabs defaultValue="signin" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-4">
-                  <TabsTrigger value="signin">{t('auth:shop.sign_in_title')}</TabsTrigger>
-                  <TabsTrigger value="signup">{t('auth:shop.sign_up_title')}</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="signin">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
                 </TabsList>
-                
-                <TabsContent value="signin">
+
+                <TabsContent value="signin" className="mt-6">
                   <AuthForm isSignUp={false} />
                 </TabsContent>
-                
-                <TabsContent value="signup">
+
+                <TabsContent value="signup" className="mt-6">
                   <AuthForm isSignUp={true} />
                 </TabsContent>
               </Tabs>
             )}
           </CardContent>
-          
-          <div className="flex justify-center pb-6">
-            <Button variant="ghost" asChild className="gap-2">
-              <Link to="/" onClick={() => window.scrollTo(0, 0)}>
-                <ArrowLeft className="h-4 w-4" />
-                {t('common:buttons.back_to_home')}
-              </Link>
-            </Button>
-          </div>
         </Card>
+
+        <div className="mt-4 flex justify-center">
+          <Button variant="ghost" asChild className="gap-2">
+            <Link to="/" onClick={() => window.scrollTo(0, 0)}>
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Link>
+          </Button>
+        </div>
       </div>
     </>
   );

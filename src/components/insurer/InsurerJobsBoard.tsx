@@ -76,20 +76,19 @@ interface Job {
   appointment_time: string;
   shop_name: string;
   shop_id: string;
-  total_cost: number;
+  total_cost: number | null;
   job_started_at?: string;
   job_completed_at?: string;
   created_at: string;
   updated_at: string;
   short_code?: string;
   notes?: string;
-  insurer_name?: string;
-  ai_assessment_details?: unknown;
-  damage_type?: string | null;
-  vehicle_info?: VehicleInfo | null;
-  workflow_stage?: string;
-  requires_adas_calibration?: boolean;
-  appointment_confirmed_at?: string;
+  job_offers?: Array<{
+    id: string;
+    offered_price: number;
+    status: string;
+    responded_at: string | null;
+  }>;
 }
 
 // Helper to safely parse vehicle_info from JSON
@@ -238,6 +237,7 @@ export const InsurerJobsBoard: React.FC = () => {
 
       if (!insurerProfile) return;
 
+      // Get jobs for this insurer with job offers
       const { data, error } = await supabase
         .from('appointments')
         .select(`
@@ -261,13 +261,12 @@ export const InsurerJobsBoard: React.FC = () => {
           updated_at,
           short_code,
           notes,
-          insurer_name,
-          ai_assessment_details,
-          damage_type,
-          vehicle_info,
-          workflow_stage,
-          requires_adas_calibration,
-          appointment_confirmed_at
+          job_offers!appointment_id (
+            id,
+            offered_price,
+            status,
+            responded_at
+          )
         `)
         .eq('insurer_name', insurerProfile.insurer_name)
         .order('created_at', { ascending: false });
@@ -475,11 +474,9 @@ export const InsurerJobsBoard: React.FC = () => {
 
   const getCancellationInfo = (job: Job): { reason: string; shop: string } | null => {
     if (job.job_status !== 'cancelled' && job.status !== 'cancelled') return null;
-    
-    let reason = job.notes || '';
-    const reasonMatch = reason.match(/Reason:\s*(.+)$/i);
-    if (reasonMatch) {
-      reason = reasonMatch[1];
+
+    if (job.notes) {
+      return { reason: job.notes };
     }
     
     return { 
@@ -496,6 +493,51 @@ export const InsurerJobsBoard: React.FC = () => {
     return {
       canSelectShops: stage === 'new' && workflowStage === 'new',
       canAddCostEstimate: stage === 'damage_report' || (stage === 'customer_handover' && workflowStage !== 'shop_selection')
+    };
+  };
+
+  const getPriceDisplay = (job: Job) => {
+    // If shop has accepted and price is confirmed
+    if (job.total_cost && (job.job_status === 'scheduled' || job.job_status === 'in_progress' || job.job_status === 'completed')) {
+      return {
+        amount: `€${job.total_cost}`,
+        status: 'accepted',
+        badge: 'Price Submitted',
+        badgeColor: 'bg-green-100 text-green-800 border-green-200'
+      };
+    }
+
+    // If job offer exists but not yet accepted
+    if (job.job_offers && job.job_offers.length > 0) {
+      // Find the most recent offered price (could be multiple offers to different shops)
+      const latestOffer = job.job_offers.find(offer => offer.status === 'offered')
+        || job.job_offers[0]; // fallback to first offer
+
+      if (latestOffer.status === 'offered') {
+        return {
+          amount: `€${latestOffer.offered_price}`,
+          status: 'pending',
+          badge: 'Awaiting Shop Response',
+          badgeColor: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+        };
+      }
+
+      if (latestOffer.status === 'accepted') {
+        return {
+          amount: `€${latestOffer.offered_price}`,
+          status: 'accepted',
+          badge: 'Price Submitted',
+          badgeColor: 'bg-green-100 text-green-800 border-green-200'
+        };
+      }
+    }
+
+    // No price information available
+    return {
+      amount: '€ —',
+      status: 'unknown',
+      badge: 'Pending',
+      badgeColor: 'bg-gray-100 text-gray-800 border-gray-200'
     };
   };
 
@@ -664,89 +706,30 @@ export const InsurerJobsBoard: React.FC = () => {
                     </span>
                   </div>
                 )}
-
-                {/* Collapsible Details Section */}
-                <Collapsible>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm" className="w-full justify-between px-2 h-8 text-xs text-muted-foreground hover:text-foreground">
-                      <span>{t('jobs_board.case_details', 'Case Details')}</span>
-                      <ChevronDown className="h-3 w-3 transition-transform duration-200 [&[data-state=open]>svg]:rotate-180" />
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 text-sm pt-2">
-                    {/* Customer Location */}
-                    {(job.customer_street || job.customer_city) && (
-                      <div className="flex items-start justify-between">
-                        <span className="text-muted-foreground flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {t('jobs_board.customer_location')}
-                        </span>
-                        <span className="font-medium text-right max-w-[60%]">
-                          {job.customer_postal_code} {job.customer_city}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Insurance number - using customer email as proxy */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">{t('jobs_board.insurance_number')}</span>
-                      <span className="font-medium">{job.customer_email.split('@')[0]}</span>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Scheduled:</span>
+                    <p className="font-medium">
+                      {format(new Date(job.appointment_date), 'MMM d')} at {job.appointment_time?.substring(0, 5)}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Cost:</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="font-medium">{getPriceDisplay(job).amount}</p>
+                      <Badge className={`text-xs ${getPriceDisplay(job).badgeColor} border`}>
+                        {getPriceDisplay(job).badge}
+                      </Badge>
                     </div>
-
-                    {/* Tracking code */}
-                    {job.short_code && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">{t('jobs_board.tracking_code')}</span>
-                        <span className="font-mono font-bold text-primary">{job.short_code}</span>
-                      </div>
-                    )}
-
-                    {/* Created date */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">{t('jobs_board.created_on')}</span>
-                      <span className="font-medium">
-                        {format(new Date(job.created_at), isGerman ? 'd. MMM yyyy' : 'MMM d, yyyy', 
-                          isGerman ? { locale: de } : undefined)}
-                      </span>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* Suggested Shops - shown when shops have been selected */}
-                {shopSelections[job.id] && shopSelections[job.id].length > 0 && (
-                  <div className="mt-3 p-3 bg-muted/50 rounded-lg border">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Store className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-medium">{t('jobs_board.suggested_shops', 'Suggested Shops')}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2"
-                        onClick={() => handleOpenShopSelection(job, true)}
-                      >
-                        <Pencil className="h-3 w-3 mr-1" />
-                        {t('jobs_board.edit', 'Edit')}
-                      </Button>
-                    </div>
-                    <div className="space-y-1.5">
-                      {shopSelections[job.id].map((sel, idx) => (
-                        <div key={sel.shop_id} className="flex items-center justify-between text-sm">
-                          <span className="flex items-center gap-2">
-                            <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-xs font-medium flex items-center justify-center">
-                              {idx + 1}
-                            </span>
-                            <span className="font-medium">{sel.shop_name}</span>
-                          </span>
-                          <span className="text-muted-foreground text-xs">
-                            {sel.distance_km && `${sel.distance_km.toFixed(1)} km`}
-                            {sel.distance_km && sel.estimated_price && ' • '}
-                            {sel.estimated_price && `€${sel.estimated_price}`}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                  </div>
+                </div>
+                
+                {job.job_started_at && (
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Started:</span>
+                    <p className="font-medium">
+                      {format(new Date(job.job_started_at), 'MMM d, HH:mm')}
+                    </p>
                   </div>
                 )}
 
