@@ -77,7 +77,30 @@
     "job_declined_title": "Job Declined",
     "job_declined_description": "You have declined this job offer.",
     "error_title": "Error",
-    "error_load": "Failed to load job offers"
+    "error_load": "Failed to load job offers",
+    "damage_report": "Damage Report",
+    "price_offer_required": "Price Offer Required",
+    "price_offer_description": "Submit your pricing for insurer approval",
+    "offer_price": "Offer Price",
+    "price_submitted": "Price Submitted",
+    "awaiting_insurer_approval": "Awaiting insurer approval",
+    "insurer_approved": "Approved by insurer - awaiting customer confirmation"
+  },
+  "price_offer": {
+    "title": "Offer Price",
+    "description": "Set the glass type, damage assessment, and your price offer",
+    "glass_type": "Glass Type",
+    "damage_type": "Damage Type",
+    "recommended_action": "Recommended Action",
+    "parts_cost": "Parts & Materials",
+    "labor_cost": "Labor Cost",
+    "total": "Total Price",
+    "notes": "Notes (optional)",
+    "notes_placeholder": "Add any notes about the repair...",
+    "submit": "Submit Price Offer",
+    "success": "Price offer submitted for insurer review",
+    "error_no_price": "Please enter a valid price",
+    "error_saving": "Failed to submit price offer"
   },
   "declined": {
     "title": "Declined Jobs",

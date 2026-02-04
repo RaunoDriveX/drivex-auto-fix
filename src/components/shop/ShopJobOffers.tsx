@@ -8,13 +8,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target, Plus, FileText, ChevronDown } from "lucide-react";
+import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target, Plus, FileText, ChevronDown, Send } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import JobOfferUpsells from "./JobOfferUpsells";
 import { AdasCalibrationAlert } from "./AdasCalibrationAlert";
 import PartsFitmentAlert from "./PartsFitmentAlert";
 import { DamageReportViewer } from "@/components/insurer/DamageReportViewer";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ShopPriceOfferDialog } from "./ShopPriceOfferDialog";
 
 interface JobOffer {
   id: string;
@@ -66,6 +67,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
   const [loading, setLoading] = useState(true);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState("");
+  const [priceOfferDialogOpen, setPriceOfferDialogOpen] = useState(false);
+  const [selectedJobForPricing, setSelectedJobForPricing] = useState<JobOffer | null>(null);
   const { toast } = useToast();
   const { t } = useTranslation(['shop', 'common', 'forms']);
 
@@ -1053,6 +1056,46 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         </div>
                       </div>
 
+                      {/* Offer Price Button - Show when workflow_stage is customer_handover */}
+                      {offer.appointments.workflow_stage === 'customer_handover' && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-semibold text-amber-900">{t('offers.price_offer_required', 'Price Offer Required')}</h4>
+                              <p className="text-sm text-amber-700">{t('offers.price_offer_description', 'Submit your pricing for insurer approval')}</p>
+                            </div>
+                            <Button
+                              onClick={() => {
+                                setSelectedJobForPricing(offer);
+                                setPriceOfferDialogOpen(true);
+                              }}
+                              className="gap-2"
+                            >
+                              <Send className="h-4 w-4" />
+                              {t('offers.offer_price', 'Offer Price')}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Show submitted price badge when in damage_report or later */}
+                      {(offer.appointments.workflow_stage === 'damage_report' || offer.appointments.workflow_stage === 'cost_approval') && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <h4 className="font-semibold text-blue-900">{t('offers.price_submitted', 'Price Submitted')}</h4>
+                              <p className="text-sm text-blue-700">
+                                {offer.appointments.workflow_stage === 'damage_report' 
+                                  ? t('offers.awaiting_insurer_approval', 'Awaiting insurer approval')
+                                  : t('offers.insurer_approved', 'Approved by insurer - awaiting customer confirmation')
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Damage Report Section - always available for accepted jobs */}
                       <Collapsible className="mt-3">
                         <CollapsibleTrigger asChild>
@@ -1079,6 +1122,22 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Price Offer Dialog */}
+      {selectedJobForPricing && (
+        <ShopPriceOfferDialog
+          open={priceOfferDialogOpen}
+          onOpenChange={setPriceOfferDialogOpen}
+          appointmentId={selectedJobForPricing.appointment_id}
+          shopId={shopId}
+          currentGlassType={selectedJobForPricing.appointments.service_type}
+          currentDamageType={selectedJobForPricing.appointments.damage_type}
+          onSuccess={() => {
+            fetchJobOffers();
+            setSelectedJobForPricing(null);
+          }}
+        />
+      )}
      </div>
    );
  };

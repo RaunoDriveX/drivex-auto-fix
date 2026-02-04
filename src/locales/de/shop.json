@@ -77,7 +77,30 @@
     "job_declined_title": "Auftrag abgelehnt",
     "job_declined_description": "Sie haben diesen Auftrag abgelehnt.",
     "error_title": "Fehler",
-    "error_load": "Angebote konnten nicht geladen werden"
+    "error_load": "Angebote konnten nicht geladen werden",
+    "damage_report": "Schadensbericht",
+    "price_offer_required": "Preisangebot erforderlich",
+    "price_offer_description": "Geben Sie Ihren Preis zur Genehmigung durch die Versicherung ein",
+    "offer_price": "Preis anbieten",
+    "price_submitted": "Preis eingereicht",
+    "awaiting_insurer_approval": "Warte auf Versicherungsgenehmigung",
+    "insurer_approved": "Von der Versicherung genehmigt - warte auf Kundenbestätigung"
+  },
+  "price_offer": {
+    "title": "Preis anbieten",
+    "description": "Wählen Sie Glastyp, Schadensart und Ihren Preis",
+    "glass_type": "Glastyp",
+    "damage_type": "Schadensart",
+    "recommended_action": "Empfohlene Maßnahme",
+    "parts_cost": "Teile & Material",
+    "labor_cost": "Arbeitskosten",
+    "total": "Gesamtpreis",
+    "notes": "Notizen (optional)",
+    "notes_placeholder": "Fügen Sie Notizen zur Reparatur hinzu...",
+    "submit": "Preisangebot einreichen",
+    "success": "Preisangebot zur Prüfung eingereicht",
+    "error_no_price": "Bitte geben Sie einen gültigen Preis ein",
+    "error_saving": "Preisangebot konnte nicht eingereicht werden"
   },
   "declined": {
     "title": "abgelehnte Aufträge",
