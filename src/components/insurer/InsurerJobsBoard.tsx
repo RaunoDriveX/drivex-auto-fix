@@ -147,10 +147,17 @@ const hasAiAssessment = (details: unknown): boolean => {
 const getWorkflowStage = (job: Job): WorkflowStage => {
   if (job.job_status === 'completed') return 'completed';
   if (job.job_status === 'cancelled') return 'completed';
+  
+  // Use the actual workflow_stage field from the database
+  if (job.workflow_stage) {
+    if (job.workflow_stage === 'cost_approval') return 'cost_approval';
+    if (job.workflow_stage === 'damage_report') return 'damage_report';
+    if (job.workflow_stage === 'customer_handover') return 'customer_handover';
+    if (job.workflow_stage === 'shop_selection') return 'new';
+  }
+  
+  // Fallback logic for legacy data
   if (job.job_status === 'in_progress') return 'cost_approval';
-  
-  if (hasAiAssessment(job.ai_assessment_details)) return 'damage_report';
-  
   if (job.status === 'accepted' || job.status === 'confirmed') return 'customer_handover';
   
   return 'new';
