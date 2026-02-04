@@ -22,9 +22,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FileText, Check, Clock, DollarSign, Wrench, Package, Car } from 'lucide-react';
+import { FileText, Check, Clock, DollarSign, Wrench, Package, Car, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+
+interface PricingRule {
+  id: string;
+  service_type: string;
+  damage_type: string;
+  base_price: number;
+  description: string | null;
+  estimated_duration_minutes: number | null;
+}
 
 interface ShopPriceOfferDialogProps {
   open: boolean;
@@ -77,12 +86,73 @@ export function ShopPriceOfferDialog({
   const [laborCost, setLaborCost] = useState<number>(75);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [pricingRules, setPricingRules] = useState<PricingRule[]>([]);
+  const [loadingRules, setLoadingRules] = useState(false);
+  const [selectedRule, setSelectedRule] = useState<string | null>(null);
 
   // Calculate total
   const totalCost = partsCost + laborCost;
 
-  // Auto-adjust defaults based on damage type
+  // Fetch pricing rules for this shop
   useEffect(() => {
+    if (open && shopId) {
+      fetchPricingRules();
+    }
+  }, [open, shopId]);
+
+  const fetchPricingRules = async () => {
+    setLoadingRules(true);
+    try {
+      const { data, error } = await supabase
+        .from('service_pricing')
+        .select('*')
+        .eq('shop_id', shopId)
+        .order('service_type', { ascending: true });
+      
+      if (error) throw error;
+      setPricingRules(data || []);
+    } catch (error) {
+      console.error('Error fetching pricing rules:', error);
+    } finally {
+      setLoadingRules(false);
+    }
+  };
+
+  // Apply pricing rule
+  const applyPricingRule = (ruleId: string) => {
+    const rule = pricingRules.find(r => r.id === ruleId);
+    if (rule) {
+      setSelectedRule(ruleId);
+      setPartsCost(rule.base_price);
+      // Set repair action based on service type
+      if (rule.service_type.includes('repair')) {
+        setRepairAction('repair');
+      } else if (rule.service_type.includes('replacement')) {
+        setRepairAction('replace');
+      }
+      // Estimate labor cost based on duration
+      if (rule.estimated_duration_minutes) {
+        const laborRate = 1.5; // €1.50 per minute
+        setLaborCost(Math.round(rule.estimated_duration_minutes * laborRate));
+      }
+      if (rule.description) {
+        setNotes(rule.description);
+      }
+    }
+  };
+
+  // Get matching rules for current damage type
+  const getMatchingRules = () => {
+    return pricingRules.filter(rule => 
+      rule.damage_type.toLowerCase() === damageType.toLowerCase() ||
+      rule.damage_type.toLowerCase().includes(damageType.toLowerCase())
+    );
+  };
+
+  // Auto-adjust defaults based on damage type (fallback when no rules)
+  useEffect(() => {
+    if (selectedRule) return; // Don't override if a rule is selected
+    
     if (damageType === 'shattered') {
       setRepairAction('replace');
       setPartsCost(350);
@@ -99,7 +169,7 @@ export function ShopPriceOfferDialog({
       setPartsCost(50);
       setLaborCost(60);
     }
-  }, [damageType]);
+  }, [damageType, selectedRule]);
 
   // Update glass type and damage type from props
   useEffect(() => {
@@ -187,7 +257,69 @@ export function ShopPriceOfferDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-4 max-h-[60vh] overflow-y-auto">
+          {/* Quick Apply from Pricing Rules */}
+          {pricingRules.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-amber-500" />
+                {t('price_offer.quick_apply', 'Quick Apply from Pricing Rules')}
+              </Label>
+              <div className="grid grid-cols-1 gap-2">
+                {getMatchingRules().length > 0 ? (
+                  getMatchingRules().map((rule) => (
+                    <Button
+                      key={rule.id}
+                      variant={selectedRule === rule.id ? "default" : "outline"}
+                      size="sm"
+                      className="justify-between h-auto py-2"
+                      onClick={() => applyPricingRule(rule.id)}
+                    >
+                      <span className="flex flex-col items-start">
+                        <span className="font-medium">{rule.service_type} - {rule.damage_type}</span>
+                        {rule.description && (
+                          <span className="text-xs text-muted-foreground">{rule.description}</span>
+                        )}
+                      </span>
+                      <Badge variant="secondary" className="ml-2">€{rule.base_price}</Badge>
+                    </Button>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    {t('price_offer.no_matching_rules', 'No pricing rules match this damage type. You can add rules in Settings.')}
+                  </p>
+                )}
+              </div>
+              {pricingRules.length > getMatchingRules().length && (
+                <details className="text-sm">
+                  <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                    {t('price_offer.show_all_rules', 'Show all pricing rules')} ({pricingRules.length})
+                  </summary>
+                  <div className="grid grid-cols-1 gap-2 mt-2">
+                    {pricingRules.filter(r => !getMatchingRules().includes(r)).map((rule) => (
+                      <Button
+                        key={rule.id}
+                        variant="ghost"
+                        size="sm"
+                        className="justify-between h-auto py-2"
+                        onClick={() => applyPricingRule(rule.id)}
+                      >
+                        <span className="flex flex-col items-start">
+                          <span className="font-medium">{rule.service_type} - {rule.damage_type}</span>
+                          {rule.description && (
+                            <span className="text-xs text-muted-foreground">{rule.description}</span>
+                          )}
+                        </span>
+                        <Badge variant="outline" className="ml-2">€{rule.base_price}</Badge>
+                      </Button>
+                    ))}
+                  </div>
+                </details>
+              )}
+              <Separator className="my-3" />
+            </div>
+          )}
+
           {/* Glass Type Selection */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">

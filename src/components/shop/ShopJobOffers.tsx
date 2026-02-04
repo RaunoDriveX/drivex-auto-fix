@@ -1059,8 +1059,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         </div>
                       </div>
 
-                      {/* Offer Price Button - Show when workflow_stage is damage_report and no price submitted yet */}
-                      {offer.appointments.workflow_stage === 'damage_report' && !offer.appointments.total_cost && (
+                      {/* Offer Price Button - Show when workflow_stage is customer_handover or damage_report and no price submitted yet */}
+                      {(offer.appointments.workflow_stage === 'customer_handover' || offer.appointments.workflow_stage === 'damage_report') && !offer.appointments.total_cost && (
                         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
                           <div className="flex items-center justify-between">
                             <div>
@@ -1082,7 +1082,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                       )}
 
                       {/* Show submitted price badge when price is submitted and awaiting approval */}
-                      {offer.appointments.workflow_stage === 'damage_report' && offer.appointments.total_cost && (
+                      {(offer.appointments.workflow_stage === 'customer_handover' || offer.appointments.workflow_stage === 'damage_report') && offer.appointments.total_cost && (
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                           <div className="flex items-center gap-2">
                             <Clock className="h-5 w-5 text-blue-600" />
