@@ -681,19 +681,13 @@ export const InsurerJobsBoard: React.FC = () => {
                 {(() => {
                   const vehicleInfo = parseVehicleInfo(job.vehicle_info);
                   const carType = vehicleInfo?.carType || vehicleInfo?.car_type;
-                  const licensePlate = vehicleInfo?.licensePlate || vehicleInfo?.license_plate;
                   const glassLabel = job.service_type ? getGlassLabel(job.service_type) : '';
-                  const hasSelectionDetails = carType || glassLabel || job.damage_type || licensePlate;
+                  const hasSelectionDetails = carType || glassLabel || job.damage_type;
                   
                   if (!hasSelectionDetails) return null;
                   
                   return (
                     <div className="flex flex-wrap gap-1.5 mb-3">
-                      {licensePlate && (
-                        <Badge variant="outline" className="text-xs font-mono">
-                          {licensePlate}
-                        </Badge>
-                      )}
                       {carType && (
                         <Badge variant="secondary" className="text-xs">
                           {getCarTypeLabel(carType)}
@@ -766,21 +760,29 @@ export const InsurerJobsBoard: React.FC = () => {
                       <ChevronDown className="h-3 w-3 transition-transform duration-200" />
                     </Button>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="pt-2 space-y-1 text-sm">
+                  <CollapsibleContent className="pt-2 space-y-1.5 text-sm">
+                    {(() => {
+                      const vehicleInfo = parseVehicleInfo(job.vehicle_info);
+                      const licensePlate = vehicleInfo?.licensePlate || vehicleInfo?.license_plate;
+                      return licensePlate ? (
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-foreground">License Plate:</span>
+                          <span className="font-mono text-foreground">{licensePlate}</span>
+                        </div>
+                      ) : null;
+                    })()}
                     {(job.customer_street || job.customer_city) && (
                       <div className="flex items-start gap-2">
-                        <MapPin className="h-3 w-3 mt-1 text-muted-foreground" />
-                        <span>
+                        <MapPin className="h-3 w-3 mt-1 text-foreground/70" />
+                        <span className="text-foreground">
                           {[job.customer_street, job.customer_postal_code, job.customer_city].filter(Boolean).join(', ')}
                         </span>
                       </div>
                     )}
-                    {job.customer_email && (
-                      <div className="text-muted-foreground">
-                        <span className="font-medium">{t('jobs_board.tracking_code', 'Tracking Code')}:</span> {job.short_code || '—'}
-                      </div>
-                    )}
-                    <div className="text-muted-foreground">
+                    <div className="text-foreground">
+                      <span className="font-medium">{t('jobs_board.tracking_code', 'Tracking Code')}:</span> {job.short_code || '—'}
+                    </div>
+                    <div className="text-foreground">
                       <span className="font-medium">{t('jobs_board.created_on', 'Created')}:</span> {format(new Date(job.created_at), isGerman ? 'd. MMM yyyy' : 'MMM d, yyyy', isGerman ? { locale: de } : undefined)}
                     </div>
                   </CollapsibleContent>
