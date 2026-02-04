@@ -742,8 +742,8 @@ export const InsurerJobsBoard: React.FC = () => {
                   </div>
                 )}
 
-                {/* Collapsible Damage Report Section - shown for new cases */}
-                {workflowStage === 'new' && (
+                {/* Collapsible Damage Report Section - available after SmartScan and booking */}
+                {job.appointment_confirmed_at && (
                   <Collapsible className="mt-3">
                     <CollapsibleTrigger asChild>
                       <Button variant="ghost" size="sm" className="w-full justify-between px-2 h-8 text-xs text-muted-foreground hover:text-foreground border border-dashed">

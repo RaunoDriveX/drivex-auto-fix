@@ -8,11 +8,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target, Plus } from "lucide-react";
+import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target, Plus, FileText, ChevronDown } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import JobOfferUpsells from "./JobOfferUpsells";
 import { AdasCalibrationAlert } from "./AdasCalibrationAlert";
 import PartsFitmentAlert from "./PartsFitmentAlert";
+import { DamageReportViewer } from "@/components/insurer/DamageReportViewer";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface JobOffer {
   id: string;
@@ -802,6 +804,27 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                    </div>
                  )}
 
+                {/* Damage Report Section - available after customer has booked */}
+                {offer.appointments.appointment_confirmed_at && (
+                  <Collapsible className="mt-3">
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-full justify-between px-3 h-10 text-sm text-muted-foreground hover:text-foreground border border-dashed">
+                        <span className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          {t('offers.damage_report', 'Damage Report')}
+                        </span>
+                        <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pt-3">
+                      <DamageReportViewer 
+                        appointmentId={offer.appointment_id} 
+                        damageType={offer.appointments.damage_type} 
+                      />
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+
                   {/* Parts Fitment Alert */}
                   {offer.appointments.vehicle_info?.make && offer.appointments.vehicle_info?.year && offer.appointments.damage_type && (
                     <PartsFitmentAlert
@@ -1029,6 +1052,27 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                           )}
                         </div>
                       </div>
+
+                      {/* Damage Report Section - for accepted jobs */}
+                      {offer.appointments.appointment_confirmed_at && (
+                        <Collapsible className="mt-3">
+                          <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm" className="w-full justify-between px-3 h-10 text-sm text-muted-foreground hover:text-foreground border border-dashed">
+                              <span className="flex items-center gap-2">
+                                <FileText className="h-4 w-4" />
+                                {t('offers.damage_report', 'Damage Report')}
+                              </span>
+                              <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                            </Button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="pt-3">
+                            <DamageReportViewer 
+                              appointmentId={offer.appointment_id} 
+                              damageType={offer.appointments.damage_type} 
+                            />
+                          </CollapsibleContent>
+                        </Collapsible>
+                      )}
                     </CardContent>
                   </Card>
                 );
