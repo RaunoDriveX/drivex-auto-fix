@@ -1053,26 +1053,24 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         </div>
                       </div>
 
-                      {/* Damage Report Section - for accepted jobs */}
-                      {offer.appointments.appointment_confirmed_at && (
-                        <Collapsible className="mt-3">
-                          <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="sm" className="w-full justify-between px-3 h-10 text-sm text-muted-foreground hover:text-foreground border border-dashed">
-                              <span className="flex items-center gap-2">
-                                <FileText className="h-4 w-4" />
-                                {t('offers.damage_report', 'Damage Report')}
-                              </span>
-                              <ChevronDown className="h-4 w-4 transition-transform duration-200" />
-                            </Button>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="pt-3">
-                            <DamageReportViewer 
-                              appointmentId={offer.appointment_id} 
-                              damageType={offer.appointments.damage_type} 
-                            />
-                          </CollapsibleContent>
-                        </Collapsible>
-                      )}
+                      {/* Damage Report Section - always available for accepted jobs */}
+                      <Collapsible className="mt-3">
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" size="sm" className="w-full justify-between px-3 h-10 text-sm text-muted-foreground hover:text-foreground border border-dashed">
+                            <span className="flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              {t('offers.damage_report', 'Damage Report')}
+                            </span>
+                            <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="pt-3">
+                          <DamageReportViewer 
+                            appointmentId={offer.appointment_id} 
+                            damageType={offer.appointments.damage_type} 
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
                     </CardContent>
                   </Card>
                 );
