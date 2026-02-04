@@ -255,5 +255,20 @@
     "no_ai_comments": "No AI comments.",
     "comments": "Comments",
     "no_comments": "No additional comments."
+  },
+  "shop_offer": {
+    "title": "Shop's Price Offer",
+    "parts_materials": "Parts & Materials",
+    "approve": "Approve & Send to Customer",
+    "reject": "Reject",
+    "no_offer": "No price offer submitted yet",
+    "approved_success": "Price offer approved and sent to customer",
+    "rejected_success": "Price offer rejected - shop will be notified",
+    "error_approving": "Failed to approve price offer",
+    "error_rejecting": "Failed to reject price offer",
+    "confirm_approval_title": "Approve Price Offer",
+    "confirm_approval_message": "Approving this offer will send it to the customer for final confirmation.",
+    "confirm_reject_title": "Reject Price Offer",
+    "confirm_reject_message": "Rejecting this offer will notify the shop to revise their pricing."
   }
 }

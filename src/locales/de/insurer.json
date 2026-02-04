@@ -254,5 +254,20 @@
     "no_ai_comments": "Keine KI-Kommentare.",
     "comments": "Kommentare",
     "no_comments": "Keine zusätzlichen Kommentare."
+  },
+  "shop_offer": {
+    "title": "Preisangebot der Werkstatt",
+    "parts_materials": "Teile & Material",
+    "approve": "Genehmigen & an Kunde senden",
+    "reject": "Ablehnen",
+    "no_offer": "Noch kein Preisangebot eingereicht",
+    "approved_success": "Preisangebot genehmigt und an Kunde gesendet",
+    "rejected_success": "Preisangebot abgelehnt - Werkstatt wird benachrichtigt",
+    "error_approving": "Preisangebot konnte nicht genehmigt werden",
+    "error_rejecting": "Preisangebot konnte nicht abgelehnt werden",
+    "confirm_approval_title": "Preisangebot genehmigen",
+    "confirm_approval_message": "Durch die Genehmigung wird das Angebot zur endgültigen Bestätigung an den Kunden gesendet.",
+    "confirm_reject_title": "Preisangebot ablehnen",
+    "confirm_reject_message": "Durch die Ablehnung wird die Werkstatt aufgefordert, ihren Preis zu überarbeiten."
   }
 }

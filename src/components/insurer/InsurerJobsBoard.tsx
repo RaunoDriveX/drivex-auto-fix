@@ -33,6 +33,7 @@ import { JobStatusTracker } from '@/components/realtime/JobStatusTracker';
 import { CompletionDocumentsViewer } from '@/components/insurer/CompletionDocumentsViewer';
 import { DamageReportViewer } from '@/components/insurer/DamageReportViewer';
 import { ShopSelectionDialog } from '@/components/insurer/ShopSelectionDialog';
+import { ShopPriceOfferViewer } from '@/components/insurer/ShopPriceOfferViewer';
 import { CostEstimationDialog } from '@/components/insurer/CostEstimationDialog';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -758,6 +759,18 @@ export const InsurerJobsBoard: React.FC = () => {
                       <DamageReportViewer appointmentId={job.id} damageType={job.damage_type} />
                     </CollapsibleContent>
                   </Collapsible>
+                )}
+
+                {/* Shop Price Offer - Show for jobs in damage_report stage */}
+                {(job.workflow_stage === 'damage_report') && (
+                  <div className="mt-3">
+                    <ShopPriceOfferViewer
+                      appointmentId={job.id}
+                      shopName={job.shop_name}
+                      onApproved={fetchJobs}
+                      onRejected={fetchJobs}
+                    />
+                  </div>
                 )}
 
                 {/* Cancellation Alert */}
