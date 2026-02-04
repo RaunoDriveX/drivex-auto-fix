@@ -14,7 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Check, Clock, DollarSign, Package, Wrench, Store, X } from 'lucide-react';
+import { Check, CheckCircle, Clock, DollarSign, Package, Wrench, Store, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -41,6 +41,7 @@ interface ShopPriceOfferViewerProps {
   shopName?: string;
   onApproved?: () => void;
   onRejected?: () => void;
+  isApproved?: boolean;
 }
 
 export function ShopPriceOfferViewer({
@@ -48,6 +49,7 @@ export function ShopPriceOfferViewer({
   shopName,
   onApproved,
   onRejected,
+  isApproved = false,
 }: ShopPriceOfferViewerProps) {
   const { t } = useTranslation('insurer');
   const [estimate, setEstimate] = useState<CostEstimate | null>(null);
@@ -172,7 +174,7 @@ export function ShopPriceOfferViewer({
   }
 
   return (
-    <Card className="border-amber-200 bg-amber-50/50">
+    <Card className={isApproved ? "border-green-200 bg-green-50/50" : "border-amber-200 bg-amber-50/50"}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
@@ -250,26 +252,35 @@ export function ShopPriceOfferViewer({
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => setRejectDialogOpen(true)}
-          >
-            <X className="h-4 w-4 mr-1" />
-            {t('shop_offer.reject', 'Reject')}
-          </Button>
-          <Button
-            size="sm"
-            className="flex-1"
-            onClick={() => setApprovalDialogOpen(true)}
-          >
-            <Check className="h-4 w-4 mr-1" />
-            {t('shop_offer.approve', 'Approve & Send to Customer')}
-          </Button>
-        </div>
+        {/* Action Buttons or Approved State */}
+        {isApproved ? (
+          <div className="flex items-center justify-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <span className="font-medium text-green-700">
+              {t('shop_offer.approved_status', 'Price approved - awaiting customer confirmation')}
+            </span>
+          </div>
+        ) : (
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => setRejectDialogOpen(true)}
+            >
+              <X className="h-4 w-4 mr-1" />
+              {t('shop_offer.reject', 'Reject')}
+            </Button>
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={() => setApprovalDialogOpen(true)}
+            >
+              <Check className="h-4 w-4 mr-1" />
+              {t('shop_offer.approve', 'Approve & Send to Customer')}
+            </Button>
+          </div>
+        )}
       </CardContent>
 
       {/* Approval Dialog */}
