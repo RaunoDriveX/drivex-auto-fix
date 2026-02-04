@@ -42,6 +42,7 @@ interface ShopPriceOfferViewerProps {
   onApproved?: () => void;
   onRejected?: () => void;
   isApproved?: boolean;
+  isCustomerApproved?: boolean;
 }
 
 export function ShopPriceOfferViewer({
@@ -50,6 +51,7 @@ export function ShopPriceOfferViewer({
   onApproved,
   onRejected,
   isApproved = false,
+  isCustomerApproved = false,
 }: ShopPriceOfferViewerProps) {
   const { t } = useTranslation('insurer');
   const [estimate, setEstimate] = useState<CostEstimate | null>(null);
@@ -174,7 +176,7 @@ export function ShopPriceOfferViewer({
   }
 
   return (
-    <Card className={isApproved ? "border-green-200 bg-green-50/50" : "border-amber-200 bg-amber-50/50"}>
+    <Card className={isCustomerApproved ? "border-green-300 bg-green-100/50" : (isApproved ? "border-green-200 bg-green-50/50" : "border-amber-200 bg-amber-50/50")}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
@@ -253,7 +255,14 @@ export function ShopPriceOfferViewer({
         )}
 
         {/* Action Buttons or Approved State */}
-        {isApproved ? (
+        {isCustomerApproved ? (
+          <div className="flex items-center justify-center gap-2 p-3 bg-green-100 border border-green-300 rounded-lg">
+            <CheckCircle className="h-5 w-5 text-green-700" />
+            <span className="font-medium text-green-800">
+              {t('shop_offer.customer_approved_status', 'Customer approved - job is scheduled')}
+            </span>
+          </div>
+        ) : isApproved ? (
           <div className="flex items-center justify-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
             <CheckCircle className="h-5 w-5 text-green-600" />
             <span className="font-medium text-green-700">
