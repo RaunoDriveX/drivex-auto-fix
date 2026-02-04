@@ -150,13 +150,12 @@ export function ShopPriceOfferDialog({
 
       if (insertError) throw insertError;
 
-      // Update appointment with the pricing and move to damage_report stage
+      // Update appointment with the pricing (keep in damage_report stage for insurer review)
       const { error: updateError } = await supabase
         .from('appointments')
         .update({
           service_type: `${glassType}_${repairAction}`,
           damage_type: damageType,
-          workflow_stage: 'damage_report',
           total_cost: totalCost,
           ai_recommended_repair: repairAction,
         })

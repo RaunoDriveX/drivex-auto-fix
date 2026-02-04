@@ -326,7 +326,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         .select('*')
         .eq('shop_id', shopId)
         .in('status', ['confirmed', 'pending'])
-        .in('workflow_stage', ['customer_handover', 'shop_selection'])
+        .in('workflow_stage', ['customer_handover', 'shop_selection', 'damage_report', 'cost_approval'])
         .order('created_at', { ascending: false });
 
       if (confirmedError) throw confirmedError;
@@ -423,7 +423,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
               shop_id: shopId,
               shop_name: shop?.name || 'Selected Shop',
               status: 'confirmed',
-              workflow_stage: 'customer_handover'
+              workflow_stage: 'damage_report'
             })
             .eq('id', appointmentId);
           
@@ -1059,8 +1059,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         </div>
                       </div>
 
-                      {/* Offer Price Button - Show when workflow_stage is customer_handover */}
-                      {offer.appointments.workflow_stage === 'customer_handover' && (
+                      {/* Offer Price Button - Show when workflow_stage is damage_report and no price submitted yet */}
+                      {offer.appointments.workflow_stage === 'damage_report' && !offer.appointments.total_cost && (
                         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
                           <div className="flex items-center justify-between">
                             <div>
@@ -1081,18 +1081,30 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         </div>
                       )}
 
-                      {/* Show submitted price badge when in damage_report or later */}
-                      {(offer.appointments.workflow_stage === 'damage_report' || offer.appointments.workflow_stage === 'cost_approval') && (
+                      {/* Show submitted price badge when price is submitted and awaiting approval */}
+                      {offer.appointments.workflow_stage === 'damage_report' && offer.appointments.total_cost && (
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                           <div className="flex items-center gap-2">
-                            <CheckCircle className="h-5 w-5 text-blue-600" />
+                            <Clock className="h-5 w-5 text-blue-600" />
                             <div>
-                              <h4 className="font-semibold text-blue-900">{t('offers.price_submitted', 'Price Submitted')}</h4>
+                              <h4 className="font-semibold text-blue-900">{t('offers.price_submitted', 'Price Submitted')}: €{offer.appointments.total_cost}</h4>
                               <p className="text-sm text-blue-700">
-                                {offer.appointments.workflow_stage === 'damage_report' 
-                                  ? t('offers.awaiting_insurer_approval', 'Awaiting insurer approval')
-                                  : t('offers.insurer_approved', 'Approved by insurer - awaiting customer confirmation')
-                                }
+                                {t('offers.awaiting_insurer_approval', 'Awaiting insurer approval')}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Show approved status when in cost_approval */}
+                      {offer.appointments.workflow_stage === 'cost_approval' && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <div>
+                              <h4 className="font-semibold text-green-900">{t('offers.insurer_approved', 'Insurer Approved')}: €{offer.appointments.total_cost}</h4>
+                              <p className="text-sm text-green-700">
+                                {t('offers.awaiting_customer_confirmation', 'Awaiting customer confirmation')}
                               </p>
                             </div>
                           </div>
