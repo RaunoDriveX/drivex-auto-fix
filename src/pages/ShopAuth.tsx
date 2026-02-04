@@ -345,15 +345,36 @@ const ShopAuth = () => {
               Access your repair shop dashboard
             </CardDescription>
           </CardHeader>
-          
-          <div className="flex justify-center">
-            <Button variant="ghost" asChild className="gap-2">
-              <Link to="/" onClick={() => window.scrollTo(0, 0)}>
-                <ArrowLeft className="h-4 w-4" />
-                Back to Home
-              </Link>
-            </Button>
-          </div>
+
+          <CardContent>
+            {needsProfileSetup ? (
+              <ShopProfileForm />
+            ) : (
+              <Tabs defaultValue="signin" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="signin">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="signin" className="mt-6">
+                  <AuthForm isSignUp={false} />
+                </TabsContent>
+
+                <TabsContent value="signup" className="mt-6">
+                  <AuthForm isSignUp={true} />
+                </TabsContent>
+              </Tabs>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="mt-4 flex justify-center">
+          <Button variant="ghost" asChild className="gap-2">
+            <Link to="/" onClick={() => window.scrollTo(0, 0)}>
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Link>
+          </Button>
         </div>
       </div>
     </>

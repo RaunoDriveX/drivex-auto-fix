@@ -42,13 +42,19 @@ interface Job {
   appointment_time: string;
   shop_name: string;
   shop_id: string;
-  total_cost: number;
+  total_cost: number | null;
   job_started_at?: string;
   job_completed_at?: string;
   created_at: string;
   updated_at: string;
   short_code?: string;
   notes?: string;
+  job_offers?: Array<{
+    id: string;
+    offered_price: number;
+    status: string;
+    responded_at: string | null;
+  }>;
 }
 
 const statusConfig = {
@@ -105,7 +111,7 @@ export const InsurerJobsBoard: React.FC = () => {
 
       if (!insurerProfile) return;
 
-      // Get jobs for this insurer
+      // Get jobs for this insurer with job offers
       const { data, error } = await supabase
         .from('appointments')
         .select(`
@@ -125,7 +131,13 @@ export const InsurerJobsBoard: React.FC = () => {
           created_at,
           updated_at,
           short_code,
-          notes
+          notes,
+          job_offers!appointment_id (
+            id,
+            offered_price,
+            status,
+            responded_at
+          )
         `)
         .eq('insurer_name', insurerProfile.insurer_name)
         .order('created_at', { ascending: false });
@@ -270,11 +282,56 @@ export const InsurerJobsBoard: React.FC = () => {
 
   const getCancellationInfo = (job: Job): { reason: string } | null => {
     if (job.job_status !== 'cancelled' && job.status !== 'cancelled') return null;
-    
+
     if (job.notes) {
       return { reason: job.notes };
     }
     return { reason: 'No reason provided' };
+  };
+
+  const getPriceDisplay = (job: Job) => {
+    // If shop has accepted and price is confirmed
+    if (job.total_cost && (job.job_status === 'scheduled' || job.job_status === 'in_progress' || job.job_status === 'completed')) {
+      return {
+        amount: `€${job.total_cost}`,
+        status: 'accepted',
+        badge: 'Price Submitted',
+        badgeColor: 'bg-green-100 text-green-800 border-green-200'
+      };
+    }
+
+    // If job offer exists but not yet accepted
+    if (job.job_offers && job.job_offers.length > 0) {
+      // Find the most recent offered price (could be multiple offers to different shops)
+      const latestOffer = job.job_offers.find(offer => offer.status === 'offered')
+        || job.job_offers[0]; // fallback to first offer
+
+      if (latestOffer.status === 'offered') {
+        return {
+          amount: `€${latestOffer.offered_price}`,
+          status: 'pending',
+          badge: 'Awaiting Shop Response',
+          badgeColor: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+        };
+      }
+
+      if (latestOffer.status === 'accepted') {
+        return {
+          amount: `€${latestOffer.offered_price}`,
+          status: 'accepted',
+          badge: 'Price Submitted',
+          badgeColor: 'bg-green-100 text-green-800 border-green-200'
+        };
+      }
+    }
+
+    // No price information available
+    return {
+      amount: '€ —',
+      status: 'unknown',
+      badge: 'Pending',
+      badgeColor: 'bg-gray-100 text-gray-800 border-gray-200'
+    };
   };
 
   if (loading) {
@@ -423,7 +480,12 @@ export const InsurerJobsBoard: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-muted-foreground">Cost:</span>
-                    <p className="font-medium">€{job.total_cost}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="font-medium">{getPriceDisplay(job).amount}</p>
+                      <Badge className={`text-xs ${getPriceDisplay(job).badgeColor} border`}>
+                        {getPriceDisplay(job).badge}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
                 
