@@ -66,6 +66,7 @@ interface Job {
   id: string;
   customer_name: string;
   customer_email: string;
+  customer_phone?: string;
   customer_street?: string;
   customer_city?: string;
   customer_postal_code?: string;
@@ -74,6 +75,7 @@ interface Job {
   status: string;
   appointment_date: string;
   appointment_time: string;
+  appointment_confirmed_at?: string;
   shop_name: string;
   shop_id: string;
   total_cost: number | null;
@@ -83,6 +85,11 @@ interface Job {
   updated_at: string;
   short_code?: string;
   notes?: string;
+  insurer_name?: string;
+  workflow_stage?: string;
+  vehicle_info?: unknown;
+  damage_type?: string;
+  requires_adas_calibration?: boolean;
   job_offers?: Array<{
     id: string;
     offered_price: number;
@@ -244,6 +251,7 @@ export const InsurerJobsBoard: React.FC = () => {
           id,
           customer_name,
           customer_email,
+          customer_phone,
           customer_street,
           customer_city,
           customer_postal_code,
@@ -252,6 +260,7 @@ export const InsurerJobsBoard: React.FC = () => {
           status,
           appointment_date,
           appointment_time,
+          appointment_confirmed_at,
           shop_name,
           shop_id,
           total_cost,
@@ -261,6 +270,11 @@ export const InsurerJobsBoard: React.FC = () => {
           updated_at,
           short_code,
           notes,
+          insurer_name,
+          workflow_stage,
+          vehicle_info,
+          damage_type,
+          requires_adas_calibration,
           job_offers!appointment_id (
             id,
             offered_price,
@@ -474,13 +488,9 @@ export const InsurerJobsBoard: React.FC = () => {
 
   const getCancellationInfo = (job: Job): { reason: string; shop: string } | null => {
     if (job.job_status !== 'cancelled' && job.status !== 'cancelled') return null;
-
-    if (job.notes) {
-      return { reason: job.notes };
-    }
     
     return { 
-      reason: reason || t('jobs_board.no_reason_provided'),
+      reason: job.notes || t('jobs_board.no_reason_provided'),
       shop: job.shop_name
     };
   };
@@ -706,6 +716,66 @@ export const InsurerJobsBoard: React.FC = () => {
                     </span>
                   </div>
                 )}
+
+                {/* Shop Selections - Show selected shops for customer */}
+                {shopSelections[job.id] && shopSelections[job.id].length > 0 && (
+                  <div className="mb-3 p-2 bg-muted/50 rounded-md">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                        <Store className="h-3 w-3" />
+                        {t('jobs_board.suggested_shops', 'Suggested Shops')}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => handleOpenShopSelection(job, true)}
+                      >
+                        <Pencil className="h-3 w-3 mr-1" />
+                        {t('jobs_board.edit', 'Edit')}
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {shopSelections[job.id].map((sel, idx) => (
+                        <Badge key={sel.shop_id} variant="outline" className="text-xs">
+                          {idx + 1}. {sel.shop_name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Collapsible Customer Details */}
+                <Collapsible className="mb-3">
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm" className="w-full justify-between px-2 h-8 text-xs text-muted-foreground hover:text-foreground border border-dashed">
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {t('jobs_board.case_details', 'Case Details')}
+                      </span>
+                      <ChevronDown className="h-3 w-3 transition-transform duration-200" />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-2 space-y-1 text-sm">
+                    {(job.customer_street || job.customer_city) && (
+                      <div className="flex items-start gap-2">
+                        <MapPin className="h-3 w-3 mt-1 text-muted-foreground" />
+                        <span>
+                          {[job.customer_street, job.customer_postal_code, job.customer_city].filter(Boolean).join(', ')}
+                        </span>
+                      </div>
+                    )}
+                    {job.customer_email && (
+                      <div className="text-muted-foreground">
+                        <span className="font-medium">{t('jobs_board.tracking_code', 'Tracking Code')}:</span> {job.short_code || '—'}
+                      </div>
+                    )}
+                    <div className="text-muted-foreground">
+                      <span className="font-medium">{t('jobs_board.created_on', 'Created')}:</span> {format(new Date(job.created_at), isGerman ? 'd. MMM yyyy' : 'MMM d, yyyy', isGerman ? { locale: de } : undefined)}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">Scheduled:</span>
