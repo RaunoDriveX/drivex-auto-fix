@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import Inspection from "./pages/Inspection";
 import InspectionResults from "./pages/InspectionResults";
@@ -26,6 +27,7 @@ const App = () => {
   console.log("App component rendering...");
   return (
     <ErrorBoundary>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -54,6 +56,7 @@ const App = () => {
       </TooltipProvider>
     </QueryClientProvider>
   </HelmetProvider>
+  </ThemeProvider>
 </ErrorBoundary>
   );
 };
