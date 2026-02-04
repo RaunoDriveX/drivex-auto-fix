@@ -32,14 +32,12 @@ function isRateLimited(ip: string): boolean {
 
 function redactPhone(phone: string | null): string | null {
   if (!phone) return null;
-  // Keep last 4 digits: +31 6 ***5678
   const cleaned = phone.replace(/\D/g, '');
   if (cleaned.length < 4) return '***';
   return '***' + cleaned.slice(-4);
 }
 
 function redactEmail(email: string): string {
-  // Redact middle of email: jo***@example.com
   const [local, domain] = email.split('@');
   if (!domain || local.length <= 2) return '***@' + (domain || '***');
   return local.slice(0, 2) + '***@' + domain;
@@ -52,12 +50,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Get client IP for rate limiting
     const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
                      req.headers.get('cf-connecting-ip') || 
                      'unknown';
     
-    // Check rate limit
     if (isRateLimited(clientIp)) {
       console.warn(`Rate limit exceeded for IP: ${clientIp}`);
       return new Response(
@@ -75,15 +71,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate tracking token format (should be 32 hex characters)
-    if (tracking_token && !/^[a-f0-9]{32}$/i.test(tracking_token)) {
+    // Tracking tokens can be hex or base64-like (32 chars with alphanumeric, dashes, underscores)
+    if (tracking_token && !/^[a-zA-Z0-9_-]{32}$/.test(tracking_token)) {
       return new Response(
         JSON.stringify({ error: 'Invalid tracking token format' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Validate job code format (should be 8 alphanumeric characters)
     if (job_code && !/^[A-Z0-9]{8}$/i.test(job_code)) {
       return new Response(
         JSON.stringify({ error: 'Invalid job code format' }),
@@ -91,7 +86,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Use service role to bypass RLS
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     let query = supabase
@@ -106,6 +100,7 @@ Deno.serve(async (req) => {
         job_completed_at,
         appointment_date,
         appointment_time,
+        appointment_confirmed_at,
         service_type,
         damage_type,
         shop_name,
@@ -119,7 +114,10 @@ Deno.serve(async (req) => {
         total_cost,
         vehicle_info,
         short_code,
-        tracking_token
+        tracking_token,
+        workflow_stage,
+        customer_shop_selection,
+        customer_cost_approved
       `);
 
     let appointment;
@@ -132,7 +130,6 @@ Deno.serve(async (req) => {
       appointment = result.data;
       error = result.error;
     } else if (job_code) {
-      // Search by short_code (first 8 characters of UUID)
       const result = await query.eq('short_code', job_code.toUpperCase()).maybeSingle();
       appointment = result.data;
       error = result.error;
@@ -148,13 +145,26 @@ Deno.serve(async (req) => {
 
     // Fetch shop details separately if appointment found (public info only)
     let shopData = null;
-    if (appointment && appointment.shop_id) {
+    if (appointment && appointment.shop_id && appointment.shop_id !== 'pending') {
       const { data } = await supabase
         .from('shops')
-        .select('name, address, city, postal_code, phone, rating')
+        .select('name, address, city, postal_code, phone, rating, email')
         .eq('id', appointment.shop_id)
         .maybeSingle();
       shopData = data;
+      console.log('Shop lookup result:', data ? 'found' : 'not found', 'for shop_id:', appointment.shop_id);
+    }
+
+    // Check if this shop was assigned via insurer selection
+    let isInsurerAssigned = false;
+    if (appointment && appointment.shop_id && appointment.shop_id !== 'pending') {
+      const { data: insurerSelection } = await supabase
+        .from('insurer_shop_selections')
+        .select('id')
+        .eq('appointment_id', appointment.id)
+        .eq('shop_id', appointment.shop_id)
+        .maybeSingle();
+      isInsurerAssigned = !!insurerSelection;
     }
 
     // Fetch audit trail for status history
@@ -164,15 +174,91 @@ Deno.serve(async (req) => {
       .eq('appointment_id', appointment.id)
       .order('status_changed_at', { ascending: true });
 
-    // Log access for audit purposes
+    // Fetch pending shop selections if workflow_stage is 'shop_selection'
+    let pendingShopSelections = null;
+    if (appointment.workflow_stage === 'shop_selection' && !appointment.customer_shop_selection) {
+      const { data: selections } = await supabase
+        .from('insurer_shop_selections')
+        .select(`
+          id,
+          shop_id,
+          priority_order,
+          estimated_price,
+          distance_km,
+          created_at
+        `)
+        .eq('appointment_id', appointment.id)
+        .order('priority_order', { ascending: true });
+
+      if (selections && selections.length > 0) {
+        // Fetch shop details for each selection
+        const shopIds = selections.map(s => s.shop_id);
+        const { data: shops } = await supabase
+          .from('shops')
+          .select('id, name, address, city, postal_code, phone, rating')
+          .in('id', shopIds);
+
+        const shopMap = new Map((shops || []).map(s => [s.id, s]));
+        
+        pendingShopSelections = selections.map(sel => {
+          const shop = shopMap.get(sel.shop_id);
+          return {
+            id: sel.id,
+            shop_id: sel.shop_id,
+            name: shop?.name || 'Unknown Shop',
+            address: shop?.address || '',
+            city: shop?.city || '',
+            distance_km: sel.distance_km || 0,
+            estimated_price: sel.estimated_price || 0,
+            rating: shop?.rating || 0,
+            total_reviews: 0, // Not tracked in shops table
+            priority_order: sel.priority_order,
+            isMobileService: false, // Not tracked yet
+            adasCalibrationCapability: false // Not tracked yet
+          };
+        });
+      }
+    }
+
+    // Fetch pending cost estimate if workflow_stage is 'cost_approval'
+    let pendingCostEstimate = null;
+    if (appointment.workflow_stage === 'cost_approval' && !appointment.customer_cost_approved) {
+      const { data: estimate } = await supabase
+        .from('insurer_cost_estimates')
+        .select(`
+          id,
+          line_items,
+          labor_cost,
+          parts_cost,
+          total_cost,
+          notes,
+          created_at
+        `)
+        .eq('appointment_id', appointment.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (estimate) {
+        pendingCostEstimate = {
+          id: estimate.id,
+          line_items: estimate.line_items || [],
+          labor_cost: estimate.labor_cost || 0,
+          parts_cost: estimate.parts_cost || 0,
+          total_cost: estimate.total_cost || 0,
+          notes: estimate.notes,
+          created_at: estimate.created_at
+        };
+      }
+    }
+
     console.log(`Job ${appointment.id} accessed via ${tracking_token ? 'token' : 'code'} from IP: ${clientIp}`);
 
-    // Return appointment with redacted PII to protect customer privacy
     return new Response(
       JSON.stringify({ 
         appointment: {
           id: appointment.id,
-          customer_name: appointment.customer_name, // Keep name for personalization
+          customer_name: appointment.customer_name,
           customer_email: redactEmail(appointment.customer_email),
           customer_phone: redactPhone(appointment.customer_phone),
           shop_name: appointment.shop_name,
@@ -192,18 +278,26 @@ Deno.serve(async (req) => {
           additional_notes: appointment.additional_notes,
           total_cost: appointment.total_cost,
           created_at: appointment.created_at,
-          // Only return tracking token if they already have it
-          tracking_token: tracking_token ? appointment.tracking_token : undefined,
+          workflow_stage: appointment.workflow_stage,
+          customer_shop_selection: appointment.customer_shop_selection,
+          customer_cost_approved: appointment.customer_cost_approved,
+          tracking_token: appointment.tracking_token,
+          shop_id: appointment.shop_id,
+          is_insurer_assigned: isInsurerAssigned,
+          appointment_confirmed_at: appointment.appointment_confirmed_at,
           shops: shopData ? {
             name: shopData.name,
             address: shopData.address,
             city: shopData.city,
             postal_code: shopData.postal_code,
             phone: shopData.phone,
+            email: shopData.email,
             rating: shopData.rating,
           } : null,
         },
-        statusHistory: statusHistory || []
+        statusHistory: statusHistory || [],
+        pendingShopSelections,
+        pendingCostEstimate
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

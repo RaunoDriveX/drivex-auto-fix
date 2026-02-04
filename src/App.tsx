@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import Inspection from "./pages/Inspection";
 import InspectionResults from "./pages/InspectionResults";
@@ -15,6 +16,8 @@ import ShopAuth from "./pages/ShopAuth";
 import ShopDashboard from "./pages/ShopDashboard";
 import InsurerAuth from "./pages/InsurerAuth";
 import InsurerDashboard from "./pages/InsurerDashboard";
+import DamageReport from "./pages/DamageReport";
+import DamageReportConfirmation from "./pages/DamageReportConfirmation";
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -24,6 +27,7 @@ const App = () => {
   console.log("App component rendering...");
   return (
     <ErrorBoundary>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -32,6 +36,8 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/damage-report/:token" element={<DamageReport />} />
+            <Route path="/damage-report/:token/confirmation" element={<DamageReportConfirmation />} />
             <Route path="/inspection/:token" element={<Inspection />} />
             <Route path="/results/:token" element={<InspectionResults />} />
             <Route path="/report/:token" element={<AIReport />} />
@@ -50,6 +56,7 @@ const App = () => {
       </TooltipProvider>
     </QueryClientProvider>
   </HelmetProvider>
+  </ThemeProvider>
 </ErrorBoundary>
   );
 };

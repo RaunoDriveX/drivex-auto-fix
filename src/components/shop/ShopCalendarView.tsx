@@ -99,8 +99,8 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
 
       if (jobOffersError) throw jobOffersError;
 
-      // Fetch accepted appointments
-      const { data: appointments, error: appointmentsError } = await supabase
+      // Fetch accepted appointments via job_offers
+      const { data: appointmentsViaOffers, error: appointmentsViaOffersError } = await supabase
         .from('appointments')
         .select(`
           *,
@@ -116,7 +116,18 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
         .gte('appointment_date', format(monthStart, 'yyyy-MM-dd'))
         .lte('appointment_date', format(monthEnd, 'yyyy-MM-dd'));
 
-      if (appointmentsError) throw appointmentsError;
+      if (appointmentsViaOffersError) throw appointmentsViaOffersError;
+
+      // Fetch direct appointments (insurer-assigned jobs where customer scheduled)
+      const { data: directAppointments, error: directApptsError } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('shop_id', shopId)
+        .not('appointment_confirmed_at', 'is', null)
+        .gte('appointment_date', format(monthStart, 'yyyy-MM-dd'))
+        .lte('appointment_date', format(monthEnd, 'yyyy-MM-dd'));
+
+      if (directApptsError) throw directApptsError;
 
       // Fetch shop availability
       const { data: availability, error: availabilityError } = await supabase
@@ -144,8 +155,8 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
           vehicle_info: jo.appointments.vehicle_info,
         }));
 
-      // Transform accepted appointments to events
-      const appointmentEvents: CalendarEvent[] = (appointments || []).map(apt => ({
+      // Transform appointments via job_offers to events
+      const appointmentViaOfferEvents: CalendarEvent[] = (appointmentsViaOffers || []).map(apt => ({
         id: apt.id,
         type: 'appointment',
         date: apt.appointment_date,
@@ -159,6 +170,22 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
         shop_name: apt.shop_name,
       }));
 
+      // Transform direct appointments (insurer-assigned) to events
+      const directAppointmentEvents: CalendarEvent[] = (directAppointments || [])
+        .filter(apt => !appointmentsViaOffers?.some(va => va.id === apt.id)) // Avoid duplicates
+        .map(apt => ({
+          id: apt.id,
+          type: 'appointment',
+          date: apt.appointment_date,
+          time: apt.appointment_time?.substring(0, 5),
+          title: `${apt.service_type} - ${apt.customer_name}`,
+          status: apt.status === 'confirmed' ? 'accepted' : apt.status,
+          customer_name: apt.customer_name,
+          service_type: apt.service_type,
+          vehicle_info: apt.vehicle_info,
+          shop_name: apt.shop_name,
+        }));
+
       // Transform availability to events
       const availabilityEvents: CalendarEvent[] = (availability || []).map(avail => ({
         id: `avail-${avail.id}`,
@@ -169,7 +196,7 @@ const ShopCalendarView = ({ shopId }: ShopCalendarViewProps) => {
         is_available: avail.is_available,
       }));
 
-      setEvents([...jobOfferEvents, ...appointmentEvents, ...availabilityEvents]);
+      setEvents([...jobOfferEvents, ...appointmentViaOfferEvents, ...directAppointmentEvents, ...availabilityEvents]);
     } catch (error: any) {
       console.error('Error fetching calendar data:', error);
       toast({

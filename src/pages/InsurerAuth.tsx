@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +26,7 @@ export default function InsurerAuth() {
   const [authenticatedEmail, setAuthenticatedEmail] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation(['auth', 'common', 'forms']);
 
   const handleAuth = async (email: string, password: string, insurerName: string, contactPerson: string, phone: string, isSignUp: boolean) => {
     setLoading(true);
@@ -32,7 +34,6 @@ export default function InsurerAuth() {
 
     try {
       if (isSignUp) {
-        // Sign up new insurer user
         const redirectUrl = `${window.location.origin}/insurer-dashboard`;
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
@@ -43,7 +44,6 @@ export default function InsurerAuth() {
         });
 
         if (signUpError) {
-          // Handle "user already registered" error
           if (signUpError.message?.toLowerCase().includes('already registered') || 
               signUpError.message?.toLowerCase().includes('already exists')) {
             throw new Error("An account with this email already exists. Please use the Sign In tab instead.");
@@ -51,10 +51,7 @@ export default function InsurerAuth() {
           throw signUpError;
         }
 
-        // Check if email confirmation is required
         if (signUpData.session) {
-          // Email confirmation disabled - user is already signed in
-          // Create insurer profile immediately
           const { error: profileError } = await supabase
             .from('insurer_profiles')
             .insert({
@@ -73,7 +70,6 @@ export default function InsurerAuth() {
 
           navigate('/insurer-dashboard');
         } else {
-          // Email confirmation enabled - user needs to verify email
           toast({
             title: 'Verify your email',
             description: 'Please check your email and click the verification link to complete signup.',
@@ -82,7 +78,6 @@ export default function InsurerAuth() {
           setError('Please check your email for a verification link to complete your registration.');
         }
       } else {
-        // Sign in existing insurer user
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -90,7 +85,6 @@ export default function InsurerAuth() {
 
         if (signInError) throw signInError;
 
-        // Check if insurer profile exists
         const { data: profile, error: profileError } = await supabase
           .from('insurer_profiles')
           .select('id')
@@ -98,26 +92,25 @@ export default function InsurerAuth() {
           .single();
 
         if (profileError || !profile) {
-          // No insurer profile - offer to create one
           setAuthenticatedEmail(email);
           setNeedsProfileSetup(true);
           toast({
-            title: 'Welcome!',
+            title: t('auth:messages.welcome_back'),
             description: 'Please complete your insurer profile to continue.',
           });
           return;
         }
 
         toast({
-          title: 'Welcome back!',
-          description: 'Successfully signed in to your insurer account.',
+          title: t('auth:messages.welcome_back'),
+          description: t('auth:messages.insurer_sign_in_success'),
         });
 
         navigate('/insurer-dashboard');
       }
     } catch (err: any) {
       console.error('Authentication error:', err);
-      setError(err.message || 'Authentication failed. Please try again.');
+      setError(err.message || t('auth:messages.invalid_credentials'));
     } finally {
       setLoading(false);
     }
@@ -174,7 +167,7 @@ export default function InsurerAuth() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="insurerName">Insurance Company Name *</Label>
+          <Label htmlFor="insurerName">{t('forms:labels.company_name')} *</Label>
           <Input
             id="insurerName"
             type="text"
@@ -186,7 +179,7 @@ export default function InsurerAuth() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="contactPerson">Contact Person *</Label>
+          <Label htmlFor="contactPerson">{t('forms:labels.contact_person')} *</Label>
           <Input
             id="contactPerson"
             type="text"
@@ -198,7 +191,7 @@ export default function InsurerAuth() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phone">{t('forms:labels.phone')}</Label>
           <Input
             id="phone"
             type="tel"
@@ -218,10 +211,10 @@ export default function InsurerAuth() {
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating Profile...
+              {t('common:status.saving')}
             </>
           ) : (
-            "Complete Setup"
+            t('common:buttons.confirm')
           )}
         </Button>
       </form>
@@ -252,7 +245,7 @@ export default function InsurerAuth() {
         {isSignUp && (
           <>
             <div className="space-y-2">
-              <Label htmlFor="insurerName">Insurance Company Name</Label>
+              <Label htmlFor="insurerName">{t('forms:labels.company_name')}</Label>
               <Input
                 id="insurerName"
                 type="text"
@@ -264,7 +257,7 @@ export default function InsurerAuth() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="contactPerson">Contact Person</Label>
+              <Label htmlFor="contactPerson">{t('forms:labels.contact_person')}</Label>
               <Input
                 id="contactPerson"
                 type="text"
@@ -276,7 +269,7 @@ export default function InsurerAuth() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">{t('forms:labels.phone')}</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -289,19 +282,19 @@ export default function InsurerAuth() {
         )}
         
         <div className="space-y-2">
-          <Label htmlFor="email">Email Address</Label>
+          <Label htmlFor="email">{t('auth:fields.email')}</Label>
           <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="insurer@company.com"
+            placeholder={t('auth:fields.insurer_email_placeholder')}
           />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t('auth:fields.password')}</Label>
           <Input
             id="password"
             type="password"
@@ -309,13 +302,13 @@ export default function InsurerAuth() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
-            placeholder={isSignUp ? "At least 6 characters" : "Enter your password"}
+            placeholder={t('auth:fields.password_placeholder')}
           />
         </div>
         
         {isSignUp && (
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">{t('auth:fields.password')}</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -323,7 +316,6 @@ export default function InsurerAuth() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={6}
-              placeholder="Re-enter your password"
             />
           </div>
         )}
@@ -338,10 +330,10 @@ export default function InsurerAuth() {
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
+              {isSignUp ? t('auth:actions.signing_up') : t('auth:actions.signing_in')}
             </>
           ) : (
-            isSignUp ? 'Create Insurer Account' : 'Sign In'
+            isSignUp ? t('auth:actions.sign_up') : t('auth:actions.sign_in')
           )}
         </Button>
       </form>
@@ -351,8 +343,8 @@ export default function InsurerAuth() {
   return (
     <>
       <Helmet>
-        <title>Insurer Login - DriveX</title>
-        <meta name="description" content="Secure login for insurance companies to access DriveX claims management system." />
+        <title>{t('auth:insurer.title')} - DriveX</title>
+        <meta name="description" content={t('auth:insurer.subtitle')} />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 flex items-center justify-center p-4">
@@ -363,18 +355,18 @@ export default function InsurerAuth() {
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Home
+              {t('common:buttons.back_to_home')}
             </Link>
             <div className="flex justify-center mb-4">
               <div className="p-3 bg-primary/10 rounded-full">
                 <ShieldCheck className="h-8 w-8 text-primary" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold">Insurer Portal</h1>
+            <h1 className="text-2xl font-bold">{t('auth:insurer.title')}</h1>
             <p className="text-muted-foreground mt-2">
               {needsProfileSetup 
                 ? "Complete your insurer profile" 
-                : "Sign in to access your claims management dashboard"
+                : t('auth:insurer.subtitle')
               }
             </p>
           </div>
@@ -384,11 +376,11 @@ export default function InsurerAuth() {
               <div className="flex justify-end mb-2">
                 <LanguageSwitcher />
               </div>
-              <CardTitle>Sign In</CardTitle>
+              <CardTitle>{t('auth:insurer.sign_in_title')}</CardTitle>
               <CardDescription>
                 {needsProfileSetup 
                   ? "Complete your insurer profile" 
-                  : "Access your claims management dashboard"
+                  : t('auth:insurer.sign_in_description')
                 }
               </CardDescription>
             </CardHeader>
@@ -398,8 +390,8 @@ export default function InsurerAuth() {
               ) : (
                 <Tabs defaultValue="signin" className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="signin">Sign In</TabsTrigger>
-                    <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                    <TabsTrigger value="signin">{t('auth:actions.sign_in')}</TabsTrigger>
+                    <TabsTrigger value="signup">{t('auth:actions.sign_up')}</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="signin" className="mt-6">

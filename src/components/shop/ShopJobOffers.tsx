@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,11 +8,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target, Plus } from "lucide-react";
+import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target, Plus, FileText, ChevronDown, Send } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import JobOfferUpsells from "./JobOfferUpsells";
 import { AdasCalibrationAlert } from "./AdasCalibrationAlert";
 import PartsFitmentAlert from "./PartsFitmentAlert";
+import { DamageReportViewer } from "@/components/insurer/DamageReportViewer";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ShopPriceOfferDialog } from "./ShopPriceOfferDialog";
 
 interface JobOffer {
   id: string;
@@ -27,6 +31,7 @@ interface JobOffer {
   requires_adas_calibration?: boolean;
   adas_calibration_notes?: string;
   is_direct_booking?: boolean;
+  is_insurer_selection?: boolean;
   appointments: {
     customer_name: string;
     customer_email: string;
@@ -45,6 +50,10 @@ interface JobOffer {
     ai_recommended_repair: string;
     driver_view_obstruction: boolean;
     short_code?: string;
+    customer_shop_selection?: string;
+    workflow_stage?: string;
+    appointment_confirmed_at?: string;
+    total_cost?: number;
   };
 }
 
@@ -59,7 +68,10 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
   const [loading, setLoading] = useState(true);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState("");
+  const [priceOfferDialogOpen, setPriceOfferDialogOpen] = useState(false);
+  const [selectedJobForPricing, setSelectedJobForPricing] = useState<JobOffer | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslation(['shop', 'common', 'forms']);
 
   useEffect(() => {
     fetchJobOffers();
@@ -97,7 +109,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
   const fetchJobOffers = async () => {
     try {
-      // Fetch pending job offers (from insurance routing)
+      // Fetch pending job offers (from insurance routing via job_offers table)
       const { data: offersData, error: offersError } = await supabase
         .from('job_offers')
         .select(`
@@ -119,7 +131,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             ai_assessment_details,
             ai_recommended_repair,
             driver_view_obstruction,
-            short_code
+            short_code,
+            appointment_confirmed_at
           )
         `)
         .eq('shop_id', shopId)
@@ -128,6 +141,82 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         .order('offered_at', { ascending: false });
 
       if (offersError) throw offersError;
+
+      // Fetch insurer shop selections where this shop has been suggested (new workflow)
+      const { data: insurerSelections, error: selectionsError } = await supabase
+        .from('insurer_shop_selections')
+        .select(`
+          id,
+          appointment_id,
+          shop_id,
+          priority_order,
+          estimated_price,
+          distance_km,
+          created_at,
+          appointments (
+            id,
+            shop_id,
+            customer_name,
+            customer_email,
+            customer_phone,
+            service_type,
+            damage_type,
+            appointment_date,
+            appointment_time,
+            vehicle_info,
+            notes,
+            is_insurance_claim,
+            damage_photos,
+            additional_notes,
+            ai_confidence_score,
+            ai_assessment_details,
+            ai_recommended_repair,
+            driver_view_obstruction,
+            short_code,
+            customer_shop_selection,
+            workflow_stage,
+            appointment_confirmed_at
+          )
+        `)
+        .eq('shop_id', shopId);
+
+      if (selectionsError) throw selectionsError;
+
+      console.log('Insurer selections found for shop:', shopId, insurerSelections?.length || 0);
+      
+      // Transform insurer selections to JobOffer format
+      // Only show pending ones where customer hasn't selected yet AND appointment not yet assigned to this shop
+      const insurerSelectionsAsOffers: JobOffer[] = (insurerSelections || [])
+        .filter((selection: any) => {
+          const appointment = selection.appointments;
+          if (!appointment) {
+            console.log('Selection has no appointment:', selection.id);
+            return false;
+          }
+          // Only show if appointment is still pending (shop_id = 'pending') and workflow is shop_selection
+          const shouldShow = appointment.shop_id === 'pending' && appointment.workflow_stage === 'shop_selection';
+          console.log('Selection filter:', selection.id, 'shop_id:', appointment.shop_id, 'workflow_stage:', appointment.workflow_stage, 'shouldShow:', shouldShow);
+          return shouldShow;
+        })
+        .map((selection: any) => {
+          const appointmentDate = new Date(selection.appointments.appointment_date);
+          appointmentDate.setHours(16, 0, 0, 0);
+          
+          return {
+            id: `selection-${selection.id}`,
+            appointment_id: selection.appointment_id,
+            shop_id: selection.shop_id,
+            offered_price: selection.estimated_price || 0,
+            status: 'offered',
+            offered_at: selection.created_at,
+            expires_at: appointmentDate.toISOString(),
+            estimated_completion_time: null,
+            notes: '',
+            appointments: selection.appointments,
+            is_direct_booking: false,
+            is_insurer_selection: true
+          };
+        });
       
       // Get ALL appointment IDs that have any job offers for this shop (any status)
       // This prevents showing direct bookings when a job offer exists (even if declined)
@@ -142,6 +231,11 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         (allOffersForShop || []).map((offer: any) => offer.appointment_id).filter(Boolean)
       );
 
+      // Also exclude appointments already shown via insurer selections
+      const insurerSelectionAppointmentIds = new Set(
+        insurerSelectionsAsOffers.map(o => o.appointment_id)
+      );
+
       // Fetch pending direct bookings (no job offer created)
       const { data: directBookings, error: directError } = await supabase
         .from('appointments')
@@ -152,9 +246,9 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
       if (directError) throw directError;
       
-      // Filter out appointments that have ANY job offers (including declined) to avoid duplicates
+      // Filter out appointments that have ANY job offers or insurer selections to avoid duplicates
       const filteredDirectBookings = (directBookings || []).filter(
-        booking => !appointmentIdsWithAnyOffers.has(booking.id)
+        booking => !appointmentIdsWithAnyOffers.has(booking.id) && !insurerSelectionAppointmentIds.has(booking.id)
       );
 
       // Transform direct bookings to match JobOffer structure
@@ -178,9 +272,10 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         };
       });
 
-      // Combine both types
+      // Combine all offer types
       const allOffers: JobOffer[] = [
         ...((offersData as JobOffer[])?.filter(offer => offer.appointments !== null) || []),
+        ...insurerSelectionsAsOffers,
         ...directBookingsAsOffers
       ].sort((a, b) => new Date(b.offered_at || 0).getTime() - new Date(a.offered_at || 0).getTime());
 
@@ -208,7 +303,10 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             ai_assessment_details,
             ai_recommended_repair,
             driver_view_obstruction,
-            short_code
+            short_code,
+            appointment_confirmed_at,
+            workflow_stage,
+            total_cost
           )
         `)
         .eq('shop_id', shopId)
@@ -227,7 +325,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         .from('appointments')
         .select('*')
         .eq('shop_id', shopId)
-        .eq('status', 'confirmed')
+        .in('status', ['confirmed', 'pending'])
+        .in('workflow_stage', ['customer_handover', 'shop_selection', 'damage_report', 'cost_approval'])
         .order('created_at', { ascending: false });
 
       if (confirmedError) throw confirmedError;
@@ -235,6 +334,16 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       // Filter out confirmed bookings that already have an accepted job offer to avoid duplicates
       const filteredConfirmedBookings = (confirmedBookings || []).filter(
         booking => !acceptedAppointmentIds.has(booking.id)
+      );
+
+      // Check which confirmed bookings came from insurer selections
+      const { data: confirmedInsurerSelections } = await supabase
+        .from('insurer_shop_selections')
+        .select('appointment_id')
+        .eq('shop_id', shopId);
+      
+      const acceptedInsurerSelectionIds = new Set(
+        (confirmedInsurerSelections || []).map((s: any) => s.appointment_id)
       );
 
       // Transform confirmed bookings to match JobOffer structure
@@ -250,7 +359,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         estimated_completion_time: null,
         notes: '',
         appointments: booking,
-        is_direct_booking: true
+        is_direct_booking: !acceptedInsurerSelectionIds.has(booking.id),
+        is_insurer_selection: acceptedInsurerSelectionIds.has(booking.id)
       }));
 
       // Combine both types
@@ -276,9 +386,10 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
     setRespondingTo(jobOfferId);
 
     try {
-      // Check if this is a direct booking
+      // Check the type of offer
       const offer = jobOffers.find(o => o.id === jobOfferId);
       const isDirectBooking = offer?.is_direct_booking;
+      const isInsurerSelection = offer?.is_insurer_selection;
 
       if (isDirectBooking) {
         // Handle direct booking - update appointment status directly
@@ -300,8 +411,35 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
           
           if (error) throw error;
         }
+      } else if (isInsurerSelection) {
+        // Handle insurer selection - update appointment to assign shop
+        const appointmentId = offer?.appointment_id;
+        if (!appointmentId) throw new Error('No appointment ID found');
+
+        if (response === 'accept') {
+          const { error } = await supabase
+            .from('appointments')
+            .update({ 
+              shop_id: shopId,
+              shop_name: shop?.name || 'Selected Shop',
+              status: 'confirmed',
+              workflow_stage: 'damage_report'
+            })
+            .eq('id', appointmentId);
+          
+          if (error) throw error;
+        } else {
+          // Remove the shop from insurer selections for this appointment
+          const selectionId = jobOfferId.replace('selection-', '');
+          const { error } = await supabase
+            .from('insurer_shop_selections')
+            .delete()
+            .eq('id', selectionId);
+          
+          if (error) throw error;
+        }
       } else {
-        // Handle job offer (insurance routing) - call edge function
+        // Handle job offer (insurance routing via job_offers table) - call edge function
         const { error } = await supabase.functions.invoke('handle-job-response', {
           body: {
             jobOfferId,
@@ -314,10 +452,10 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       }
 
       toast({
-        title: response === 'accept' ? "Job Accepted" : "Job Declined",
+        title: response === 'accept' ? t('offers.job_accepted_title') : t('offers.job_declined_title'),
         description: response === 'accept' 
-          ? "You have successfully accepted this job offer." 
-          : "You have declined this job offer."
+          ? t('offers.job_accepted_description')
+          : t('offers.job_declined_description')
       });
 
       // Refresh job offers
@@ -326,8 +464,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
     } catch (error: any) {
       console.error('Error responding to job offer:', error);
       toast({
-        title: "Error",
-        description: "Failed to respond to job offer",
+        title: t('offers.error_title'),
+        description: t('offers.response_error'),
         variant: "destructive"
       });
     } finally {
@@ -368,7 +506,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         <CardContent className="py-6">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-muted-foreground">Loading job offers...</p>
+            <p className="mt-2 text-muted-foreground">{t('offers.loading_offers')}</p>
           </div>
         </CardContent>
       </Card>
@@ -380,13 +518,13 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       <Tabs defaultValue="pending" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="pending">
-            Pending Offers
+            {t('offers.pending_offers')}
             {jobOffers.length > 0 && (
               <Badge variant="secondary" className="ml-2">{jobOffers.length}</Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="accepted">
-            Accepted Jobs
+            {t('offers.accepted_jobs')}
             {acceptedJobs.length > 0 && (
               <Badge variant="default" className="ml-2">{acceptedJobs.length}</Badge>
             )}
@@ -398,8 +536,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             <Card>
               <CardContent className="py-6">
                 <div className="text-center text-muted-foreground">
-                  <p>No active job offers at the moment.</p>
-                  <p className="text-sm mt-2">New offers will appear here when available.</p>
+                  <p>{t('offers.no_offers')}</p>
+                  <p className="text-sm mt-2">{t('offers.new_offers_hint')}</p>
                 </div>
               </CardContent>
             </Card>
@@ -423,7 +561,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                     {/* Tracking Code */}
                     {offer.appointments.short_code && (
                       <div className="text-xs mb-3">
-                        <span className="text-muted-foreground">Tracking Code:</span>
+                        <span className="text-muted-foreground">{t('offers.tracking_code')}:</span>
                         <span className="ml-2 font-mono font-bold text-primary">{offer.appointments.short_code}</span>
                       </div>
                     )}
@@ -441,11 +579,11 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         {(offer.appointments.vehicle_info.license_plate || offer.appointments.vehicle_info.vin) && (
                           <div className="text-sm text-muted-foreground ml-7">
                             {offer.appointments.vehicle_info.license_plate && (
-                              <span>License: {offer.appointments.vehicle_info.license_plate}</span>
+                              <span>{t('offers.license')}: {offer.appointments.vehicle_info.license_plate}</span>
                             )}
                             {offer.appointments.vehicle_info.license_plate && offer.appointments.vehicle_info.vin && " • "}
                             {offer.appointments.vehicle_info.vin && (
-                              <span>VIN: {offer.appointments.vehicle_info.vin}</span>
+                              <span>{t('offers.vin')}: {offer.appointments.vehicle_info.vin}</span>
                             )}
                           </div>
                         )}
@@ -458,9 +596,9 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <Brain className="h-4 w-4 text-blue-600" />
-                            <span className="font-semibold text-blue-900 text-sm">AI Assessment</span>
+                            <span className="font-semibold text-blue-900 text-sm">{t('offers.ai_assessment')}</span>
                             <Badge variant={offer.appointments.ai_confidence_score >= 0.9 ? "default" : "secondary"} className="text-xs">
-                              {Math.round(offer.appointments.ai_confidence_score * 100)}% confident
+                              {Math.round(offer.appointments.ai_confidence_score * 100)}% {t('offers.confident')}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-1">
@@ -496,25 +634,22 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                       {offer.appointments.is_insurance_claim && (
                         <Badge variant="secondary" className="flex items-center gap-1">
                           <CreditCard className="h-3 w-3" />
-                          Insurance Claim
+                          {t('offers.insurance_claim')}
                         </Badge>
                       )}
                        {offer.appointments.damage_type && (
                          <Badge variant="outline" className="flex items-center gap-1">
                            <AlertTriangle className="h-3 w-3" />
-                           {offer.appointments.damage_type}
+                           {t(`damage_types.${offer.appointments.damage_type.toLowerCase()}`, { ns: 'common', defaultValue: offer.appointments.damage_type })}
                          </Badge>
                        )}
                        {offer.requires_adas_calibration && (
                          <Badge variant="destructive" className="text-xs">
-                           ADAS Required
+                           {t('offers.adas_required', { ns: 'insurer', defaultValue: 'ADAS Required' })}
                          </Badge>
                        )}
                     </div>
                   </div>
-                  <Badge variant={getStatusColor(offer.expires_at)} className="text-sm">
-                    {formatTimeRemaining(offer.expires_at)}
-                  </Badge>
                 </div>
               </CardHeader>
               
@@ -524,10 +659,10 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                   <div className="space-y-3">
                     <h4 className="font-semibold flex items-center gap-2">
                       <ImageIcon className="h-4 w-4" />
-                      Damage Photos ({offer.appointments.damage_photos.length})
+                      {t('offers.damage_photos')} ({offer.appointments.damage_photos.length})
                       <Badge variant="outline" className="text-xs ml-2">
                         <Target className="h-3 w-3 mr-1" />
-                        AI Detected
+                        {t('offers.ai_assessment')}
                       </Badge>
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -588,18 +723,26 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                       <div className="flex items-center gap-3">
                         <Calendar className="h-5 w-5 text-blue-600" />
                         <div>
-                          <p className="font-medium">{new Date(offer.appointments.appointment_date).toLocaleDateString()}</p>
+                          <p className="font-medium">
+                            {offer.is_insurer_selection 
+                              ? t('time.tbd', { ns: 'common' })
+                              : new Date(offer.appointments.appointment_date).toLocaleDateString()}
+                          </p>
                           <p className="text-sm text-muted-foreground">Appointment Date</p>
                         </div>
                       </div>
                       
-                          <div className="flex items-center gap-3">
-                            <Clock className="h-5 w-5 text-orange-600" />
-                            <div>
-                              <p className="font-medium">{offer.appointments.appointment_time.substring(0, 5)}</p>
-                              <p className="text-sm text-muted-foreground">Appointment Time</p>
-                            </div>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <Clock className="h-5 w-5 text-orange-600" />
+                        <div>
+                          <p className="font-medium">
+                            {offer.is_insurer_selection 
+                              ? t('time.tbd', { ns: 'common' })
+                              : offer.appointments.appointment_time.substring(0, 5)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">Appointment Time</p>
+                        </div>
+                      </div>
                       
                       {offer.estimated_completion_time && (
                         <div className="flex items-center gap-3">
@@ -667,6 +810,27 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                    </div>
                  )}
 
+                {/* Damage Report Section - available after customer has booked */}
+                {offer.appointments.appointment_confirmed_at && (
+                  <Collapsible className="mt-3">
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-full justify-between px-3 h-10 text-sm text-muted-foreground hover:text-foreground border border-dashed">
+                        <span className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          {t('offers.damage_report', 'Damage Report')}
+                        </span>
+                        <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pt-3">
+                      <DamageReportViewer 
+                        appointmentId={offer.appointment_id} 
+                        damageType={offer.appointments.damage_type} 
+                      />
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+
                   {/* Parts Fitment Alert */}
                   {offer.appointments.vehicle_info?.make && offer.appointments.vehicle_info?.year && offer.appointments.damage_type && (
                     <PartsFitmentAlert
@@ -711,7 +875,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                     className="flex-1 text-lg py-6"
                     size="lg"
                   >
-                    {respondingTo === offer.id ? "Processing..." : "Accept Job"}
+                    {respondingTo === offer.id ? t('offers.processing') : t('offers.accept_job')}
                   </Button>
                   
                   <AlertDialog>
@@ -722,34 +886,34 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         className="flex-1 text-lg py-6"
                         size="lg"
                       >
-                        Decline
+                        {t('offers.decline')}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Decline Job Offer</AlertDialogTitle>
+                        <AlertDialogTitle>{t('offers.decline')} {t('offers.title', { defaultValue: 'Job Offer' })}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Please provide a reason for declining this job offer (optional).
+                          {t('offers.decline_placeholder')}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="decline-reason">Reason for declining</Label>
+                        <Label htmlFor="decline-reason">{t('offers.decline_reason')}</Label>
                         <Textarea
                           id="decline-reason"
                           value={declineReason}
                           onChange={(e) => setDeclineReason(e.target.value)}
-                          placeholder="e.g., Fully booked, outside service area, etc."
+                          placeholder={t('offers.decline_placeholder')}
                         />
                       </div>
                        
                        <AlertDialogFooter>
-                         <AlertDialogCancel>Cancel</AlertDialogCancel>
+                         <AlertDialogCancel>{t('cancel', { ns: 'common' })}</AlertDialogCancel>
                          <AlertDialogAction
                            onClick={() => handleJobResponse(offer.id, 'decline')}
                            disabled={respondingTo === offer.id}
                          >
-                           Decline Job
+                           {t('offers.confirm_decline')}
                          </AlertDialogAction>
                        </AlertDialogFooter>
                      </AlertDialogContent>
@@ -811,12 +975,18 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                           <div className="flex gap-2 mt-3">
                             <Badge variant="default" className="flex items-center gap-1">
                               <CheckCircle className="h-3 w-3" />
-                              Accepted
+                              {t('calendar.status.accepted')}
                             </Badge>
                             {offer.appointments.is_insurance_claim && (
                               <Badge variant="secondary" className="flex items-center gap-1">
                                 <CreditCard className="h-3 w-3" />
-                                Insurance Claim
+                                {t('offers.insurance_claim')}
+                              </Badge>
+                            )}
+                            {offer.appointments.damage_type && (
+                              <Badge variant="outline" className="flex items-center gap-1">
+                                <AlertTriangle className="h-3 w-3" />
+                                {t(`damage_types.${offer.appointments.damage_type.toLowerCase()}`, { ns: 'common', defaultValue: offer.appointments.damage_type })}
                               </Badge>
                             )}
                           </div>
@@ -840,15 +1010,27 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                           <div className="flex items-center gap-3">
                             <Calendar className="h-5 w-5 text-blue-600" />
                             <div>
-                              <p className="font-medium">{new Date(offer.appointments.appointment_date).toLocaleDateString()}</p>
-                              <p className="text-sm text-muted-foreground">Appointment Date</p>
+                              <p className="font-medium">
+                                {offer.is_insurer_selection && !offer.appointments.appointment_confirmed_at
+                                  ? t('time.tbd', { ns: 'common' })
+                                  : new Date(offer.appointments.appointment_date).toLocaleDateString()}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {offer.appointments.appointment_confirmed_at 
+                                  ? 'Customer Confirmed' 
+                                  : 'Appointment Date'}
+                              </p>
                             </div>
                           </div>
                           
                           <div className="flex items-center gap-3">
                             <Clock className="h-5 w-5 text-orange-600" />
                             <div>
-                              <p className="font-medium">{offer.appointments.appointment_time.substring(0, 5)}</p>
+                              <p className="font-medium">
+                                {offer.is_insurer_selection && !offer.appointments.appointment_confirmed_at
+                                  ? t('time.tbd', { ns: 'common' })
+                                  : offer.appointments.appointment_time.substring(0, 5)}
+                              </p>
                               <p className="text-sm text-muted-foreground">Appointment Time</p>
                             </div>
                           </div>
@@ -876,6 +1058,77 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                           )}
                         </div>
                       </div>
+
+                      {/* Offer Price Button - Show when workflow_stage is damage_report and no price submitted yet */}
+                      {offer.appointments.workflow_stage === 'damage_report' && !offer.appointments.total_cost && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-semibold text-amber-900">{t('offers.price_offer_required', 'Price Offer Required')}</h4>
+                              <p className="text-sm text-amber-700">{t('offers.price_offer_description', 'Submit your pricing for insurer approval')}</p>
+                            </div>
+                            <Button
+                              onClick={() => {
+                                setSelectedJobForPricing(offer);
+                                setPriceOfferDialogOpen(true);
+                              }}
+                              className="gap-2"
+                            >
+                              <Send className="h-4 w-4" />
+                              {t('offers.offer_price', 'Offer Price')}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Show submitted price badge when price is submitted and awaiting approval */}
+                      {offer.appointments.workflow_stage === 'damage_report' && offer.appointments.total_cost && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <h4 className="font-semibold text-blue-900">{t('offers.price_submitted', 'Price Submitted')}: €{offer.appointments.total_cost}</h4>
+                              <p className="text-sm text-blue-700">
+                                {t('offers.awaiting_insurer_approval', 'Awaiting insurer approval')}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Show approved status when in cost_approval */}
+                      {offer.appointments.workflow_stage === 'cost_approval' && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <div>
+                              <h4 className="font-semibold text-green-900">{t('offers.insurer_approved', 'Insurer Approved')}: €{offer.appointments.total_cost}</h4>
+                              <p className="text-sm text-green-700">
+                                {t('offers.awaiting_customer_confirmation', 'Awaiting customer confirmation')}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Damage Report Section - always available for accepted jobs */}
+                      <Collapsible className="mt-3">
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" size="sm" className="w-full justify-between px-3 h-10 text-sm text-muted-foreground hover:text-foreground border border-dashed">
+                            <span className="flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              {t('offers.damage_report', 'Damage Report')}
+                            </span>
+                            <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="pt-3">
+                          <DamageReportViewer 
+                            appointmentId={offer.appointment_id} 
+                            damageType={offer.appointments.damage_type} 
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
                     </CardContent>
                   </Card>
                 );
@@ -884,6 +1137,22 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Price Offer Dialog */}
+      {selectedJobForPricing && (
+        <ShopPriceOfferDialog
+          open={priceOfferDialogOpen}
+          onOpenChange={setPriceOfferDialogOpen}
+          appointmentId={selectedJobForPricing.appointment_id}
+          shopId={shopId}
+          currentGlassType={selectedJobForPricing.appointments.service_type}
+          currentDamageType={selectedJobForPricing.appointments.damage_type}
+          onSuccess={() => {
+            fetchJobOffers();
+            setSelectedJobForPricing(null);
+          }}
+        />
+      )}
      </div>
    );
  };

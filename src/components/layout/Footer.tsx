@@ -1,19 +1,18 @@
-import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Mail, Phone, MapPin } from "lucide-react";
 
 const Footer = () => {
+  const { t } = useTranslation('marketing');
   const currentYear = new Date().getFullYear();
 
   return (
     <footer id="contact" className="bg-muted/30 border-t border-border">
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          
-          {/* Company Info */}
           <div>
             <div className="text-2xl font-bold text-primary mb-4">Glassify</div>
             <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-              Patent-pending AI technology for transparent auto glass repair. 
-              Your advocate in the marketplace.
+              {t('footer.tagline')}
             </p>
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -31,81 +30,48 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Services */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Services</h3>
+            <h3 className="font-semibold text-foreground mb-4">{t('footer.services')}</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">AI Damage Assessment</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Repair Shop Matching</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Mobile Glass Repair</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Fleet Solutions</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">DIY Repair Kits</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Insurance Claims</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.ai_assessment')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.shop_matching')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.mobile_repair')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.fleet_solutions')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.insurance_claims')}</a></li>
             </ul>
           </div>
 
-          {/* Company */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Company</h3>
+            <h3 className="font-semibold text-foreground mb-4">{t('footer.company')}</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">About Us</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Our Team</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Careers</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">News & Press</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Partner Network</a></li>
-              <li><a href="mailto:contact@glassify24.com" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</a></li>
+              <li><a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.about_us')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.our_team')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.careers')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.news_press')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.partner_network')}</a></li>
+              <li><a href="mailto:contact@glassify24.com" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.contact_us')}</a></li>
             </ul>
           </div>
 
-          {/* Legal & Support */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Legal & Support</h3>
+            <h3 className="font-semibold text-foreground mb-4">{t('footer.legal_support')}</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Help Center</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Support</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Warranty</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.privacy_policy')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.terms_of_service')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.cookie_policy')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.help_center')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.support')}</a></li>
+              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">{t('footer.warranty')}</a></li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Section */}
         <div className="mt-8 pt-8 border-t border-border">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            
-            {/* Copyright */}
+          <div className="text-center">
             <div className="text-sm text-muted-foreground">
-              © {currentYear} Glassify. All rights reserved. Patent pending technology.
+              {t('footer.copyright', { year: currentYear })}
             </div>
-
-            {/* Social Links */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">Follow us:</span>
-              <div className="flex gap-3">
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  <Facebook className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  <Twitter className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  <Linkedin className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  <Instagram className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Additional Info */}
-          <div className="mt-4 text-center">
-            <p className="text-xs text-muted-foreground">
-              Operating in Europe, North America, Latin America, and Africa. 
-              Over 300,000 assessments completed with 95% accuracy.
-            </p>
+            <p className="text-xs text-muted-foreground mt-2">{t('footer.operating_regions')}</p>
           </div>
         </div>
       </div>

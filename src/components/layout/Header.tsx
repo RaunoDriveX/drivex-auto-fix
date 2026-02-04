@@ -1,12 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, Phone, Mail, Search } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import CallCenterToolbarWidget from "@/components/call-center/CallCenterToolbarWidget";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import glassifyLogo from "@/assets/glassify-logo.svg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { t } = useTranslation('marketing');
   
   // Safely check location to avoid white screen issues
   let showCallCenter = false;
@@ -18,15 +22,15 @@ const Header = () => {
   }
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "How it Works", href: "#workflow" },
-    { name: "About Us", href: "#about" },
-    { name: "Contact", href: "#contact" },
-    { name: "Shop Portal", href: "/shop-auth" }
+    { name: t('header.home'), href: "/" },
+    { name: t('header.how_it_works'), href: "#workflow" },
+    { name: t('header.about_us'), href: "#about" },
+    { name: t('header.contact'), href: "#contact" },
+    { name: t('header.shop_portal'), href: "/shop-auth" }
   ];
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
+    <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 lg:px-2">
         <div className="flex items-center justify-between h-24 gap-4 -ml-2 lg:-ml-4">
           {/* Logo and Track Job grouped together */}
@@ -44,7 +48,7 @@ const Header = () => {
               <Link to="/track">
                 <Button variant="outline" className="flex items-center gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 py-3 text-base font-semibold">
                   <Search className="h-5 w-5" />
-                  Track Your Job
+                  {t('header.track_job')}
                 </Button>
               </Link>
             </div>
@@ -76,22 +80,16 @@ const Header = () => {
             })}
           </nav>
 
-          {/* Contact Info & Call Center */}
+          {/* Call Center & Actions */}
           <div className="hidden lg:flex items-center gap-6 flex-shrink-0">
             {showCallCenter && <CallCenterToolbarWidget />}
-            <LanguageSwitcher />
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Phone className="h-4 w-4" />
-              <span>+372 58528824</span>
-            </div>
             <Link to="/insurer-auth">
               <Button variant="outline" size="sm">
-                Insurer Login
+                {t('header.insurer_login')}
               </Button>
             </Link>
-            <Button size="sm">
-              Get Started
-            </Button>
+            <LanguageSwitcher />
+            <ThemeSwitcher />
           </div>
 
           {/* Mobile Menu Button */}
@@ -115,7 +113,7 @@ const Header = () => {
               <Link to="/track" onClick={() => setIsMenuOpen(false)}>
                 <Button className="w-full flex items-center justify-center gap-2">
                   <Search className="h-4 w-4" />
-                  Track Your Job
+                  {t('header.track_job')}
                 </Button>
               </Link>
             </div>
@@ -146,22 +144,16 @@ const Header = () => {
                 );
               })}
               <div className="pt-4 border-t border-border">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                  <Phone className="h-4 w-4" />
-                  <span>+372 58528824</span>
-                </div>
                 <div className="space-y-2">
-                  <div className="mb-3">
+                  <div className="mb-3 flex items-center gap-2">
                     <LanguageSwitcher />
+                    <ThemeSwitcher />
                   </div>
                   <Link to="/insurer-auth">
                     <Button variant="outline" size="sm" className="w-full">
-                      Insurer Login
+                      {t('header.insurer_login')}
                     </Button>
                   </Link>
-                  <Button size="sm" className="w-full">
-                    Get Started
-                  </Button>
                 </div>
               </div>
             </nav>

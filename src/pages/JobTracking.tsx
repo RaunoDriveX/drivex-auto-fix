@@ -4,15 +4,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CustomerJobTimeline } from "@/components/customer/CustomerJobTimeline";
 import { CustomerJobNotifications } from "@/components/customer/CustomerJobNotifications";
 import { RescheduleDialog } from "@/components/customer/RescheduleDialog";
 import { CancelAppointmentDialog } from "@/components/customer/CancelAppointmentDialog";
+import { ShopAndScheduleCard } from "@/components/customer/ShopAndScheduleCard";
+import { CostApprovalCard } from "@/components/customer/CostApprovalCard";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useMockMode } from "@/hooks/useMockMode";
+import { mockJobStages, MockShopSelection, MockCostEstimate } from "@/lib/mockData";
+import { useTranslation } from 'react-i18next';
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { formatInsurerName, formatServiceType } from "@/lib/utils";
+import { formatInsurerName, formatServiceType, formatDamageType } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import smartScanQrCode from "@/assets/smartscan-qr-code.png";
 import { 
   Clock, 
   MapPin, 
@@ -22,7 +29,8 @@ import {
   ExternalLink,
   Calendar,
   Home,
-  XCircle
+  XCircle,
+  ScanLine
 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 
@@ -47,12 +55,20 @@ interface JobDetails {
     make?: string;
     model?: string;
     licensePlate?: string;
+    license_plate?: string;
     vin?: string;
+    vehicle_type?: string;
   };
   additional_notes?: string;
   shop_name: string;
   shop_id: string;
   insurer_name?: string;
+  workflow_stage?: string;
+  customer_shop_selection?: string;
+  customer_cost_approved?: boolean;
+  tracking_token?: string;
+  is_insurer_assigned?: boolean;
+  appointment_confirmed_at?: string;
   shops?: {
     name: string;
     phone?: string;
@@ -65,22 +81,67 @@ interface JobDetails {
 
 export default function JobTracking() {
   const { appointmentId } = useParams<{ appointmentId: string }>();
+  const { isMockMode } = useMockMode();
+  const { t } = useTranslation('common');
+  
   const [jobDetails, setJobDetails] = useState<JobDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [smartScanDialogOpen, setSmartScanDialogOpen] = useState(false);
+  
+  // Customer confirmation states
+  const [pendingShopSelections, setPendingShopSelections] = useState<MockShopSelection[] | null>(null);
+  const [pendingCostEstimate, setPendingCostEstimate] = useState<MockCostEstimate | null>(null);
+  const [confirmationLoading, setConfirmationLoading] = useState(false);
+  
+  // SmartScan URL
+  const smartScanUrl = "https://smartscan.drivex.ee/?urlId=FBLhLeT8gOim_Wb-g_SxybH_&lang=de";
 
   useEffect(() => {
     if (appointmentId) {
       fetchJobDetails();
     }
-  }, [appointmentId]);
+  }, [appointmentId, isMockMode]);
 
   const fetchJobDetails = async () => {
     if (!appointmentId) return;
 
+    // Mock mode handling
+    if (isMockMode && appointmentId.startsWith('mock-')) {
+      const mockJob = mockJobStages[appointmentId];
+      if (mockJob) {
+        setJobDetails({
+          id: mockJob.id,
+          customer_name: mockJob.customer_name,
+          customer_email: mockJob.customer_email,
+          service_type: mockJob.service_type,
+          damage_type: mockJob.damage_type,
+          appointment_date: '2025-01-25',
+          appointment_time: '10:00',
+          job_status: 'scheduled',
+          shop_name: 'Mock Shop',
+          shop_id: 'mock-shop-1',
+          workflow_stage: mockJob.workflow_stage,
+          customer_shop_selection: mockJob.customer_shop_selection,
+          customer_cost_approved: mockJob.customer_cost_approved,
+          vehicle_info: mockJob.vehicle_info
+        });
+        
+        if (mockJob.workflow_stage === 'shop_selection' && mockJob.shop_selections) {
+          setPendingShopSelections(mockJob.shop_selections);
+        }
+        
+        if (mockJob.workflow_stage === 'cost_approval' && mockJob.cost_estimate) {
+          setPendingCostEstimate(mockJob.cost_estimate);
+        }
+        
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
-      // Use secure edge function instead of direct RLS query
       const isShortCode = appointmentId.length === 8;
       const { data, error } = await supabase.functions.invoke('get-job-tracking', {
         body: isShortCode ? { job_code: appointmentId } : { tracking_token: appointmentId }
@@ -93,6 +154,15 @@ export default function JobTracking() {
       }
 
       setJobDetails(data.appointment);
+      
+      // Set pending selections/estimates from API response
+      if (data.pendingShopSelections) {
+        setPendingShopSelections(data.pendingShopSelections);
+      }
+      
+      if (data.pendingCostEstimate) {
+        setPendingCostEstimate(data.pendingCostEstimate);
+      }
     } catch (error) {
       console.error('Error fetching job details:', error);
       toast({
@@ -102,6 +172,109 @@ export default function JobTracking() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle shop selection is now combined with scheduling in ShopAndScheduleCard
+  // This handler is kept for mock mode compatibility
+  const handleShopSelect = async (shopId: string) => {
+    if (!jobDetails?.tracking_token && !isMockMode) {
+      toast({
+        title: "Error",
+        description: "Unable to confirm selection. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setConfirmationLoading(true);
+    
+    try {
+      if (isMockMode) {
+        // Mock mode - just update local state
+        setPendingShopSelections(null);
+        if (jobDetails) {
+          setJobDetails({
+            ...jobDetails,
+            customer_shop_selection: shopId,
+            workflow_stage: 'awaiting_shop_response'
+          });
+        }
+        return;
+      }
+
+      // Real mode now uses select_shop_and_schedule action in ShopAndScheduleCard
+      await fetchJobDetails();
+      
+      toast({
+        title: "Shop Selected",
+        description: "Your shop selection has been confirmed."
+      });
+    } catch (error: any) {
+      console.error('Error selecting shop:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to confirm shop selection.",
+        variant: "destructive"
+      });
+    } finally {
+      setConfirmationLoading(false);
+    }
+  };
+
+  const handleCostApprove = async () => {
+    if (!jobDetails?.tracking_token && !isMockMode) {
+      toast({
+        title: "Error",
+        description: "Unable to approve cost. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setConfirmationLoading(true);
+    
+    try {
+      if (isMockMode) {
+        // Mock mode - just update local state
+        setPendingCostEstimate(null);
+        if (jobDetails) {
+          setJobDetails({
+            ...jobDetails,
+            customer_cost_approved: true,
+            workflow_stage: 'approved'
+          });
+        }
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('confirm-customer-selection', {
+        body: {
+          tracking_token: jobDetails!.tracking_token,
+          action: 'approve_cost'
+        }
+      });
+
+      if (error || data?.error) {
+        throw new Error(data?.error || 'Failed to approve cost');
+      }
+
+      // Refresh job details
+      await fetchJobDetails();
+      
+      toast({
+        title: "Cost Approved",
+        description: "Your cost approval has been confirmed."
+      });
+    } catch (error: any) {
+      console.error('Error approving cost:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to approve cost.",
+        variant: "destructive"
+      });
+    } finally {
+      setConfirmationLoading(false);
     }
   };
 
@@ -134,14 +307,14 @@ export default function JobTracking() {
     return (
       <div className="min-h-screen bg-background p-4">
         <div className="max-w-4xl mx-auto text-center py-12">
-          <h1 className="text-2xl font-bold text-destructive mb-4">Job Not Found</h1>
+          <h1 className="text-2xl font-bold text-destructive mb-4">{t('job_tracking.job_not_found_title')}</h1>
           <p className="text-muted-foreground mb-6">
-            The job tracking link may be invalid or expired. Please check the link and try again.
+            {t('job_tracking.job_not_found_description')}
           </p>
           <Button asChild>
             <Link to="/" className="gap-2">
               <Home className="h-4 w-4" />
-              Return to Home
+              {t('job_tracking.back_to_home')}
             </Link>
           </Button>
         </div>
@@ -151,6 +324,20 @@ export default function JobTracking() {
 
   const shop = jobDetails.shops;
   const isCancelled = jobDetails.job_status === 'cancelled' || jobDetails.status === 'cancelled';
+  
+  // Determine if customer actions are needed
+  // Combined shop + schedule selection when in 'shop_selection' stage
+  const needsShopAndSchedule = pendingShopSelections && 
+    pendingShopSelections.length > 0 && 
+    !jobDetails.customer_shop_selection &&
+    jobDetails.workflow_stage === 'shop_selection';
+    
+  const needsCostApproval = pendingCostEstimate && 
+    !jobDetails.customer_cost_approved &&
+    jobDetails.workflow_stage === 'cost_approval';
+
+  // Show waiting message when in awaiting_shop_response stage
+  const isAwaitingShopResponse = jobDetails.workflow_stage === 'awaiting_shop_response';
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -160,15 +347,23 @@ export default function JobTracking() {
           <Button variant="ghost" size="sm" asChild>
             <Link to="/" className="gap-2">
               <Home className="h-4 w-4" />
-              Back to Home
+              {t('job_tracking.back_to_home')}
             </Link>
           </Button>
+          <div className="flex items-center gap-3">
+            {isMockMode && (
+              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                Mock Mode
+              </Badge>
+            )}
+            <LanguageSwitcher />
+          </div>
         </div>
         
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Track Your Repair Job</h1>
+          <h1 className="text-3xl font-bold">{t('job_tracking.title')}</h1>
           <p className="text-muted-foreground">
-            Real-time updates for your windshield repair with {jobDetails.shop_name}
+            {t('job_tracking.subtitle', { shopName: jobDetails.shop_name })}
           </p>
         </div>
 
@@ -176,26 +371,149 @@ export default function JobTracking() {
         {isCancelled && (
           <Alert variant="destructive" className="border-red-300 bg-red-50">
             <XCircle className="h-5 w-5" />
-            <AlertTitle>This Job Has Been Cancelled</AlertTitle>
+            <AlertTitle>{t('job_tracking.cancelled_title')}</AlertTitle>
             <AlertDescription>
-              This appointment was cancelled. Please create a new appointment if you still need service.
+              {t('job_tracking.cancelled_description')}
             </AlertDescription>
           </Alert>
         )}
 
-        {/* Job Timeline */}
-        <CustomerJobTimeline
-          appointmentId={jobDetails.id}
-          currentStatus={jobDetails.job_status}
-          appointmentStatus={jobDetails.status}
-          startedAt={jobDetails.job_started_at}
-          completedAt={jobDetails.job_completed_at}
-          scheduledDate={jobDetails.appointment_date}
-          scheduledTime={jobDetails.appointment_time}
-          shopId={jobDetails.shop_id}
-          onRescheduleClick={() => setRescheduleOpen(true)}
-          onCancelClick={() => setCancelOpen(true)}
-        />
+        {/* Customer Action Cards with Timeline - Two column layout when shop selection is needed */}
+        {needsShopAndSchedule ? (
+          <div className="space-y-6">
+            {/* Top: Horizontal Job Timeline */}
+            <CustomerJobTimeline
+              appointmentId={jobDetails.id}
+              currentStatus={jobDetails.job_status}
+              appointmentStatus={jobDetails.status}
+              workflowStage={jobDetails.workflow_stage}
+              startedAt={jobDetails.job_started_at}
+              completedAt={jobDetails.job_completed_at}
+              scheduledDate={jobDetails.appointment_date}
+              scheduledTime={jobDetails.appointment_time}
+              shopId={jobDetails.shop_id}
+              hasShopAssigned={jobDetails.shop_id !== 'pending' && !!jobDetails.shop_id}
+              appointmentConfirmedAt={jobDetails.appointment_confirmed_at}
+              trackingToken={jobDetails.tracking_token}
+              onRescheduleClick={() => setRescheduleOpen(true)}
+              onCancelClick={() => setCancelOpen(true)}
+              horizontal
+            />
+            
+            {/* SmartScan CTA Card - Between timeline and shop selection */}
+            <Card className="border-2 border-green-500 bg-green-50 dark:bg-green-950/20">
+              <CardContent className="py-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-lg">
+                      1
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">{t('timeline.smartscan_cta_title')}</h3>
+                      <p className="text-sm text-muted-foreground">{t('timeline.smartscan_cta_description')}</p>
+                    </div>
+                  </div>
+                  <Dialog open={smartScanDialogOpen} onOpenChange={setSmartScanDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="lg" className="gap-2 w-full sm:w-auto">
+                        <ScanLine className="h-5 w-5" />
+                        {t('timeline.perform_smartscan')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <ScanLine className="h-5 w-5" />
+                          {t('timeline.smartscan_dialog_title')}
+                        </DialogTitle>
+                        <DialogDescription>
+                          {t('timeline.smartscan_dialog_description')}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="flex flex-col items-center space-y-4 py-6">
+                        <div className="bg-background p-4 rounded-lg shadow-sm border">
+                          <img 
+                            src={smartScanQrCode} 
+                            alt="SmartScan QR Code" 
+                            className="w-[200px] h-[200px]"
+                          />
+                        </div>
+                        <p className="text-sm text-muted-foreground text-center max-w-xs">
+                          {t('inspection.qr_instruction')}
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="w-full max-w-xs"
+                          onClick={() => {
+                            navigator.clipboard.writeText(smartScanUrl);
+                            toast({
+                              title: t('timeline.link_copied'),
+                              description: t('timeline.link_copied_description'),
+                            });
+                          }}
+                        >
+                          {t('timeline.copy_link')}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Below: Shop Selection Card - full width */}
+            <ShopAndScheduleCard
+              shops={pendingShopSelections!}
+              appointmentId={jobDetails.id}
+              trackingToken={jobDetails.tracking_token}
+              onSuccess={fetchJobDetails}
+              isLoading={confirmationLoading}
+              isMockMode={isMockMode}
+            />
+          </div>
+        ) : (
+          <>
+            {/* Waiting for shop response message */}
+            {isAwaitingShopResponse && (
+              <Alert className="border-blue-200 bg-blue-50">
+                <Clock className="h-5 w-5 text-blue-600" />
+                <AlertTitle className="text-blue-800">{t('job_tracking.awaiting_shop_title')}</AlertTitle>
+                <AlertDescription className="text-blue-700">
+                  {t('job_tracking.awaiting_shop_description')}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {needsCostApproval && (
+              <CostApprovalCard
+                estimate={pendingCostEstimate!}
+                shopName={jobDetails.shop_name}
+                onApprove={handleCostApprove}
+                isLoading={confirmationLoading}
+                isMockMode={isMockMode}
+              />
+            )}
+
+            {/* Job Timeline - Full width when no shop selection needed */}
+            <CustomerJobTimeline
+              appointmentId={jobDetails.id}
+              currentStatus={jobDetails.job_status}
+              appointmentStatus={jobDetails.status}
+              workflowStage={jobDetails.workflow_stage}
+              startedAt={jobDetails.job_started_at}
+              completedAt={jobDetails.job_completed_at}
+              scheduledDate={jobDetails.appointment_date}
+              scheduledTime={jobDetails.appointment_time}
+              shopId={jobDetails.shop_id}
+              hasShopAssigned={jobDetails.shop_id !== 'pending' && !!jobDetails.shop_id}
+              appointmentConfirmedAt={jobDetails.appointment_confirmed_at}
+              trackingToken={jobDetails.tracking_token}
+              onRescheduleClick={() => setRescheduleOpen(true)}
+              onCancelClick={() => setCancelOpen(true)}
+            />
+          </>
+        )}
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Shop Details */}
@@ -203,14 +521,21 @@ export default function JobTracking() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                Shop Details
+                {t('job_tracking.shop_details')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="font-semibold">{shop?.name || jobDetails.shop_name}</h3>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-semibold">{shop?.name || jobDetails.shop_name}</h3>
+                  {jobDetails.is_insurer_assigned && (
+                    <Badge variant="secondary" className="text-xs">
+                      {t('job_tracking.selected_by_insurance')}
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground">
-                  Authorized repair facility
+                  {t('job_tracking.authorized_facility')}
                 </p>
               </div>
               
@@ -255,7 +580,7 @@ export default function JobTracking() {
                         rel="noopener noreferrer"
                         className="flex items-center gap-1"
                       >
-                        Open in Google Maps <ExternalLink className="h-3 w-3" />
+                        {t('job_tracking.open_in_maps')} <ExternalLink className="h-3 w-3" />
                       </a>
                     </Button>
                   </div>
@@ -269,22 +594,22 @@ export default function JobTracking() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Appointment Details
+                {t('job_tracking.appointment_details')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground">Service Type</p>
+                <p className="text-sm text-muted-foreground">{t('job_tracking.service_type')}</p>
                 <p className="font-medium">{formatServiceType(jobDetails.service_type)}</p>
                 {jobDetails.damage_type && (
-                  <p className="text-sm text-muted-foreground">{jobDetails.damage_type}</p>
+                  <p className="text-sm text-muted-foreground">{formatDamageType(jobDetails.damage_type)}</p>
                 )}
               </div>
               {jobDetails.insurer_name && (
                 <>
                   <Separator />
                   <div>
-                    <p className="text-sm text-muted-foreground">Insurer</p>
+                    <p className="text-sm text-muted-foreground">{t('job_tracking.insurer')}</p>
                     <p className="font-medium">{formatInsurerName(jobDetails.insurer_name)}</p>
                   </div>
                 </>
@@ -296,20 +621,27 @@ export default function JobTracking() {
                   <div>
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
                       <Car className="h-4 w-4" />
-                      Vehicle Information
+                      {t('job_tracking.vehicle_info')}
                     </p>
                     <div className="space-y-1 mt-2">
-                      <p className="font-medium">
-                        {jobDetails.vehicle_info.year} {jobDetails.vehicle_info.make} {jobDetails.vehicle_info.model}
-                      </p>
-                      {jobDetails.vehicle_info.licensePlate && (
+                      {(jobDetails.vehicle_info.year || jobDetails.vehicle_info.make || jobDetails.vehicle_info.model) && (
+                        <p className="font-medium">
+                          {jobDetails.vehicle_info.year} {jobDetails.vehicle_info.make} {jobDetails.vehicle_info.model}
+                        </p>
+                      )}
+                      {(jobDetails.vehicle_info.licensePlate || jobDetails.vehicle_info.license_plate) && (
                         <p className="text-sm text-muted-foreground">
-                          License Plate: {jobDetails.vehicle_info.licensePlate}
+                          {t('job_tracking.license_plate')}: {jobDetails.vehicle_info.licensePlate || jobDetails.vehicle_info.license_plate}
                         </p>
                       )}
                       {jobDetails.vehicle_info.vin && (
                         <p className="text-sm text-muted-foreground">
-                          VIN: {jobDetails.vehicle_info.vin}
+                          {t('job_tracking.vin')}: {jobDetails.vehicle_info.vin}
+                        </p>
+                      )}
+                      {jobDetails.vehicle_info.vehicle_type && (
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {t('job_tracking.vehicle_type')}: {jobDetails.vehicle_info.vehicle_type}
                         </p>
                       )}
                     </div>
@@ -317,33 +649,20 @@ export default function JobTracking() {
                 </>
               )}
               
-              {jobDetails.total_cost && (
-              <>
-                  <Separator />
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Estimated Cost
-                    </p>
-                    <p className="font-medium">
-                      {jobDetails.total_cost !== undefined && jobDetails.total_cost !== null ? `€${jobDetails.total_cost}` : 'Not yet available'}
-                    </p>
-                  </div>
-                </>
-              )}
             </CardContent>
           </Card>
 
           {/* Customer Contact Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Your Contact Information</CardTitle>
+              <CardTitle>{t('job_tracking.your_contact_info')}</CardTitle>
               <CardDescription>
-                Keep your contact details up to date
+                {t('job_tracking.keep_contact_updated')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground">Name</p>
+                <p className="text-sm text-muted-foreground">{t('job_tracking.name')}</p>
                 <p className="font-medium">{jobDetails.customer_name}</p>
               </div>
               
@@ -353,7 +672,7 @@ export default function JobTracking() {
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="text-sm text-muted-foreground">{t('job_tracking.email')}</p>
                     <a 
                       href={`mailto:${jobDetails.customer_email}`}
                       className="text-primary hover:underline"
@@ -370,7 +689,7 @@ export default function JobTracking() {
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />
                     <div className="flex-1">
-                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <p className="text-sm text-muted-foreground">{t('job_tracking.phone')}</p>
                       <a 
                         href={`tel:${jobDetails.customer_phone}`}
                         className="text-primary hover:underline"

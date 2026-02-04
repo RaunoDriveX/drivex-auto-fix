@@ -1,0 +1,243 @@
+{
+  "hero": {
+    "title": "Reparieren Sie Ihren Glasschaden!",
+    "description": "Schnelle und einfache Schadenserfassung. Wir regulieren die Kostenübernahme mit der Versicherung für Sie und kümmern uns um einen Reparaturtermin in Ihrer Nähe.",
+    "license_plate": "Kennzeichen",
+    "phone_number": "Telefonnummer",
+    "begin_assessment": "Schadensbewertung starten"
+  },
+  "header": {
+    "home": "Startseite",
+    "how_it_works": "So funktioniert's",
+    "about_us": "Über uns",
+    "contact": "Kontakt",
+    "shop_portal": "Partnerportal",
+    "track_job": "Auftrag verfolgen",
+    "insurer_login": "Versicherer Login",
+    "get_started": "Jetzt starten"
+  },
+  "damage_report": {
+    "title": "Schadensmeldung",
+    "subtitle": "Erzählen Sie uns von Ihrem Glasschaden",
+    "back_home": "Zurück zur Startseite",
+    "glass_location": "Glasposition",
+    "front_windshield": "Frontscheibe",
+    "side_window": "Seitenscheibe",
+    "rear_windshield": "Heckscheibe",
+    "damage_type": "Schadensart",
+    "stone_chip": "1 Steinschlag",
+    "crack": "Riss / eingeschlagen",
+    "multiple_damages": "Mehrere Schäden",
+    "vehicle_type": "Fahrzeugtyp",
+    "car": "PKW",
+    "van": "Transporter",
+    "license_plate": "KFZ-Kennzeichen",
+    "insured_name": "Name des Versicherten",
+    "insured_name_placeholder": "Name des Versicherten eingeben",
+    "insurance_company": "Versicherungsgesellschaft",
+    "select_insurance": "Wählen Sie Ihre Versicherung",
+    "customer_address": "Ihre Adresse",
+    "customer_address_hint": "Zur Suche von Werkstätten in Ihrer Nähe",
+    "street": "Straße & Hausnummer",
+    "street_placeholder": "z.B. Hauptstraße 123",
+    "city": "Stadt",
+    "city_placeholder": "z.B. Berlin",
+    "postal_code": "Postleitzahl",
+    "postal_code_placeholder": "z.B. 10115",
+    "submit": "Fertig",
+    "submitting": "Wird gesendet...",
+    "validation_error": "Bitte füllen Sie alle Pflichtfelder aus",
+    "submit_error": "Übermittlung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "thank_you_title": "Vielen Dank für Ihre Schadensmeldung!",
+    "thank_you_subtitle": "Ihre Schadensmeldung wird an Ihren Versicherer weitergeleitet.",
+    "contact_question": "Wie kommunizieren wir mit Ihnen?",
+    "mobile_phone": "Mobil Telefon",
+    "reference_info": "Sie erhalten unter dieser Vorgangsnummer alle weiteren Informationen",
+    "confirm_send": "Bestätigung wird automatisch versendet",
+    "contact_update_error": "Kontaktdaten konnten nicht gespeichert werden. Bitte erneut versuchen."
+  },
+  "confirmation": {
+    "success_title": "Schadensmeldung erfolgreich eingereicht!",
+    "success_description": "Ihre Schadensmeldung wurde erhalten und wird bearbeitet.",
+    "your_job_id": "Ihre Auftrags-ID",
+    "save_id_note": "Speichern Sie diese ID, um Ihren Reparaturfortschritt zu verfolgen",
+    "summary": "Zusammenfassung",
+    "continue_inspection": "Weiter zur Foto-Inspektion",
+    "track_job": "Auftrag verfolgen",
+    "copied": "In die Zwischenablage kopiert!",
+    "copy_failed": "Kopieren fehlgeschlagen"
+  },
+  "why_choose_us": {
+    "badge": "Patentierte Technologie",
+    "title": "Faire Preise. Qualitätsreparaturen.",
+    "title_highlight": "Mit KI-Unterstützung.",
+    "description": "Unsere KI Technologie hat in den letzten 6 Jahren eine 95% Genauigkeit bei über 300.000 erfolgreichen Analysen entwickelt.",
+    "practices": {
+      "ai_powered": {
+        "title": "KI-gestützte Analyse",
+        "description": "Patentierte Technologie analysiert Schäden sofort mit 95% Genauigkeit.",
+        "benefit": "Stets die richtige Lösung."
+      },
+      "transparent": {
+        "title": "Digitaler Prozess",
+        "description": "Maximale Entlastung inklusive Werkstattauswahl und Versicherungsklärung.",
+        "benefit": "Günstig und mit voller Preistransparenz"
+      },
+      "mobile_first": {
+        "title": "Mobile-First Plattform",
+        "description": "Von der Bewertung bis zur Buchung in Minuten auf Ihrem Handy.",
+        "benefit": "Maximale Einfachheit und Geschwindigkeit"
+      }
+    },
+    "team": {
+      "badge": "Unser Team",
+      "title": "Weltweit von Fahrern geschätzt",
+      "description": "Unser internationales Team revolutioniert bereits die Autoglas-Reparatur auf mehreren Kontinenten. Von unserem Hauptsitz bis zu unseren Partnernetzwerken bauen wir die Zukunft der Fahrzeugwartung.",
+      "europe": "Europa",
+      "europe_desc": "- Deutschland, Niederlande und Expansion",
+      "north_america": "Nordamerika",
+      "north_america_desc": "- Betrieb in den USA",
+      "latin_america": "Lateinamerika",
+      "latin_america_desc": "- Markteinführung in Brasilien",
+      "africa": "Afrika",
+      "africa_desc": "- Partnerschaften in Schwellenländern",
+      "proven_track": "Nachgewiesene Erfolgsbilanz",
+      "proven_desc": "Über 300.000 Bewertungen in 6 Betriebsjahren mit 97% Kundenzufriedenheit.",
+      "continents": "Kontinent"
+    },
+    "segments": {
+      "individual_title": "Für Privatpersonen",
+      "individual_desc": "Schnelle, günstige und unkomplizierte Glasreparatur für Ihr Fahrzeug.",
+      "fleet_title": "Für Flottenbesitzer",
+      "fleet_desc": "Optimieren Sie die Wartung Ihrer gesamten Flotte mit professionellen Tools.",
+      "avg_repair_time": "Durchschnittliche Reparaturzeit: 30 Minuten",
+      "same_day": "Die meisten Reparaturen am selben Tag",
+      "cost_savings": "Durchschnittliche Kosteneinsparung: 25-40%",
+      "vs_traditional": "Im Vergleich zu traditionellen Reparaturkanälen"
+    },
+    "individual_benefits": {
+      "fair_pricing": "Faire Preise von mehreren Werkstätten sofort",
+      "mobile_repair": "Mobile Reparatur an Ihrem Standort buchen",
+      "real_time": "Echtzeit-Tracking und Erinnerungen",
+      "insurance_assist": "Unterstützung bei Versicherungsangelegenheiten"
+    },
+    "fleet_benefits": {
+      "centralized": "Zentrales Dashboard für alle Fahrzeuge",
+      "volume_discounts": "Mengenrabatte von unserem Partnernetzwerk",
+      "priority": "Priorisierte Terminplanung für Geschäftsfahrzeuge",
+      "reporting": "Detaillierte Berichte und Kostenanalysen",
+      "support": "Dediziertes Flotten-Support-Team"
+    }
+  },
+  "workflow": {
+    "title": "So funktioniert Glassify",
+    "description": "Von der Schadensmeldung bis zur fertigen Reparatur in 3 einfachen Schritten. Schnell, digital und einfach!",
+    "virtual_tech_title": "Lernen Sie Ihren virtuellen Techniker kennen",
+    "virtual_tech_desc": "Unser KI-Assistent leitet Ihre Fotos an, erklärt Ergebnisse in einfachen Worten und hilft Ihnen, die perfekte Werkstatt zu finden.",
+    "steps": {
+      "vehicle_info": {
+        "title": "Digitale Schadensmeldung",
+        "desc": "Schnelle und einfache Erfassung Ihres Schadens."
+      },
+      "inspection": {
+        "title": "Klärung mit der Versicherung",
+        "desc": "Wir klären für Sie die Übernahme der Reparaturkosten mit Ihrer Versicherung."
+      },
+      "ai_triage": {
+        "title": "Terminkoordination für Ihre Reparatur",
+        "desc": "Wir koordinieren den Termin für Ihre Reparatur"
+      },
+      "matching": {
+        "title": "Geprüfte Partnerwerkstätten",
+        "desc": "Unsere Partnerwerkstätten sind geprüft und werden auch von den Versicherungsunternehmen akzeptiert."
+      },
+      "book": {
+        "title": "Buchen & Verfolgen",
+        "desc": "Wählen Sie Ihren Termin, erhalten Sie Erinnerungen und verfolgen Sie den Fortschritt in Echtzeit."
+      },
+      "diy": {
+        "title": "DIY-Reparaturoption",
+        "desc": "Nicht versichert oder kostenbewusst? Bestellen Sie professionelles Harz und reparieren Sie selbst."
+      }
+    }
+  },
+  "testimonials": {
+    "title": "Was unsere Kunden sagen",
+    "description": "über 300.000 Fahrer vertrauen bereits Glassify für ihre Autoglas-Reparatur",
+    "cta_text": "Schließen Sie sich Tausenden von Fahrern an, die den smarten Weg zur Autoglas-Reparatur gewählt haben",
+    "start_assessment": "Bewertung starten",
+    "contact_fleet": "Flottenvertrieb kontaktieren",
+    "reviews": {
+      "anna": {
+        "name": "Anna Schmidt",
+        "location": "Berlin",
+        "text": "Glassify hat mir geholfen, über 150€ zu sparen, indem ich Preise verschiedener Werkstätten verglichen habe. Früher ging ich einfach zur erstbesten Werkstatt. Jetzt weiß ich, dass ich einen fairen Preis zahle.",
+        "benefit": "Geld sparen"
+      },
+      "thomas": {
+        "name": "Thomas Müller",
+        "location": "Düsseldorf",
+        "text": "In 20 Minuten hatte ich meinen Termin gebucht und der Techniker kam zu meinem Büro. Ich habe keine Zeit mit der Suche nach Werkstätten oder Warten verschwendet. Unglaublicher Service.",
+        "benefit": "Zeit sparen"
+      },
+      "sophie": {
+        "name": "Sophie Weber",
+        "location": "München",
+        "text": "Endlich jemand, der meine Interessen vertritt und nicht die der Werkstatt. Glassify hat alles klar erklärt und mir geholfen, die beste Entscheidung für mein Budget zu treffen.",
+        "benefit": "Seelenfrieden"
+      }
+    }
+  },
+  "footer": {
+    "tagline": "Patentierte KI-Technologie für transparente Autoglas-Reparatur.",
+    "services": "Dienstleistungen",
+    "ai_assessment": "KI-Schadensbewertung",
+    "shop_matching": "Werkstatt-Matching",
+    "mobile_repair": "Mobile Glasreparatur",
+    "fleet_solutions": "Flottenlösungen",
+    "diy_kits": "Heimwerker-Reparatursets",
+    "insurance_claims": "Klärung der Versicherungsansprüche",
+    "company": "Unternehmen",
+    "about_us": "Über uns",
+    "our_team": "Unser Team",
+    "careers": "Karriere",
+    "news_press": "Nachrichten & Presse",
+    "partner_network": "Partnernetzwerk",
+    "contact_us": "Kontakt",
+    "legal_support": "Rechtliches & Support",
+    "privacy_policy": "Datenschutzrichtlinie",
+    "terms_of_service": "Nutzungsbedingungen",
+    "cookie_policy": "Cookie-Richtlinie",
+    "help_center": "Hilfezentrum",
+    "support": "Unterstützung",
+    "warranty": "Garantie",
+    "copyright": "© {{year}} Glassify. Alle Rechte vorbehalten. Patentierte Technologie.",
+    "follow_us": "Folgen Sie uns:",
+    "operating_regions": "Über 300.000 Analysen mit 95% Genauigkeit."
+  },
+  "lead_form": {
+    "full_name": "Vollständiger Name",
+    "email": "E-Mail",
+    "phone": "Telefonnummer",
+    "insurance_question": "Handelt es sich um einen Versicherungsfall?",
+    "yes_insurance": "Ja, Versicherungsfall",
+    "no_paying_self": "Nein, ich zahle selbst",
+    "insurance_company": "Versicherungsgesellschaft",
+    "select_insurance": "Wählen Sie Ihre Versicherungsgesellschaft",
+    "other_not_listed": "Andere / Nicht aufgeführt",
+    "select_date_time": "Datum & Uhrzeit wählen",
+    "estimated_duration": "Geschätzte Dauer:",
+    "select_date": "Datum auswählen",
+    "select_time": "Zeitfenster auswählen",
+    "book_appointment": "Termin buchen",
+    "booking_confirmed": "Buchung bestätigt!",
+    "appointment_scheduled": "Ihr Termin wurde erfolgreich geplant",
+    "shop": "Werkstatt:",
+    "date": "Datum:",
+    "time": "Uhrzeit:",
+    "tracking_code": "Tracking-Code:",
+    "tracking_code_help": "Verwenden Sie diesen Code bei der Auftragsverfolgung, um Ihren Reparaturstatus zu überprüfen.",
+    "confirmation_email": "Eine Bestätigungs-E-Mail mit allen Details wurde an Ihre E-Mail-Adresse gesendet.",
+    "back_to_home": "Zurück zur Startseite"
+  }
+}

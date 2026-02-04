@@ -21,6 +21,7 @@ export type Database = {
           ai_assessment_details: Json | null
           ai_confidence_score: number | null
           ai_recommended_repair: string | null
+          appointment_confirmed_at: string | null
           appointment_date: string
           appointment_time: string
           completion_documents_verified: boolean | null
@@ -28,9 +29,18 @@ export type Database = {
           completion_proof_uploaded_at: string | null
           confirmation_email_sent: boolean | null
           created_at: string
+          customer_city: string | null
+          customer_cost_approved: boolean | null
+          customer_cost_approved_at: string | null
           customer_email: string
+          customer_latitude: number | null
+          customer_longitude: number | null
           customer_name: string
           customer_phone: string | null
+          customer_postal_code: string | null
+          customer_shop_selected_at: string | null
+          customer_shop_selection: string | null
+          customer_street: string | null
           damage_photos: string[] | null
           damage_type: string | null
           driver_view_obstruction: boolean | null
@@ -47,8 +57,12 @@ export type Database = {
           job_started_at: string | null
           job_status: Database["public"]["Enums"]["job_status_type"] | null
           notes: string | null
+          preferred_contact_method: string | null
+          previous_shop_selection: string | null
           reminder_email_sent: boolean | null
           requires_adas_calibration: boolean | null
+          selection_change_accepted: boolean | null
+          selection_modified_at: string | null
           service_type: string
           shop_id: string
           shop_name: string
@@ -58,6 +72,7 @@ export type Database = {
           tracking_token: string | null
           updated_at: string
           vehicle_info: Json | null
+          workflow_stage: string | null
         }
         Insert: {
           adas_calibration_reason?: string | null
@@ -65,6 +80,7 @@ export type Database = {
           ai_assessment_details?: Json | null
           ai_confidence_score?: number | null
           ai_recommended_repair?: string | null
+          appointment_confirmed_at?: string | null
           appointment_date: string
           appointment_time: string
           completion_documents_verified?: boolean | null
@@ -72,9 +88,18 @@ export type Database = {
           completion_proof_uploaded_at?: string | null
           confirmation_email_sent?: boolean | null
           created_at?: string
+          customer_city?: string | null
+          customer_cost_approved?: boolean | null
+          customer_cost_approved_at?: string | null
           customer_email: string
+          customer_latitude?: number | null
+          customer_longitude?: number | null
           customer_name: string
           customer_phone?: string | null
+          customer_postal_code?: string | null
+          customer_shop_selected_at?: string | null
+          customer_shop_selection?: string | null
+          customer_street?: string | null
           damage_photos?: string[] | null
           damage_type?: string | null
           driver_view_obstruction?: boolean | null
@@ -91,8 +116,12 @@ export type Database = {
           job_started_at?: string | null
           job_status?: Database["public"]["Enums"]["job_status_type"] | null
           notes?: string | null
+          preferred_contact_method?: string | null
+          previous_shop_selection?: string | null
           reminder_email_sent?: boolean | null
           requires_adas_calibration?: boolean | null
+          selection_change_accepted?: boolean | null
+          selection_modified_at?: string | null
           service_type?: string
           shop_id: string
           shop_name: string
@@ -102,6 +131,7 @@ export type Database = {
           tracking_token?: string | null
           updated_at?: string
           vehicle_info?: Json | null
+          workflow_stage?: string | null
         }
         Update: {
           adas_calibration_reason?: string | null
@@ -109,6 +139,7 @@ export type Database = {
           ai_assessment_details?: Json | null
           ai_confidence_score?: number | null
           ai_recommended_repair?: string | null
+          appointment_confirmed_at?: string | null
           appointment_date?: string
           appointment_time?: string
           completion_documents_verified?: boolean | null
@@ -116,9 +147,18 @@ export type Database = {
           completion_proof_uploaded_at?: string | null
           confirmation_email_sent?: boolean | null
           created_at?: string
+          customer_city?: string | null
+          customer_cost_approved?: boolean | null
+          customer_cost_approved_at?: string | null
           customer_email?: string
+          customer_latitude?: number | null
+          customer_longitude?: number | null
           customer_name?: string
           customer_phone?: string | null
+          customer_postal_code?: string | null
+          customer_shop_selected_at?: string | null
+          customer_shop_selection?: string | null
+          customer_street?: string | null
           damage_photos?: string[] | null
           damage_type?: string | null
           driver_view_obstruction?: boolean | null
@@ -135,8 +175,12 @@ export type Database = {
           job_started_at?: string | null
           job_status?: Database["public"]["Enums"]["job_status_type"] | null
           notes?: string | null
+          preferred_contact_method?: string | null
+          previous_shop_selection?: string | null
           reminder_email_sent?: boolean | null
           requires_adas_calibration?: boolean | null
+          selection_change_accepted?: boolean | null
+          selection_modified_at?: string | null
           service_type?: string
           shop_id?: string
           shop_name?: string
@@ -146,6 +190,7 @@ export type Database = {
           tracking_token?: string | null
           updated_at?: string
           vehicle_info?: Json | null
+          workflow_stage?: string | null
         }
         Relationships: []
       }
@@ -470,6 +515,53 @@ export type Database = {
         }
         Relationships: []
       }
+      insurer_cost_estimates: {
+        Row: {
+          appointment_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          labor_cost: number
+          line_items: Json
+          notes: string | null
+          parts_cost: number
+          total_cost: number
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          labor_cost?: number
+          line_items?: Json
+          notes?: string | null
+          parts_cost?: number
+          total_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          labor_cost?: number
+          line_items?: Json
+          notes?: string | null
+          parts_cost?: number
+          total_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurer_cost_estimates_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurer_preferred_shops: {
         Row: {
           created_at: string
@@ -541,6 +633,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      insurer_shop_selections: {
+        Row: {
+          appointment_id: string
+          created_at: string
+          created_by: string | null
+          distance_km: number | null
+          estimated_price: number | null
+          id: string
+          priority_order: number
+          shop_id: string
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string
+          created_by?: string | null
+          distance_km?: number | null
+          estimated_price?: number | null
+          id?: string
+          priority_order: number
+          shop_id: string
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string
+          created_by?: string | null
+          distance_km?: number | null
+          estimated_price?: number | null
+          id?: string
+          priority_order?: number
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurer_shop_selections_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       insurer_users: {
         Row: {
