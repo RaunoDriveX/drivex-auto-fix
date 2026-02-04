@@ -49,9 +49,12 @@ import {
 
 interface VehicleInfo {
   carType?: string;
+  car_type?: string;
   make?: string;
   model?: string;
   year?: string;
+  licensePlate?: string;
+  license_plate?: string;
 }
 
 interface ShopSelection {
@@ -677,16 +680,23 @@ export const InsurerJobsBoard: React.FC = () => {
                 {/* Customer Selection Details */}
                 {(() => {
                   const vehicleInfo = parseVehicleInfo(job.vehicle_info);
+                  const carType = vehicleInfo?.carType || vehicleInfo?.car_type;
+                  const licensePlate = vehicleInfo?.licensePlate || vehicleInfo?.license_plate;
                   const glassLabel = job.service_type ? getGlassLabel(job.service_type) : '';
-                  const hasSelectionDetails = vehicleInfo?.carType || glassLabel || job.damage_type;
+                  const hasSelectionDetails = carType || glassLabel || job.damage_type || licensePlate;
                   
                   if (!hasSelectionDetails) return null;
                   
                   return (
                     <div className="flex flex-wrap gap-1.5 mb-3">
-                      {vehicleInfo?.carType && (
+                      {licensePlate && (
+                        <Badge variant="outline" className="text-xs font-mono">
+                          {licensePlate}
+                        </Badge>
+                      )}
+                      {carType && (
                         <Badge variant="secondary" className="text-xs">
-                          {getCarTypeLabel(vehicleInfo.carType)}
+                          {getCarTypeLabel(carType)}
                         </Badge>
                       )}
                       {glassLabel && (
