@@ -53,6 +53,7 @@ interface JobOffer {
     customer_shop_selection?: string;
     workflow_stage?: string;
     appointment_confirmed_at?: string;
+    total_cost?: number;
   };
 }
 
@@ -303,7 +304,9 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             ai_recommended_repair,
             driver_view_obstruction,
             short_code,
-            appointment_confirmed_at
+            appointment_confirmed_at,
+            workflow_stage,
+            total_cost
           )
         `)
         .eq('shop_id', shopId)
