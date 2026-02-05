@@ -1320,6 +1320,29 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                                   try {
                                     setRespondingTo(offer.id);
                                     
+                                    // Create cost estimate for insurer review
+                                    const lineItems = [
+                                      {
+                                        name: offer.appointments.service_type || 'Glass Repair/Replacement',
+                                        description: `${offer.appointments.damage_type || 'Damage'} - Repair/Replacement`,
+                                        quantity: 1,
+                                        unit_price: price,
+                                      }
+                                    ];
+                                    
+                                    const { error: insertError } = await supabase
+                                      .from('insurer_cost_estimates')
+                                      .insert({
+                                        appointment_id: offer.appointment_id,
+                                        line_items: lineItems,
+                                        labor_cost: 0,
+                                        parts_cost: price,
+                                        total_cost: price,
+                                        notes: 'Quick price submission',
+                                      });
+                                    
+                                    if (insertError) throw insertError;
+                                    
                                     // Update appointment with price and move to damage_report
                                     const { error: updateError } = await supabase
                                       .from('appointments')

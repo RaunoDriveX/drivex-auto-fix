@@ -170,20 +170,22 @@ export function ShopPriceOfferViewer({
   }
 
   if (!estimate) {
-    // If in damage_report stage but no estimate, show waiting for confirmation message
+    // If in damage_report stage but no estimate, this shouldn't happen with the new flow
+    // But keep as fallback - check if appointment has total_cost directly
     if (workflowStage === 'damage_report') {
       return (
         <div className="flex items-center gap-2 py-4 px-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg">
           <Clock className="h-4 w-4 animate-pulse" />
-          {t('shop_offer.awaiting_shop_price', 'Price offer submitted and is waiting for your confirmation')}
+          {t('shop_offer.awaiting_shop_price', 'Shop has submitted a price - loading details...')}
         </div>
       );
     }
     // If in customer_handover stage, shop hasn't submitted their price yet
     if (workflowStage === 'customer_handover') {
       return (
-        <div className="text-center py-4 text-sm text-muted-foreground border border-dashed rounded-lg">
-          {t('shop_offer.shop_preparing', 'Shop is preparing their price offer')}
+        <div className="flex items-center gap-2 py-4 px-3 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg">
+          <Clock className="h-4 w-4" />
+          {t('shop_offer.shop_preparing', 'Waiting for shop to submit their price offer')}
         </div>
       );
     }
