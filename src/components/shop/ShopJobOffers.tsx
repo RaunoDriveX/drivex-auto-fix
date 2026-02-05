@@ -17,6 +17,7 @@ import PartsFitmentAlert from "./PartsFitmentAlert";
 import { DamageReportViewer } from "@/components/insurer/DamageReportViewer";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ShopPriceOfferDialog } from "./ShopPriceOfferDialog";
+import { cn } from "@/lib/utils";
 
 interface JobOffer {
   id: string;
@@ -557,6 +558,29 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
   return (
     <div className="space-y-6">
+      {/* Workflow Steps */}
+      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
+        {[
+          { key: 'new_requests', icon: FileText, label: t('workflow_steps.new_requests') },
+          { key: 'cost_estimation', icon: DollarSign, label: t('workflow_steps.cost_estimation') },
+          { key: 'cost_confirmed', icon: CheckCircle, label: t('workflow_steps.cost_confirmed') },
+          { key: 'repair_completed', icon: Target, label: t('workflow_steps.repair_completed') }
+        ].map((step, index, arr) => (
+          <div key={step.key} className="flex items-center flex-1 min-w-0">
+            <div className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors flex-1 min-w-0",
+              "bg-muted/50 border-border hover:bg-muted"
+            )}>
+              <step.icon className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-sm font-medium text-foreground truncate">{step.label}</span>
+            </div>
+            {index < arr.length - 1 && (
+              <div className="h-px w-4 bg-border shrink-0 mx-1" />
+            )}
+          </div>
+        ))}
+      </div>
+
       <Tabs defaultValue="pending" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="pending">
