@@ -395,16 +395,24 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
   };
 
   const getStatusProgress = () => {
-    // Progress based on actual flow: Report -> Confirmed -> Scheduled -> In Progress -> Completed
+    // Progress based on actual flow: Report -> Shop Selection -> DateTime -> Approve Offer -> Scheduled -> In Progress -> Completed
     if (displayStatus === 'cancelled') return 0;
     if (displayStatus === 'completed') return 100;
-    if (displayStatus === 'in_progress') return 75;
-    if (hasCustomerConfirmedAppointment) return 60; // Customer scheduled
+    if (displayStatus === 'in_progress') return 95;
+    if (workflowStage === 'scheduled' || customerHasApprovedCost) return 90; // Scheduled
+    if (workflowStage === 'cost_approval') return 70; // Approve Offer
+    if (hasCustomerConfirmedAppointment) return 50; // Customer scheduled
     if (displayStatus === 'confirmed' || appointmentStatus === 'confirmed') return 40; // Shop confirmed
     if (hasShopAssigned && shopId !== 'pending') return 25; // Shop assigned
     if (displayStatus === 'awaiting_shop') return 10;
     return 5;
   };
+
+  // Derived state for progress calculation
+  const customerHasApprovedCost = workflowStage === 'scheduled' || 
+                                   workflowStage === 'completed' ||
+                                   displayStatus === 'in_progress' ||
+                                   displayStatus === 'completed';
 
   // Only show management actions if customer has scheduled and job not yet in progress
   const showManagementActions = hasShopAssigned && 
