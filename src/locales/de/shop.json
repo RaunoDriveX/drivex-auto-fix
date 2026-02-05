@@ -91,7 +91,10 @@
     "offer_price": "Preis anbieten",
     "price_submitted": "Preis eingereicht",
     "awaiting_insurer_approval": "Warte auf Versicherungsgenehmigung",
-    "insurer_approved": "Von der Versicherung genehmigt - warte auf Kundenbestätigung"
+    "insurer_approved": "Von der Versicherung genehmigt - warte auf Kundenbestätigung",
+    "submit_price": "Preis einreichen",
+    "detailed_pricing": "Details",
+    "set_price": "Preis festlegen"
   },
   "price_offer": {
     "title": "Preis anbieten",

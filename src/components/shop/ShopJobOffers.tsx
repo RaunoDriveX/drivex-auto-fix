@@ -1278,27 +1278,103 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                       </div>
 
                       {/* Price Action Section - Shows appropriate UI based on workflow state */}
-                      {(offer.appointments.workflow_stage === 'customer_handover' || offer.appointments.workflow_stage === 'damage_report') && !offer.appointments.total_cost && (
+                      {(offer.appointments.workflow_stage === 'customer_handover' || offer.appointments.workflow_stage === 'damage_report' || offer.appointments.workflow_stage === 'shop_selection') && !offer.appointments.total_cost && (
                         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
                           <div className="flex flex-col gap-3">
                             <div className="flex items-start gap-3">
                               <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
                               <div className="flex-1">
                                 <h4 className="font-semibold text-amber-900">{t('offers.price_offer_required', 'Price Offer Required')}</h4>
-                                <p className="text-sm text-amber-700">{t('offers.price_offer_description', 'Set your pricing in Job Details above, then confirm to send for insurer review')}</p>
+                                <p className="text-sm text-amber-700">{t('offers.price_offer_description', 'Set your pricing and submit to advance to the next step')}</p>
                               </div>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-2 flex-1">
+                                <span className="text-muted-foreground font-medium">€</span>
+                                <Input
+                                  type="number"
+                                  placeholder="Enter price"
+                                  value={editedPrices[offer.appointment_id] ?? ''}
+                                  onChange={(e) => setEditedPrices(prev => ({
+                                    ...prev,
+                                    [offer.appointment_id]: parseFloat(e.target.value) || 0
+                                  }))}
+                                  className="w-32 font-medium text-lg h-10 border-amber-300 focus:border-amber-500 focus:ring-amber-500"
+                                  min={0}
+                                  step={0.01}
+                                />
+                              </div>
+                              <Button
+                                variant="default"
+                                onClick={async () => {
+                                  const price = editedPrices[offer.appointment_id];
+                                  if (!price || price <= 0) {
+                                    toast({
+                                      title: t('price_offer.error_no_price', 'Invalid Price'),
+                                      description: t('price_offer.error_no_price_desc', 'Please enter a valid price before submitting'),
+                                      variant: "destructive"
+                                    });
+                                    return;
+                                  }
+                                  
+                                  try {
+                                    setRespondingTo(offer.id);
+                                    
+                                    // Update appointment with price and move to damage_report
+                                    const { error: updateError } = await supabase
+                                      .from('appointments')
+                                      .update({
+                                        total_cost: price,
+                                        workflow_stage: 'damage_report'
+                                      })
+                                      .eq('id', offer.appointment_id);
+                                    
+                                    if (updateError) throw updateError;
+                                    
+                                    toast({
+                                      title: t('price_offer.success_title', 'Price Submitted'),
+                                      description: t('price_offer.success', 'Price offer submitted for insurer review'),
+                                    });
+                                    
+                                    // Clear the edited price and refresh
+                                    setEditedPrices(prev => {
+                                      const newPrices = { ...prev };
+                                      delete newPrices[offer.appointment_id];
+                                      return newPrices;
+                                    });
+                                    fetchJobOffers();
+                                  } catch (error) {
+                                    console.error('Error submitting price:', error);
+                                    toast({
+                                      title: t('price_offer.error_title', 'Error'),
+                                      description: t('price_offer.error_saving', 'Failed to submit price offer'),
+                                      variant: "destructive"
+                                    });
+                                  } finally {
+                                    setRespondingTo(null);
+                                  }
+                                }}
+                                disabled={respondingTo === offer.id || !editedPrices[offer.appointment_id]}
+                                className="gap-2"
+                              >
+                                {respondingTo === offer.id ? (
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                                ) : (
+                                  <Send className="h-4 w-4" />
+                                )}
+                                {t('offers.submit_price', 'Submit Price')}
+                              </Button>
                               <Button
                                 variant="outline"
+                                size="sm"
                                 onClick={() => {
                                   setSelectedJobForPricing(offer);
                                   setPriceOfferDialogOpen(true);
                                 }}
-                                className="gap-2"
+                                className="gap-1"
                               >
-                                <DollarSign className="h-4 w-4" />
-                                {t('offers.set_price', 'Set Price')}
+                                <Edit2 className="h-4 w-4" />
+                                {t('offers.detailed_pricing', 'Detailed')}
                               </Button>
                             </div>
                           </div>
