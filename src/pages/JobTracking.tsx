@@ -89,6 +89,7 @@ export default function JobTracking() {
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [smartScanDialogOpen, setSmartScanDialogOpen] = useState(false);
+  const [smartScanActivated, setSmartScanActivated] = useState(false);
   
   // Customer confirmation states
   const [pendingShopSelections, setPendingShopSelections] = useState<MockShopSelection[] | null>(null);
@@ -413,11 +414,16 @@ export default function JobTracking() {
                       <p className="text-sm text-muted-foreground">{t('timeline.smartscan_cta_description')}</p>
                     </div>
                   </div>
-                  <Dialog open={smartScanDialogOpen} onOpenChange={setSmartScanDialogOpen}>
+                  <Dialog open={smartScanDialogOpen} onOpenChange={(open) => {
+                    setSmartScanDialogOpen(open);
+                    if (open) {
+                      setSmartScanActivated(true);
+                    }
+                  }}>
                     <DialogTrigger asChild>
-                      <Button size="lg" className="gap-2 w-full sm:w-auto">
+                      <Button size="lg" className={`gap-2 w-full sm:w-auto ${smartScanActivated ? 'bg-green-600 hover:bg-green-700' : ''}`}>
                         <ScanLine className="h-5 w-5" />
-                        {t('timeline.perform_smartscan')}
+                        {smartScanActivated ? t('timeline.smartscan_completed', 'SmartScan Started ✓') : t('timeline.perform_smartscan')}
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-md">
@@ -462,15 +468,22 @@ export default function JobTracking() {
               </CardContent>
             </Card>
             
-            {/* Below: Shop Selection Card - full width */}
-            <ShopAndScheduleCard
-              shops={pendingShopSelections!}
-              appointmentId={jobDetails.id}
-              trackingToken={jobDetails.tracking_token}
-              onSuccess={fetchJobDetails}
-              isLoading={confirmationLoading}
-              isMockMode={isMockMode}
-            />
+            {/* Below: Shop Selection Card - full width, disabled until SmartScan activated */}
+            <div className={!smartScanActivated ? 'opacity-50 pointer-events-none' : ''}>
+              <ShopAndScheduleCard
+                shops={pendingShopSelections!}
+                appointmentId={jobDetails.id}
+                trackingToken={jobDetails.tracking_token}
+                onSuccess={fetchJobDetails}
+                isLoading={confirmationLoading}
+                isMockMode={isMockMode}
+              />
+              {!smartScanActivated && (
+                <p className="text-center text-sm text-muted-foreground mt-2">
+                  {t('timeline.complete_smartscan_first', 'Please complete the SmartScan first to proceed with shop selection.')}
+                </p>
+              )}
+            </div>
           </div>
         ) : (
           <>
