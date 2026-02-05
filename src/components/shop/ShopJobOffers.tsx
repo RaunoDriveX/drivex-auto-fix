@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target, Plus, FileText, ChevronDown, Send } from "lucide-react";
+import { Clock, MapPin, Car, DollarSign, Calendar, Phone, Mail, CreditCard, AlertTriangle, Image as ImageIcon, Brain, CheckCircle, XCircle, Target, Plus, FileText, ChevronDown, Send, Edit2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import JobOfferUpsells from "./JobOfferUpsells";
 import { AdasCalibrationAlert } from "./AdasCalibrationAlert";
@@ -70,6 +71,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
   const [declineReason, setDeclineReason] = useState("");
   const [priceOfferDialogOpen, setPriceOfferDialogOpen] = useState(false);
   const [selectedJobForPricing, setSelectedJobForPricing] = useState<JobOffer | null>(null);
+  const [editedPrices, setEditedPrices] = useState<Record<string, number>>({});
   const { toast } = useToast();
   const { t } = useTranslation(['shop', 'common', 'forms']);
 
@@ -390,13 +392,20 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       const offer = jobOffers.find(o => o.id === jobOfferId);
       const isDirectBooking = offer?.is_direct_booking;
       const isInsurerSelection = offer?.is_insurer_selection;
+      
+      // Get the edited price or use the original
+      const finalPrice = editedPrices[jobOfferId] ?? offer?.offered_price ?? 0;
 
       if (isDirectBooking) {
         // Handle direct booking - update appointment status directly
         if (response === 'accept') {
           const { error } = await supabase
             .from('appointments')
-            .update({ status: 'confirmed' })
+            .update({ 
+              status: 'confirmed',
+              total_cost: finalPrice,
+              workflow_stage: 'damage_report'
+            })
             .eq('id', jobOfferId);
           
           if (error) throw error;
@@ -411,32 +420,59 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
           
           if (error) throw error;
         }
-      } else if (isInsurerSelection) {
-        // Handle insurer selection - update appointment to assign shop
+      } else if (isInsurerSelection || offer?.appointment_id) {
+        // Handle insurer selection or job offers with appointment - update appointment
         const appointmentId = offer?.appointment_id;
         if (!appointmentId) throw new Error('No appointment ID found');
 
         if (response === 'accept') {
-          const { error } = await supabase
+          // Update the appointment with shop info and move to damage_report stage
+          const { error: appointmentError } = await supabase
             .from('appointments')
             .update({ 
               shop_id: shopId,
               shop_name: shop?.name || 'Selected Shop',
               status: 'confirmed',
+              total_cost: finalPrice,
               workflow_stage: 'damage_report'
             })
             .eq('id', appointmentId);
           
-          if (error) throw error;
-        } else {
-          // Remove the shop from insurer selections for this appointment
-          const selectionId = jobOfferId.replace('selection-', '');
-          const { error } = await supabase
-            .from('insurer_shop_selections')
-            .delete()
-            .eq('id', selectionId);
+          if (appointmentError) throw appointmentError;
           
-          if (error) throw error;
+          // Also update the job offer if it exists
+          if (!isInsurerSelection && !jobOfferId.startsWith('selection-')) {
+            await supabase
+              .from('job_offers')
+              .update({
+                status: 'accepted',
+                responded_at: new Date().toISOString(),
+                offered_price: finalPrice
+              })
+              .eq('id', jobOfferId);
+          }
+        } else {
+          if (isInsurerSelection) {
+            // Remove the shop from insurer selections for this appointment
+            const selectionId = jobOfferId.replace('selection-', '');
+            const { error } = await supabase
+              .from('insurer_shop_selections')
+              .delete()
+              .eq('id', selectionId);
+            
+            if (error) throw error;
+          } else {
+            // Handle job offer decline via edge function
+            const { error } = await supabase.functions.invoke('handle-job-response', {
+              body: {
+                jobOfferId,
+                response,
+                declineReason: declineReason || undefined
+              }
+            });
+
+            if (error) throw error;
+          }
         }
       } else {
         // Handle job offer (insurance routing via job_offers table) - call edge function
@@ -444,7 +480,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
           body: {
             jobOfferId,
             response,
-            declineReason: response === 'decline' ? declineReason : undefined
+            declineReason: response === 'decline' ? declineReason : undefined,
+            offeredPrice: response === 'accept' ? finalPrice : undefined
           }
         });
 
@@ -458,7 +495,12 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
           : t('offers.job_declined_description')
       });
 
-      // Refresh job offers
+      // Clear edited price and refresh
+      setEditedPrices(prev => {
+        const newPrices = { ...prev };
+        delete newPrices[jobOfferId];
+        return newPrices;
+      });
       fetchJobOffers();
       setDeclineReason("");
     } catch (error: any) {
@@ -714,9 +756,28 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <DollarSign className="h-5 w-5 text-green-600" />
-                        <div>
-                          <p className="font-medium text-lg">${offer.offered_price}</p>
-                          <p className="text-sm text-muted-foreground">Offered Price</p>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">$</span>
+                            <Input
+                              type="number"
+                              value={editedPrices[offer.id] ?? offer.offered_price}
+                              onChange={(e) => setEditedPrices(prev => ({
+                                ...prev,
+                                [offer.id]: parseFloat(e.target.value) || 0
+                              }))}
+                              className="w-32 font-medium text-lg h-9"
+                              min={0}
+                              step={0.01}
+                            />
+                            {editedPrices[offer.id] !== undefined && editedPrices[offer.id] !== offer.offered_price && (
+                              <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-300">
+                                <Edit2 className="h-3 w-3 mr-1" />
+                                Edited
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">{t('offers.your_price_offer', 'Your Price Offer')}</p>
                         </div>
                       </div>
                       
