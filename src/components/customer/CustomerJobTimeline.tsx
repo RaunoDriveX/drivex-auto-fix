@@ -51,6 +51,7 @@ const statusIcons = {
   awaiting_shop: Clock,
   awaiting_datetime: Calendar,
   awaiting_shop_confirmation: Clock,
+  approve_offer: CheckCircle,
   scheduled: Calendar,
   confirmed: CheckCircle,
   in_progress: Play,
@@ -63,6 +64,7 @@ const statusColors = {
   awaiting_shop: { color: 'text-blue-600', bgColor: 'bg-blue-100' },
   awaiting_datetime: { color: 'text-orange-600', bgColor: 'bg-orange-100' },
   awaiting_shop_confirmation: { color: 'text-amber-600', bgColor: 'bg-amber-100' },
+  approve_offer: { color: 'text-purple-600', bgColor: 'bg-purple-100' },
   scheduled: { color: 'text-blue-600', bgColor: 'bg-blue-100' },
   confirmed: { color: 'text-green-600', bgColor: 'bg-green-100' },
   in_progress: { color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
@@ -185,7 +187,17 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
                            workflowStage === 'awaiting_shop_response' ||
                            workflowStage === 'damage_report' ||
                            workflowStage === 'cost_approval' ||
+                           workflowStage === 'scheduled' ||
                            workflowStage === 'completed';
+
+    // Check if we're in cost_approval stage (customer needs to approve the offer)
+    const isAwaitingCostApproval = workflowStage === 'cost_approval';
+    
+    // Check if customer has approved the cost (job is scheduled or beyond)
+    const customerHasApprovedCost = workflowStage === 'scheduled' || 
+                                     workflowStage === 'completed' ||
+                                     displayStatus === 'in_progress' ||
+                                     displayStatus === 'completed';
 
     // Show "Awaiting Shop Selection" for jobs without shop assignment
     if (!shopIsSelected) {
@@ -204,12 +216,20 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
         notes: 'Select your preferred date and time for the appointment'
       });
       
-      // Show "Confirmation by the Shop" as upcoming step
+      // Show "Approve Offer" as upcoming step
       steps.push({
-        status: 'awaiting_shop_confirmation',
+        status: 'approve_offer',
         isCompleted: false,
         isCurrent: false,
-        notes: 'The shop will confirm your appointment'
+        notes: 'Review and approve the repair cost estimate'
+      });
+      
+      // Show "Scheduled" as upcoming step
+      steps.push({
+        status: 'scheduled',
+        isCompleted: false,
+        isCurrent: false,
+        notes: 'Your appointment will be scheduled after approval'
       });
     } else {
       // Shop has been assigned by customer - mark awaiting shop as completed
@@ -221,14 +241,18 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
       });
       
       // Check if shop has confirmed (accepted the job)
-      const shopHasConfirmed = appointmentStatus === 'confirmed' || ['in_progress', 'completed'].includes(displayStatus);
+      const shopHasConfirmed = appointmentStatus === 'confirmed' || 
+                               workflowStage === 'damage_report' ||
+                               workflowStage === 'cost_approval' ||
+                               workflowStage === 'scheduled' ||
+                               ['in_progress', 'completed'].includes(displayStatus);
       
       // Check if customer has selected date/time
       const hasDateTimeSelected = hasCustomerConfirmedAppointment || shopHasConfirmed;
       
-      // If shop has confirmed, all previous steps are complete
+      // If shop has confirmed, date/time and shop confirmation steps are complete
       if (shopHasConfirmed) {
-        // Date/time is completed (either customer selected or shop confirmed implies it)
+        // Date/time is completed
         steps.push({
           status: 'awaiting_datetime',
           isCompleted: true,
@@ -236,22 +260,38 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
           notes: 'Appointment date and time has been set'
         });
         
-        // Shop confirmation is completed
+        // Add "Approve Offer" step - this is current if in cost_approval stage
         steps.push({
-          status: 'awaiting_shop_confirmation',
-          isCompleted: true,
-          isCurrent: false,
-          notes: 'The shop has confirmed your appointment'
+          status: 'approve_offer',
+          isCompleted: customerHasApprovedCost,
+          isCurrent: isAwaitingCostApproval,
+          notes: isAwaitingCostApproval 
+            ? 'Please review and approve the repair cost estimate' 
+            : customerHasApprovedCost 
+              ? 'You have approved the repair cost estimate'
+              : 'Waiting for insurer to approve the quote'
         });
         
-        // Add confirmed step
-        steps.push({
-          status: 'confirmed',
-          timestamp: new Date().toISOString(),
-          isCompleted: true,
-          isCurrent: !['in_progress', 'completed'].includes(displayStatus),
-          notes: 'Shop has accepted your job and confirmed the appointment'
-        });
+        // Show "Scheduled" step - only current AFTER customer has approved the cost
+        if (customerHasApprovedCost) {
+          steps.push({
+            status: 'scheduled',
+            timestamp: hasRealScheduledDate ? `${scheduledDate} ${scheduledTime}` : undefined,
+            isCompleted: ['in_progress', 'completed'].includes(displayStatus),
+            isCurrent: !['in_progress', 'completed'].includes(displayStatus),
+            notes: hasRealScheduledDate 
+              ? `Your appointment is scheduled for ${format(new Date(`${scheduledDate} ${scheduledTime}`), 'PPpp')}`
+              : 'Your repair appointment is scheduled'
+          });
+        } else {
+          // Show scheduled as upcoming (not current)
+          steps.push({
+            status: 'scheduled',
+            isCompleted: false,
+            isCurrent: false,
+            notes: 'Your appointment will be confirmed after you approve the estimate'
+          });
+        }
       } else if (!hasDateTimeSelected) {
         // Customer needs to select date/time - this is the current step
         steps.push({
@@ -261,12 +301,20 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
           notes: 'Select your preferred date and time for the appointment'
         });
         
-        // Show shop confirmation as upcoming
+        // Show approve offer as upcoming
         steps.push({
-          status: 'awaiting_shop_confirmation',
+          status: 'approve_offer',
           isCompleted: false,
           isCurrent: false,
-          notes: 'The shop will confirm your appointment after you select a time'
+          notes: 'Review and approve the repair cost estimate'
+        });
+        
+        // Show scheduled as upcoming
+        steps.push({
+          status: 'scheduled',
+          isCompleted: false,
+          isCurrent: false,
+          notes: 'Your appointment will be scheduled after approval'
         });
       } else {
         // Date/time has been selected but shop hasn't confirmed yet
@@ -277,23 +325,28 @@ export const CustomerJobTimeline: React.FC<TimelineProps> = ({
           notes: 'You have selected your appointment date and time'
         });
         
-        // Waiting for shop confirmation
+        // Waiting for shop confirmation - show as current
         steps.push({
           status: 'awaiting_shop_confirmation',
           isCompleted: false,
           isCurrent: true,
           notes: 'Waiting for the shop to confirm your appointment'
         });
-      }
-      
-      // Only show "Scheduled" step AFTER customer has confirmed their appointment time AND shop confirmed
-      if (hasCustomerConfirmedAppointment && shopHasConfirmed) {
+        
+        // Show approve offer as upcoming
+        steps.push({
+          status: 'approve_offer',
+          isCompleted: false,
+          isCurrent: false,
+          notes: 'Review and approve the repair cost estimate'
+        });
+        
+        // Show scheduled as upcoming
         steps.push({
           status: 'scheduled',
-          timestamp: hasRealScheduledDate ? `${scheduledDate} ${scheduledTime}` : undefined,
-          isCompleted: ['in_progress', 'completed'].includes(displayStatus),
-          isCurrent: !['in_progress', 'completed'].includes(displayStatus),
-          notes: `Your appointment is scheduled for ${format(new Date(`${scheduledDate} ${scheduledTime}`), 'PPpp')}`
+          isCompleted: false,
+          isCurrent: false,
+          notes: 'Your appointment will be scheduled after approval'
         });
       }
 
