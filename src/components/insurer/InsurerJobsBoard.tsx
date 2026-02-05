@@ -158,19 +158,22 @@ const getWorkflowStage = (job: Job): WorkflowStage => {
   if (job.job_status === 'completed') return 'completed';
   if (job.job_status === 'cancelled') return 'completed';
   
-  // Use the actual workflow_stage field from the database
+  // Use the actual workflow_stage field from the database - prioritize this
   if (job.workflow_stage) {
-    if (job.workflow_stage === 'scheduled') return 'scheduled';
-    if (job.workflow_stage === 'cost_approval') return 'cost_approval';
-    if (job.workflow_stage === 'damage_report') return 'damage_report';
+    if (job.workflow_stage === 'new' || job.workflow_stage === 'shop_selection') return 'new';
+    if (job.workflow_stage === 'awaiting_shop_response') return 'new'; // Still in selection phase
     if (job.workflow_stage === 'customer_handover') return 'customer_handover';
-    if (job.workflow_stage === 'shop_selection') return 'new';
+    if (job.workflow_stage === 'damage_report') return 'damage_report';
+    if (job.workflow_stage === 'cost_approval') return 'cost_approval';
+    if (job.workflow_stage === 'scheduled') return 'scheduled';
   }
   
-  // Fallback logic for legacy data
-  if (job.job_status === 'scheduled') return 'scheduled';
-  if (job.job_status === 'in_progress') return 'scheduled';
-  if (job.status === 'accepted' || job.status === 'confirmed') return 'customer_handover';
+  // Fallback logic for legacy data without workflow_stage
+  if (!job.workflow_stage) {
+    if (job.job_status === 'scheduled') return 'scheduled';
+    if (job.job_status === 'in_progress') return 'scheduled';
+    if (job.status === 'accepted' || job.status === 'confirmed') return 'customer_handover';
+  }
   
   return 'new';
 };
