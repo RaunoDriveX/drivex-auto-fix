@@ -311,7 +311,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             short_code,
             appointment_confirmed_at,
             workflow_stage,
-            total_cost
+            total_cost,
+            status
           )
         `)
         .eq('shop_id', shopId)
@@ -320,17 +321,24 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
 
       if (acceptedError) throw acceptedError;
       
+      // Filter out cancelled appointments from accepted jobs
+      const filteredAcceptedData = (acceptedData || []).filter(
+        (offer: any) => offer.appointments && offer.appointments.status !== 'cancelled'
+      );
+      
       // Get appointment IDs that have accepted job offers
       const acceptedAppointmentIds = new Set(
-        (acceptedData || []).map((offer: any) => offer.appointment_id).filter(Boolean)
+        filteredAcceptedData.map((offer: any) => offer.appointment_id).filter(Boolean)
       );
       
       // Fetch confirmed direct bookings that DON'T have an associated job offer
+      // Exclude cancelled appointments - they go to the cancelled tab
       const { data: confirmedBookings, error: confirmedError } = await supabase
         .from('appointments')
         .select('*')
         .eq('shop_id', shopId)
         .in('status', ['confirmed', 'pending'])
+        .neq('status', 'cancelled')
         .in('workflow_stage', ['customer_handover', 'shop_selection', 'damage_report', 'cost_approval'])
         .order('created_at', { ascending: false });
 
@@ -368,9 +376,9 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         is_insurer_selection: acceptedInsurerSelectionIds.has(booking.id)
       }));
 
-      // Combine both types
+      // Combine both types - use filteredAcceptedData to exclude cancelled appointments
       const allAccepted: JobOffer[] = [
-        ...((acceptedData as JobOffer[])?.filter(offer => offer.appointments !== null) || []),
+        ...((filteredAcceptedData as JobOffer[])?.filter(offer => offer.appointments !== null) || []),
         ...confirmedBookingsAsJobs
       ].sort((a, b) => new Date(b.offered_at || 0).getTime() - new Date(a.offered_at || 0).getTime());
 
