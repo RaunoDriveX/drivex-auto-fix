@@ -21,7 +21,7 @@
   "workflow_stages": {
     "new": "Neue Vorgänge",
     "customer_handover": "An Kunden übergeben Fälle",
-    "damage_report": "Damage Report & Kostenvoranschlag",
+    "damage_report": "An Werkstatt gesendet & Kostenvoranschlag",
     "cost_approval": "Kostenfreigabe",
     "scheduled": "Geplant",
     "completed": "erledigte Vorgänge"
