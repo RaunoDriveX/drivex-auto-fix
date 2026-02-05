@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.send-customer-notification]
 verify_jwt = true
+
+[functions.reset-job-price]
+verify_jwt = false
