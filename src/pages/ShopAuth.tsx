@@ -327,7 +327,16 @@ const ShopAuth = () => {
         <meta name="description" content={t('auth:shop.subtitle')} />
       </Helmet>
       
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 flex flex-col items-center justify-center p-4">
+        <div className="mb-4">
+          <Button variant="ghost" asChild className="gap-2">
+            <Link to="/" onClick={() => window.scrollTo(0, 0)}>
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Link>
+          </Button>
+        </div>
+
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="flex justify-end mb-2">
@@ -363,15 +372,6 @@ const ShopAuth = () => {
             )}
           </CardContent>
         </Card>
-
-        <div className="mt-4 flex justify-center">
-          <Button variant="ghost" asChild className="gap-2">
-            <Link to="/" onClick={() => window.scrollTo(0, 0)}>
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
-          </Button>
-        </div>
       </div>
     </>
   );
