@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       // Update appointment with shop selection AND schedule in one step
-      // Set workflow_stage to 'awaiting_shop_response' - waiting for shop to accept
+      // Set workflow_stage to 'customer_handover' - shop has customer booking, ready for handover
       // Also update shop_id and shop_name so the job is properly assigned
       const { error: updateError } = await supabase
         .from('appointments')
@@ -175,7 +175,8 @@ Deno.serve(async (req) => {
           appointment_date: appointment_date,
           appointment_time: appointment_time,
           appointment_confirmed_at: new Date().toISOString(),
-          workflow_stage: 'awaiting_shop_response',
+          workflow_stage: 'customer_handover',
+          status: 'confirmed',
           total_cost: validSelection.estimated_price,
           updated_at: new Date().toISOString()
         })
@@ -200,7 +201,7 @@ Deno.serve(async (req) => {
           appointment_id: appointment.id
         });
 
-      // Create a job offer for the selected shop so they can accept/decline
+      // Create a job offer for the selected shop with accepted status (customer already booked)
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour expiry
 
@@ -210,9 +211,10 @@ Deno.serve(async (req) => {
           appointment_id: appointment.id,
           shop_id: shop_id,
           offered_price: validSelection.estimated_price || 0,
-          status: 'offered',
+          status: 'accepted',
+          responded_at: new Date().toISOString(),
           expires_at: expiresAt.toISOString(),
-          notes: `Customer selected shop and scheduled for ${appointment_date} at ${appointment_time}`
+          notes: `Customer booked appointment for ${appointment_date} at ${appointment_time}`
         });
 
       if (offerError) {
@@ -245,8 +247,8 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: true, 
-          message: 'Shop selected and appointment scheduled successfully. Waiting for shop confirmation.',
-          next_stage: 'awaiting_shop_response'
+          message: 'Shop selected and appointment scheduled successfully. Job moved to Customer Handover.',
+          next_stage: 'customer_handover'
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
