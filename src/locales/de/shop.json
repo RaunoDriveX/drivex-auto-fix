@@ -42,6 +42,7 @@
     "pending_title": "ausstehende Angebote",
     "pending_offers": "ausstehende Angebote",
     "accepted_jobs": "angenommene Aufträge",
+    "cancelled_jobs": "Storniert",
     "service": "Service",
     "customer": "Kunde",
     "remaining": "verbleibend",
@@ -107,6 +108,21 @@
     "success": "Preisangebot zur Prüfung eingereicht",
     "error_no_price": "Bitte geben Sie einen gültigen Preis ein",
     "error_saving": "Preisangebot konnte nicht eingereicht werden"
+  },
+  "cancelled": {
+    "no_cancelled": "Keine stornierten Aufträge",
+    "no_cancelled_hint": "Hier werden vom Kunden stornierte Aufträge angezeigt",
+    "status": "Storniert",
+    "delete": "Löschen",
+    "delete_confirm_title": "Stornierten Auftrag löschen?",
+    "delete_confirm_desc": "Dieser Auftrag wird dauerhaft aus Ihren Unterlagen entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "delete_success": "Auftrag gelöscht",
+    "delete_success_desc": "Der stornierte Auftrag wurde entfernt",
+    "delete_error": "Auftrag konnte nicht gelöscht werden",
+    "original_date": "Ursprüngliches Datum",
+    "quoted_price": "Angebotspreis",
+    "cancelled_on": "Storniert am",
+    "reason": "Grund"
   },
   "declined": {
     "title": "abgelehnte Aufträge",
