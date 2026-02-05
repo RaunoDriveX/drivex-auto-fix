@@ -67,12 +67,14 @@ interface ShopJobOffersProps {
 const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
   const [jobOffers, setJobOffers] = useState<JobOffer[]>([]);
   const [acceptedJobs, setAcceptedJobs] = useState<JobOffer[]>([]);
+  const [cancelledJobs, setCancelledJobs] = useState<JobOffer[]>([]);
   const [loading, setLoading] = useState(true);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState("");
   const [priceOfferDialogOpen, setPriceOfferDialogOpen] = useState(false);
   const [selectedJobForPricing, setSelectedJobForPricing] = useState<JobOffer | null>(null);
   const [editedPrices, setEditedPrices] = useState<Record<string, number>>({});
+  const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
   const { toast } = useToast();
   const { t } = useTranslation(['shop', 'common', 'forms']);
 
@@ -373,6 +375,34 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       ].sort((a, b) => new Date(b.offered_at || 0).getTime() - new Date(a.offered_at || 0).getTime());
 
       setAcceptedJobs(allAccepted);
+
+      // Fetch cancelled appointments for this shop
+      const { data: cancelledAppointments, error: cancelledError } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('shop_id', shopId)
+        .eq('status', 'cancelled')
+        .order('updated_at', { ascending: false });
+
+      if (cancelledError) throw cancelledError;
+
+      // Transform cancelled appointments to match JobOffer structure
+      const cancelledAsJobs: JobOffer[] = (cancelledAppointments || []).map(apt => ({
+        id: apt.id,
+        appointment_id: apt.id,
+        shop_id: apt.shop_id,
+        offered_price: apt.total_cost || 0,
+        status: 'cancelled',
+        offered_at: apt.created_at,
+        responded_at: apt.updated_at,
+        expires_at: '',
+        estimated_completion_time: null,
+        notes: apt.notes || '',
+        appointments: apt,
+        is_direct_booking: true
+      }));
+
+      setCancelledJobs(cancelledAsJobs);
     } catch (error: any) {
       console.error('Error fetching job offers:', error);
       toast({
@@ -382,6 +412,66 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteCancelledJob = async (appointmentId: string) => {
+    setDeletingJobId(appointmentId);
+    try {
+      // Delete related records first
+      await supabase
+        .from('job_offer_upsells')
+        .delete()
+        .eq('job_offer_id', appointmentId);
+
+      await supabase
+        .from('job_status_audit')
+        .delete()
+        .eq('appointment_id', appointmentId);
+
+      await supabase
+        .from('job_completion_documents')
+        .delete()
+        .eq('appointment_id', appointmentId);
+
+      await supabase
+        .from('insurance_claims')
+        .delete()
+        .eq('appointment_id', appointmentId);
+
+      await supabase
+        .from('job_offers')
+        .delete()
+        .eq('appointment_id', appointmentId);
+
+      await supabase
+        .from('customer_notification_preferences')
+        .delete()
+        .eq('appointment_id', appointmentId);
+
+      // Now delete the appointment itself
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('id', appointmentId);
+
+      if (error) throw error;
+
+      toast({
+        title: t('cancelled.delete_success', 'Job deleted'),
+        description: t('cancelled.delete_success_desc', 'The cancelled job has been removed'),
+      });
+
+      fetchJobOffers();
+    } catch (error: any) {
+      console.error('Error deleting cancelled job:', error);
+      toast({
+        title: t('error', { ns: 'common' }),
+        description: t('cancelled.delete_error', 'Failed to delete job'),
+        variant: "destructive"
+      });
+    } finally {
+      setDeletingJobId(null);
     }
   };
 
@@ -582,7 +672,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
       </div>
 
       <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="pending">
             {t('offers.pending_offers')}
             {jobOffers.length > 0 && (
@@ -593,6 +683,12 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
             {t('offers.accepted_jobs')}
             {acceptedJobs.length > 0 && (
               <Badge variant="default" className="ml-2">{acceptedJobs.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="cancelled">
+            {t('offers.cancelled_jobs', 'Cancelled')}
+            {cancelledJobs.length > 0 && (
+              <Badge variant="destructive" className="ml-2">{cancelledJobs.length}</Badge>
             )}
           </TabsTrigger>
         </TabsList>
@@ -1253,6 +1349,143 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                   </Card>
                 );
               }).filter(Boolean)}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Cancelled Jobs Tab */}
+        <TabsContent value="cancelled" className="mt-6">
+          {cancelledJobs.length === 0 ? (
+            <Card>
+              <CardContent className="py-6">
+                <div className="text-center text-muted-foreground">
+                  <p>{t('cancelled.no_cancelled', 'No cancelled jobs')}</p>
+                  <p className="text-sm mt-2">{t('cancelled.no_cancelled_hint', 'Jobs cancelled by customers will appear here')}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {cancelledJobs.map((job) => {
+                if (!job.appointments) return null;
+                
+                return (
+                  <Card key={job.id} className="border-l-4 border-l-destructive">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">{job.appointments.service_type}</CardTitle>
+                          
+                          {job.appointments.short_code && (
+                            <div className="text-xs mt-1">
+                              <span className="text-muted-foreground">{t('offers.tracking_code')}:</span>
+                              <span className="ml-2 font-mono font-bold text-destructive">{job.appointments.short_code}</span>
+                            </div>
+                          )}
+                          
+                          {job.appointments.vehicle_info && (
+                            <div className="flex items-center gap-2 mt-2">
+                              <Car className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">
+                                {job.appointments.vehicle_info.make} {job.appointments.vehicle_info.model}
+                                {job.appointments.vehicle_info.year && ` (${job.appointments.vehicle_info.year})`}
+                              </span>
+                            </div>
+                          )}
+                          
+                          <div className="flex gap-2 mt-2">
+                            <Badge variant="destructive" className="flex items-center gap-1">
+                              <XCircle className="h-3 w-3" />
+                              {t('cancelled.status', 'Cancelled')}
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-destructive hover:text-destructive"
+                              disabled={deletingJobId === job.id}
+                            >
+                              {deletingJobId === job.id ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-destructive" />
+                              ) : (
+                                <>
+                                  <XCircle className="h-4 w-4 mr-1" />
+                                  {t('cancelled.delete', 'Delete')}
+                                </>
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t('cancelled.delete_confirm_title', 'Delete cancelled job?')}</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t('cancelled.delete_confirm_desc', 'This will permanently remove this job from your records. This action cannot be undone.')}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t('cancel', { ns: 'common' })}</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteCancelledJob(job.appointment_id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                {t('cancelled.delete', 'Delete')}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent className="pt-0">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">{job.appointments.customer_name}</p>
+                            <p className="text-xs text-muted-foreground">{job.appointments.customer_email}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">{new Date(job.appointments.appointment_date).toLocaleDateString()}</p>
+                            <p className="text-xs text-muted-foreground">{t('cancelled.original_date', 'Original date')}</p>
+                          </div>
+                        </div>
+                        
+                        {job.appointments.total_cost && (
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="font-medium">€{job.appointments.total_cost}</p>
+                              <p className="text-xs text-muted-foreground">{t('cancelled.quoted_price', 'Quoted price')}</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">{new Date(job.responded_at || job.offered_at || '').toLocaleDateString()}</p>
+                            <p className="text-xs text-muted-foreground">{t('cancelled.cancelled_on', 'Cancelled on')}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {job.notes && (
+                        <div className="mt-3 p-2 bg-muted/50 rounded text-sm text-muted-foreground">
+                          <span className="font-medium">{t('cancelled.reason', 'Reason')}:</span> {job.notes}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </TabsContent>

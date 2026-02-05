@@ -42,6 +42,8 @@
     "pending_title": "Pending Job Offers",
     "pending_offers": "Pending Offers",
     "accepted_jobs": "Accepted Jobs",
+    "cancelled_jobs": "Cancelled",
+    "cancelled_jobs": "Cancelled",
     "service": "Service",
     "customer": "Customer",
     "remaining": "remaining",
@@ -107,6 +109,21 @@
     "success": "Price offer submitted for insurer review",
     "error_no_price": "Please enter a valid price",
     "error_saving": "Failed to submit price offer"
+  },
+  "cancelled": {
+    "no_cancelled": "No cancelled jobs",
+    "no_cancelled_hint": "Jobs cancelled by customers will appear here",
+    "status": "Cancelled",
+    "delete": "Delete",
+    "delete_confirm_title": "Delete cancelled job?",
+    "delete_confirm_desc": "This will permanently remove this job from your records. This action cannot be undone.",
+    "delete_success": "Job deleted",
+    "delete_success_desc": "The cancelled job has been removed",
+    "delete_error": "Failed to delete job",
+    "original_date": "Original date",
+    "quoted_price": "Quoted price",
+    "cancelled_on": "Cancelled on",
+    "reason": "Reason"
   },
   "declined": {
     "title": "Declined Jobs",
