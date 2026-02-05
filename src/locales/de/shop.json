@@ -28,6 +28,12 @@
     "jobs": "Aufträge",
     "profile": "Profil"
   },
+  "workflow_steps": {
+    "new_requests": "Neue Kundenanfragen",
+    "cost_estimation": "Kostenvoranschlag",
+    "cost_confirmed": "Kostenvoranschlag bestätigt",
+    "repair_completed": "Reparatur abgeschlossen"
+  },
   "offers": {
     "title": "aktive Angebote",
     "description": "Neue Reparaturanfragen, die Ihre Antwort erfordern.",

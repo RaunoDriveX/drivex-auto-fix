@@ -28,6 +28,12 @@
     "jobs": "Jobs",
     "profile": "Profile"
   },
+  "workflow_steps": {
+    "new_requests": "New customer requests",
+    "cost_estimation": "Cost estimation",
+    "cost_confirmed": "Cost estimation confirmed",
+    "repair_completed": "Repair completed"
+  },
   "offers": {
     "title": "Active Job Offers",
     "description": "New repair requests requiring your response",
