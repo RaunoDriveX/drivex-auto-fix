@@ -89,31 +89,6 @@ export default function TrackJobLookup() {
                   Track This Job
                 </Button>
               </div>
-
-              <Separator />
-
-              <div className="text-center space-y-2">
-                <h4 className="font-medium">Need Help?</h4>
-                <p className="text-sm text-muted-foreground">
-                  Can't find your job? Contact us for assistance.
-                </p>
-                <div className="flex items-center justify-center gap-4 text-sm">
-                  <a 
-                    href="tel:+37258528824" 
-                    className="flex items-center gap-1 text-primary hover:underline"
-                  >
-                    <Phone className="h-4 w-4" />
-                    +372 58528824
-                  </a>
-                  <a 
-                    href="mailto:support@drivex.com" 
-                    className="flex items-center gap-1 text-primary hover:underline"
-                  >
-                    <Mail className="h-4 w-4" />
-                    support@drivex.com
-                  </a>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
