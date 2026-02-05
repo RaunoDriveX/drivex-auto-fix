@@ -754,11 +754,11 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                     <h4 className="font-semibold text-lg">Job Details</h4>
                     
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 p-3 rounded-lg border-2 border-green-500 bg-green-50 dark:bg-green-950/20">
                         <DollarSign className="h-5 w-5 text-green-600" />
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">$</span>
+                            <span className="text-muted-foreground font-medium">$</span>
                             <Input
                               type="number"
                               value={editedPrices[offer.id] ?? offer.offered_price}
@@ -766,7 +766,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                                 ...prev,
                                 [offer.id]: parseFloat(e.target.value) || 0
                               }))}
-                              className="w-32 font-medium text-lg h-9"
+                              className="w-32 font-medium text-lg h-9 border-green-300 focus:border-green-500 focus:ring-green-500"
                               min={0}
                               step={0.01}
                             />
@@ -777,7 +777,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                               </Badge>
                             )}
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1">{t('offers.your_price_offer', 'Your Price Offer')}</p>
+                          <p className="text-sm text-green-700 dark:text-green-400 mt-1 font-medium">{t('offers.your_price_offer', 'Your Price Offer')}</p>
                         </div>
                       </div>
                       
