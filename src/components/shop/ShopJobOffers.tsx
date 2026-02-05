@@ -1277,8 +1277,8 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                         </div>
                       </div>
 
-                      {/* Price Action Section - Shows appropriate UI based on workflow state */}
-                      {(offer.appointments.workflow_stage === 'customer_handover' || offer.appointments.workflow_stage === 'damage_report' || offer.appointments.workflow_stage === 'shop_selection') && !offer.appointments.total_cost && (
+                      {/* Price Action Section - Only show after customer has confirmed booking (customer_handover stage) */}
+                      {offer.appointments.workflow_stage === 'customer_handover' && !offer.appointments.total_cost && (
                         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
                           <div className="flex flex-col gap-3">
                             <div className="flex items-start gap-3">
