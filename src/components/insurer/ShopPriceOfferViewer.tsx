@@ -43,6 +43,7 @@ interface ShopPriceOfferViewerProps {
   onRejected?: () => void;
   isApproved?: boolean;
   isCustomerApproved?: boolean;
+  workflowStage?: string;
 }
 
 export function ShopPriceOfferViewer({
@@ -52,6 +53,7 @@ export function ShopPriceOfferViewer({
   onRejected,
   isApproved = false,
   isCustomerApproved = false,
+  workflowStage,
 }: ShopPriceOfferViewerProps) {
   const { t } = useTranslation('insurer');
   const [estimate, setEstimate] = useState<CostEstimate | null>(null);
@@ -168,12 +170,32 @@ export function ShopPriceOfferViewer({
   }
 
   if (!estimate) {
+    // If in damage_report stage but no estimate, show waiting for confirmation message
+    if (workflowStage === 'damage_report') {
+      return (
+        <div className="flex items-center gap-2 py-4 px-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg">
+          <Clock className="h-4 w-4 animate-pulse" />
+          {t('shop_offer.awaiting_shop_price', 'Price offer submitted and is waiting for your confirmation')}
+        </div>
+      );
+    }
+    // If in customer_handover stage, shop hasn't submitted their price yet
+    if (workflowStage === 'customer_handover') {
+      return (
+        <div className="text-center py-4 text-sm text-muted-foreground border border-dashed rounded-lg">
+          {t('shop_offer.shop_preparing', 'Shop is preparing their price offer')}
+        </div>
+      );
+    }
     return (
       <div className="text-center py-4 text-sm text-muted-foreground border border-dashed rounded-lg">
         {t('shop_offer.no_offer', 'No price offer submitted yet')}
       </div>
     );
   }
+
+  // Check if this is in damage_report stage - shop has submitted but insurer hasn't approved yet
+  const isPendingInsurerApproval = !isApproved && !isCustomerApproved;
 
   return (
     <Card className={isCustomerApproved ? "border-green-300 bg-green-100/50" : (isApproved ? "border-green-200 bg-green-50/50" : "border-amber-200 bg-amber-50/50")}>
@@ -183,11 +205,19 @@ export function ShopPriceOfferViewer({
             <Store className="h-4 w-4 text-amber-600" />
             {t('shop_offer.title', "Shop's Price Offer")}
           </CardTitle>
-          {shopName && (
-            <Badge variant="secondary" className="text-xs">
-              {shopName}
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {isPendingInsurerApproval && (
+              <Badge variant="outline" className="text-xs bg-amber-100 text-amber-800 border-amber-300">
+                <Clock className="h-3 w-3 mr-1" />
+                {t('shop_offer.awaiting_approval', 'Awaiting Your Approval')}
+              </Badge>
+            )}
+            {shopName && (
+              <Badge variant="secondary" className="text-xs">
+                {shopName}
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
