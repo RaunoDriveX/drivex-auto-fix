@@ -842,8 +842,8 @@ export const InsurerJobsBoard: React.FC = () => {
                   </Collapsible>
                 )}
 
-                {/* Shop Price Offer - Show for jobs in damage_report, cost_approval, or scheduled stage */}
-                {(job.workflow_stage === 'damage_report' || job.workflow_stage === 'cost_approval' || job.workflow_stage === 'scheduled') && (
+                {/* Shop Price Offer - Show for jobs in customer_handover, damage_report, cost_approval, or scheduled stage */}
+                {(job.workflow_stage === 'customer_handover' || job.workflow_stage === 'damage_report' || job.workflow_stage === 'cost_approval' || job.workflow_stage === 'scheduled') && (
                   <div className="mt-3">
                     <ShopPriceOfferViewer
                       appointmentId={job.id}
@@ -852,6 +852,7 @@ export const InsurerJobsBoard: React.FC = () => {
                       onRejected={fetchJobs}
                       isApproved={job.workflow_stage === 'cost_approval' || job.workflow_stage === 'scheduled'}
                       isCustomerApproved={job.customer_cost_approved === true || job.workflow_stage === 'scheduled'}
+                      workflowStage={job.workflow_stage}
                     />
                   </div>
                 )}
