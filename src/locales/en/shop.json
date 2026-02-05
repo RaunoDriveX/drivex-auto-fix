@@ -92,7 +92,10 @@
     "offer_price": "Offer Price",
     "price_submitted": "Price Submitted",
     "awaiting_insurer_approval": "Awaiting insurer approval",
-    "insurer_approved": "Approved by insurer - awaiting customer confirmation"
+    "insurer_approved": "Approved by insurer - awaiting customer confirmation",
+    "submit_price": "Submit Price",
+    "detailed_pricing": "Detailed",
+    "set_price": "Set Price"
   },
   "price_offer": {
     "title": "Offer Price",
