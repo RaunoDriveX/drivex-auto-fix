@@ -27,7 +27,7 @@ const App = () => {
   console.log("App component rendering...");
   return (
     <ErrorBoundary>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
