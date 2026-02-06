@@ -519,39 +519,46 @@ export const InsurerJobsBoard: React.FC = () => {
   };
 
   const getPriceDisplay = (job: Job) => {
-    // If shop has accepted and price is confirmed
-    if (job.total_cost && (job.job_status === 'scheduled' || job.job_status === 'in_progress' || job.job_status === 'completed')) {
+    const workflowStage = job.workflow_stage || '';
+    
+    // Customer approved and scheduled - final state
+    if (job.customer_cost_approved && job.total_cost && (job.workflow_stage === 'scheduled' || job.job_status === 'scheduled' || job.job_status === 'completed')) {
       return {
         amount: `€${job.total_cost}`,
-        status: 'accepted',
-        badge: 'Price Submitted',
+        status: 'approved',
+        badge: 'Customer Approved',
         badgeColor: 'bg-green-100 text-green-800 border-green-200'
       };
     }
-
-    // If job offer exists but not yet accepted
-    if (job.job_offers && job.job_offers.length > 0) {
-      // Find the most recent offered price (could be multiple offers to different shops)
-      const latestOffer = job.job_offers.find(offer => offer.status === 'offered')
-        || job.job_offers[0]; // fallback to first offer
-
-      if (latestOffer.status === 'offered') {
-        return {
-          amount: `€${latestOffer.offered_price}`,
-          status: 'pending',
-          badge: 'Awaiting Shop Response',
-          badgeColor: 'bg-yellow-100 text-yellow-800 border-yellow-200'
-        };
-      }
-
-      if (latestOffer.status === 'accepted') {
-        return {
-          amount: `€${latestOffer.offered_price}`,
-          status: 'accepted',
-          badge: 'Price Submitted',
-          badgeColor: 'bg-green-100 text-green-800 border-green-200'
-        };
-      }
+    
+    // Insurer has approved, waiting for customer
+    if (workflowStage === 'cost_approval' && job.total_cost) {
+      return {
+        amount: `€${job.total_cost}`,
+        status: 'insurer_approved',
+        badge: 'Insurer Approved',
+        badgeColor: 'bg-blue-100 text-blue-800 border-blue-200'
+      };
+    }
+    
+    // Shop has submitted price, awaiting insurer approval
+    if (workflowStage === 'damage_report' && job.total_cost) {
+      return {
+        amount: `€${job.total_cost}`,
+        status: 'awaiting_insurer',
+        badge: 'Awaiting Your Approval',
+        badgeColor: 'bg-amber-100 text-amber-800 border-amber-200'
+      };
+    }
+    
+    // Customer handover - waiting for shop to submit price
+    if (workflowStage === 'customer_handover') {
+      return {
+        amount: '€ —',
+        status: 'awaiting_shop',
+        badge: 'Awaiting Shop Price',
+        badgeColor: 'bg-gray-100 text-gray-800 border-gray-200'
+      };
     }
 
     // No price information available
