@@ -44,6 +44,7 @@ interface ShopPriceOfferViewerProps {
   isApproved?: boolean;
   isCustomerApproved?: boolean;
   workflowStage?: string;
+  appointmentTotalCost?: number | null;
 }
 
 export function ShopPriceOfferViewer({
@@ -54,6 +55,7 @@ export function ShopPriceOfferViewer({
   isApproved = false,
   isCustomerApproved = false,
   workflowStage,
+  appointmentTotalCost,
 }: ShopPriceOfferViewerProps) {
   const { t } = useTranslation('insurer');
   const [estimate, setEstimate] = useState<CostEstimate | null>(null);
@@ -170,21 +172,122 @@ export function ShopPriceOfferViewer({
   }
 
   if (!estimate) {
+    // If shop has set a total_cost but no formal estimate record exists, show approval UI
+    if (appointmentTotalCost && appointmentTotalCost > 0 && !isApproved && !isCustomerApproved) {
+      return (
+        <Card className="border-amber-200 bg-amber-50/50">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Store className="h-4 w-4 text-amber-600" />
+                {t('shop_offer.title', "Shop's Price Offer")}
+              </CardTitle>
+              <Badge variant="outline" className="text-xs bg-amber-100 text-amber-800 border-amber-300">
+                <Clock className="h-3 w-3 mr-1" />
+                {t('shop_offer.awaiting_approval', 'Awaiting Your Approval')}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-background rounded-lg p-3">
+              <div className="flex justify-between font-bold">
+                <span>Total</span>
+                <span className="text-primary text-lg">€{appointmentTotalCost.toFixed(2)}</span>
+              </div>
+            </div>
+            {shopName && (
+              <div className="text-sm text-muted-foreground">
+                Submitted by: <span className="font-medium">{shopName}</span>
+              </div>
+            )}
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => setRejectDialogOpen(true)}
+              >
+                <X className="h-4 w-4 mr-1" />
+                {t('shop_offer.reject', 'Reject')}
+              </Button>
+              <Button
+                size="sm"
+                className="flex-1"
+                onClick={() => setApprovalDialogOpen(true)}
+              >
+                <Check className="h-4 w-4 mr-1" />
+                {t('shop_offer.approve', 'Approve & Send to Customer')}
+              </Button>
+            </div>
+          </CardContent>
+
+          {/* Approval Dialog */}
+          <AlertDialog open={approvalDialogOpen} onOpenChange={setApprovalDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('shop_offer.confirm_approval_title', 'Approve Price Offer')}</AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <div className="space-y-2">
+                    <p>{t('shop_offer.confirm_approval_message', 'Approving this offer will send it to the customer for final confirmation.')}</p>
+                    <div className="p-3 bg-muted rounded-lg mt-2">
+                      <div className="flex justify-between font-medium">
+                        <span>Total Cost</span>
+                        <span className="text-primary">€{appointmentTotalCost.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={approving}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleApprove} disabled={approving}>
+                  {approving ? (
+                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4 mr-2" />
+                  )}
+                  Approve
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {/* Reject Dialog */}
+          <AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('shop_offer.confirm_reject_title', 'Reject Price Offer')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('shop_offer.confirm_reject_message', 'Rejecting this offer will notify the shop to revise their pricing.')}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={rejecting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleReject} 
+                  disabled={rejecting}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {rejecting ? (
+                    <Clock className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <X className="h-4 w-4 mr-2" />
+                  )}
+                  Reject
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </Card>
+      );
+    }
+
     // If in customer_handover stage, shop hasn't submitted their price yet
     if (workflowStage === 'customer_handover') {
       return (
         <div className="flex items-center gap-2 py-4 px-3 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg">
           <Clock className="h-4 w-4" />
           {t('shop_offer.shop_preparing', 'Waiting for shop to submit their price offer')}
-        </div>
-      );
-    }
-    // If in damage_report stage but no estimate found, show loading state briefly
-    if (workflowStage === 'damage_report') {
-      return (
-        <div className="flex items-center gap-2 py-4 px-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg">
-          <Clock className="h-4 w-4 animate-pulse" />
-          {t('shop_offer.loading_estimate', 'Loading price estimate details...')}
         </div>
       );
     }
