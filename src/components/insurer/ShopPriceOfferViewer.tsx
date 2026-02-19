@@ -135,11 +135,12 @@ export function ShopPriceOfferViewer({
   const handleReject = async () => {
     setRejecting(true);
     try {
-      // Move back to customer_handover stage for shop to revise
+      // Move back to customer_handover stage and reset total_cost for shop to revise
       const { error } = await supabase
         .from('appointments')
         .update({
-          workflow_stage: 'customer_handover',
+          workflow_stage: 'price_rejected',
+          total_cost: null,
         })
         .eq('id', appointmentId);
 

@@ -561,6 +561,16 @@ export const InsurerJobsBoard: React.FC = () => {
       };
     }
     
+    // Price was rejected by insurer - waiting for shop to resubmit
+    if (workflowStage === 'price_rejected') {
+      return {
+        amount: '€ —',
+        status: 'price_rejected',
+        badge: 'Price Rejected — Awaiting Revision',
+        badgeColor: 'bg-destructive/10 text-destructive border-destructive/20'
+      };
+    }
+    
     // Customer handover - no price yet
     if (workflowStage === 'customer_handover') {
       return {
