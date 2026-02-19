@@ -339,7 +339,7 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
         .eq('shop_id', shopId)
         .in('status', ['confirmed', 'pending'])
         .neq('status', 'cancelled')
-        .in('workflow_stage', ['customer_handover', 'shop_selection', 'damage_report', 'cost_approval'])
+        .in('workflow_stage', ['customer_handover', 'shop_selection', 'damage_report', 'cost_approval', 'price_rejected'])
         .order('created_at', { ascending: false });
 
       if (confirmedError) throw confirmedError;
@@ -1386,6 +1386,130 @@ const ShopJobOffers = ({ shopId, shop }: ShopJobOffersProps) => {
                                   <Send className="h-4 w-4" />
                                 )}
                                 {t('offers.submit_price', 'Submit Price')}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedJobForPricing(offer);
+                                  setPriceOfferDialogOpen(true);
+                                }}
+                                className="gap-1"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                                {t('offers.detailed_pricing', 'Detailed')}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Show rejection notice when insurer rejected the price */}
+                      {offer.appointments.workflow_stage === 'price_rejected' && (
+                        <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 mb-4">
+                          <div className="flex flex-col gap-3">
+                            <div className="flex items-start gap-3">
+                              <XCircle className="h-5 w-5 text-destructive mt-0.5" />
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-destructive">{t('offers.price_rejected', 'Price Rejected by Insurer')}</h4>
+                                <p className="text-sm text-muted-foreground">{t('offers.price_rejected_desc', 'The insurer has rejected your price offer. Please submit a revised price.')}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-2 flex-1">
+                                <span className="text-muted-foreground font-medium">€</span>
+                                <Input
+                                  type="number"
+                                  placeholder="Enter revised price"
+                                  value={editedPrices[offer.appointment_id] ?? ''}
+                                  onChange={(e) => setEditedPrices(prev => ({
+                                    ...prev,
+                                    [offer.appointment_id]: parseFloat(e.target.value) || 0
+                                  }))}
+                                  className="w-32 font-medium text-lg h-10 border-destructive/30 focus:border-primary focus:ring-primary"
+                                  min={0}
+                                  step={0.01}
+                                />
+                              </div>
+                              <Button
+                                variant="default"
+                                onClick={async () => {
+                                  const price = editedPrices[offer.appointment_id];
+                                  if (!price || price <= 0) {
+                                    toast({
+                                      title: t('price_offer.error_no_price', 'Invalid Price'),
+                                      description: t('price_offer.error_no_price_desc', 'Please enter a valid price before submitting'),
+                                      variant: "destructive"
+                                    });
+                                    return;
+                                  }
+                                  
+                                  try {
+                                    setRespondingTo(offer.id);
+                                    
+                                    const lineItems = [
+                                      {
+                                        name: offer.appointments.service_type || 'Glass Repair/Replacement',
+                                        description: `${offer.appointments.damage_type || 'Damage'} - Revised Price`,
+                                        quantity: 1,
+                                        unit_price: price,
+                                      }
+                                    ];
+                                    
+                                    const { error: insertError } = await supabase
+                                      .from('insurer_cost_estimates')
+                                      .insert({
+                                        appointment_id: offer.appointment_id,
+                                        line_items: lineItems,
+                                        labor_cost: 0,
+                                        parts_cost: price,
+                                        total_cost: price,
+                                        notes: 'Revised price after insurer rejection',
+                                      });
+                                    
+                                    if (insertError) throw insertError;
+                                    
+                                    const { error: updateError } = await supabase
+                                      .from('appointments')
+                                      .update({
+                                        total_cost: price,
+                                        workflow_stage: 'damage_report'
+                                      })
+                                      .eq('id', offer.appointment_id);
+                                    
+                                    if (updateError) throw updateError;
+                                    
+                                    toast({
+                                      title: t('price_offer.success_title', 'Revised Price Submitted'),
+                                      description: t('price_offer.success', 'Price offer submitted for insurer review'),
+                                    });
+                                    
+                                    setEditedPrices(prev => {
+                                      const newPrices = { ...prev };
+                                      delete newPrices[offer.appointment_id];
+                                      return newPrices;
+                                    });
+                                    fetchJobOffers();
+                                  } catch (error) {
+                                    console.error('Error submitting revised price:', error);
+                                    toast({
+                                      title: t('price_offer.error_title', 'Error'),
+                                      description: t('price_offer.error_saving', 'Failed to submit price offer'),
+                                      variant: "destructive"
+                                    });
+                                  } finally {
+                                    setRespondingTo(null);
+                                  }
+                                }}
+                                disabled={respondingTo === offer.id || !editedPrices[offer.appointment_id]}
+                                className="gap-2"
+                              >
+                                {respondingTo === offer.id ? (
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                                ) : (
+                                  <Send className="h-4 w-4" />
+                                )}
+                                {t('offers.resubmit_price', 'Resubmit Price')}
                               </Button>
                               <Button
                                 variant="outline"
