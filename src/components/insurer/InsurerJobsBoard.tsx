@@ -551,7 +551,17 @@ export const InsurerJobsBoard: React.FC = () => {
       };
     }
     
-    // Customer handover - waiting for shop to submit price
+    // Customer handover - check if shop has already set a price (total_cost exists)
+    if (workflowStage === 'customer_handover' && job.total_cost) {
+      return {
+        amount: `€${job.total_cost}`,
+        status: 'awaiting_insurer',
+        badge: 'Awaiting Your Approval',
+        badgeColor: 'bg-amber-100 text-amber-800 border-amber-200'
+      };
+    }
+    
+    // Customer handover - no price yet
     if (workflowStage === 'customer_handover') {
       return {
         amount: '€ —',
@@ -860,6 +870,7 @@ export const InsurerJobsBoard: React.FC = () => {
                       isApproved={job.workflow_stage === 'cost_approval' || job.workflow_stage === 'scheduled'}
                       isCustomerApproved={job.customer_cost_approved === true || job.workflow_stage === 'scheduled'}
                       workflowStage={job.workflow_stage}
+                      appointmentTotalCost={job.total_cost}
                     />
                   </div>
                 )}
