@@ -54,7 +54,9 @@
     "mobile_phone": "Mobile Phone",
     "reference_info": "You will receive all further information under this reference number",
     "confirm_send": "Confirm and send",
-    "contact_update_error": "Failed to save contact info. Please try again."
+    "contact_update_error": "Failed to save contact info. Please try again.",
+    "din_partner_label": "DIN Partner Name or ID",
+    "din_partner_placeholder": "Enter DIN Partner name or ID"
   },
   "confirmation": {
     "success_title": "Report Submitted Successfully!",

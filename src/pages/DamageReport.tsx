@@ -48,6 +48,7 @@ const DamageReport = () => {
   const [submissionData, setSubmissionData] = useState<SubmissionData | null>(null);
   const [contactMethod, setContactMethod] = useState<ContactMethod>("email");
   const [contactValue, setContactValue] = useState("");
+  const [dinPartner, setDinPartner] = useState("");
 
   // Hardcoded common insurers
   const hardcodedInsurers = [
@@ -197,6 +198,10 @@ const DamageReport = () => {
       updateData.customer_phone = contactValue;
     }
 
+    if (dinPartner.trim()) {
+      updateData.additional_notes = `DIN Partner: ${dinPartner.trim()}`;
+    }
+
     const { error } = await supabase
       .from('appointments')
       .update(updateData)
@@ -324,6 +329,19 @@ const DamageReport = () => {
                   placeholder={getContactPlaceholder()}
                   className="text-lg h-12"
                 />
+
+                <div className="mt-4">
+                  <Label className="text-sm font-medium mb-2 block">
+                    {t('damage_report.din_partner_label')}
+                  </Label>
+                  <Input
+                    type="text"
+                    value={dinPartner}
+                    onChange={(e) => setDinPartner(e.target.value)}
+                    placeholder={t('damage_report.din_partner_placeholder')}
+                    className="text-lg h-12"
+                  />
+                </div>
               </CardContent>
             </Card>
 
