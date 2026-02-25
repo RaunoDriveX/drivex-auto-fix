@@ -213,6 +213,31 @@ const DamageReport = () => {
       return;
     }
 
+    // Fire-and-forget: send damage report email with CSV
+    const selectedInsurerData = insurerOptions.find(i => i.id === selectedInsurer);
+    supabase.functions.invoke('send-damage-report-email', {
+      body: {
+        glassLocation,
+        damageType,
+        vehicleType,
+        licensePlate: licensePlate.trim().toUpperCase(),
+        insuredName: insuredName.trim(),
+        selectedInsurer: selectedInsurerData?.name || selectedInsurer,
+        customerStreet: customerStreet.trim(),
+        customerCity: customerCity.trim(),
+        customerPostalCode: customerPostalCode.trim(),
+        contactMethod,
+        contactValue,
+        dinPartner: dinPartner.trim(),
+        token,
+        appointmentId: submissionData.appointmentId,
+        timestamp: new Date().toISOString(),
+      },
+    }).then(({ error: emailError }) => {
+      if (emailError) console.error('Email send error:', emailError);
+      else console.log('Damage report email sent successfully');
+    });
+
     // Navigate to confirmation page
     navigate(`/damage-report/${token}/confirmation`, {
       state: {

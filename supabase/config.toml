@@ -32,3 +32,6 @@ verify_jwt = true
 
 [functions.reset-job-price]
 verify_jwt = false
+
+[functions.send-damage-report-email]
+verify_jwt = false
