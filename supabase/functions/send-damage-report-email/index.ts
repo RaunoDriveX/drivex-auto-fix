@@ -51,7 +51,7 @@ serve(async (req) => {
 
     const { error } = await resend.emails.send({
       from: "Glassify <noreply@resend.dev>",
-      to: ["joseph.soomer@drivex.io"],
+      to: ["rauno.sigur@drivex.io"],
       subject,
       html: `<p>New damage report submitted.</p><p>License Plate: ${licensePlate}</p><p>See attached CSV for full details.</p>`,
       attachments: [
