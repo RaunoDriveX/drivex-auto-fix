@@ -117,6 +117,24 @@ const DamageReport = () => {
     setIsSubmitting(true);
 
     try {
+      // Check if an appointment with this tracking token already exists
+      const { data: existing } = await supabase
+        .from('appointments')
+        .select('id, short_code')
+        .eq('tracking_token', token)
+        .maybeSingle();
+
+      if (existing) {
+        // Reuse the existing appointment
+        setSubmissionData({
+          appointmentId: existing.id,
+          shortCode: existing.short_code
+        });
+        setShowContactSelection(true);
+        setIsSubmitting(false);
+        return;
+      }
+
       // Create appointment record in Supabase
       const { data, error } = await supabase
         .from('appointments')
@@ -127,7 +145,7 @@ const DamageReport = () => {
           customer_street: customerStreet.trim(),
           customer_city: customerCity.trim(),
           customer_postal_code: customerPostalCode.trim(),
-          shop_id: 'pending', // Will be assigned when insurance selects shops
+          shop_id: 'pending',
           shop_name: 'Pending Assignment',
           service_type: getServiceType(glassLocation),
           damage_type: getDamageTypeValue(damageType),
@@ -136,7 +154,7 @@ const DamageReport = () => {
             vehicle_type: vehicleType
           },
           status: 'pending',
-          is_insurance_claim: true, // Insurance will assign shops
+          is_insurance_claim: true,
           insurer_name: selectedInsurerData?.name || '',
           appointment_date: new Date().toISOString().split('T')[0],
           appointment_time: '09:00'
