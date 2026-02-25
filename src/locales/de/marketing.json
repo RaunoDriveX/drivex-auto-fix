@@ -54,7 +54,9 @@
     "mobile_phone": "Mobil Telefon",
     "reference_info": "Sie erhalten unter dieser Vorgangsnummer alle weiteren Informationen",
     "confirm_send": "Bestätigung wird automatisch versendet",
-    "contact_update_error": "Kontaktdaten konnten nicht gespeichert werden. Bitte erneut versuchen."
+    "contact_update_error": "Kontaktdaten konnten nicht gespeichert werden. Bitte erneut versuchen.",
+    "din_partner_label": "Name oder Nummer des DIN Partners",
+    "din_partner_placeholder": "DIN Partner Name oder Nummer eingeben"
   },
   "confirmation": {
     "success_title": "Schadensmeldung erfolgreich eingereicht!",
